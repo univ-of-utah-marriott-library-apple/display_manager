@@ -87,7 +87,7 @@ def get_mode_for_display(display, exact_scan, find_mode):
                 d_height    = dh
                 d_bpp       = db
                 d_refresh   = dr
-                mode_ref = mod
+                mode_ref = mode
     print("{width} {height} {bpp} {refresh}".format(
         width   = matching_mode.width,
         height  = matching_mode.height,
