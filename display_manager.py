@@ -2,15 +2,23 @@
 
 ## Some info should go here.
 
-attributes = {
-    'long_name' : 'Display Manager',
-    'name'      : 'display_manager',
-    'version'   : '0.2.0'
-}
-
 ## Imports
 import argparse
+import os
 import sys
+
+# Globally-accessible attributes.
+attributes = {
+    'long_name' : 'Display Manager',
+    'name'      : os.path.basename(sys.argv[0]),
+    'version'   : '0.3.0'
+}
+
+def set(command, width, height, depth, refresh):
+    pass
+
+def show(command, width, height, depth, refresh):
+    pass
 
 def version():
     """
@@ -70,10 +78,11 @@ OPTIONS
 ''')
     else:
         print('''\
-usage: {name} {{ help | set | show }}
+usage: {name} {{ help | version | set | show }}
 
 Use any of the subcommands with 'help' to get more information:
     help    Print this help information.
+    version Print the version information.
     set     Set the display configuration.
     show    See available display configurations.
 ''').format(name=attributes['name'])
@@ -94,7 +103,7 @@ if __name__ == '__main__':
         sys.exit(1)
     
     # Do actual argument parsing.
-    parser = ArgumentParser(usage='this is a test')
+    parser = ArgumentParser(add_help=False)
     parser.add_argument('-v', '--version', action='store_true')
     
     # Check whether user wanted version information.
@@ -106,6 +115,9 @@ if __name__ == '__main__':
     
     # Add the subparsers.
     subparsers = parser.add_subparsers(dest='subcommand')
+    
+    # Subparser for 'version'.
+    parser_version = subparsers.add_parser('version', add_help=False)
     
     # Subparser for 'help'.
     parser_help = subparsers.add_parser('help', add_help=False)
@@ -137,7 +149,11 @@ if __name__ == '__main__':
         usage(command=args.command)
         sys.exit(0)
     
-    # Print help information and quit.
+    if args.subcommand == 'version':
+        print(version())
+        sys.exit(0)
+    
+    # Check if they wanted help with the subcommand.
     if args.command == 'help' or args.help:
         usage(command=args.subcommand)
         sys.exit(0)
