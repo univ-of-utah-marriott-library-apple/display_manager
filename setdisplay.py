@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 # We're going to use the magical future print function.
 # Mostly this is for easy text output to stderr.
@@ -124,6 +124,7 @@ def get_mode_for_display(display, exact_scan, find_mode):
     return mode_ref
 
 def set_display(display, mode, mirroring, verbose=False):
+    print("Setting display {} to mode: ".format(display))
     (error, config_ref) = Quartz.CGBeginDisplayConfiguration(None)
     if error:
         print("Cannot begin display configuration ({})".format(error), file=sys.stderr)
@@ -173,11 +174,14 @@ if __name__ == '__main__':
     verbose             = args.verbose
     should_show_all     = args.show_all
     should_find_exact   = args.show_exact
-    should_find_highest = args.show_highest
+    should_find_highest = args.show_highest or args.set_highest
     should_find_closest = args.show_closest
     enable_mirroring    = args.mirroring
     
-    should_set_display  = False
+    should_set_display  = True
+    
+    if args.no_change or should_show_all or should_find_closest or (should_find_highest and not args.set_highest):
+        should_set_display = False
     
     mode = DisplayMode(1024, 768, 32, 75)
     
