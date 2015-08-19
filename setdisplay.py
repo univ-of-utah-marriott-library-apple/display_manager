@@ -25,9 +25,9 @@ def get_display_bits_per_pixel(mode):
     IO8BitIndexedPixels = "PPPPPPPP"
     IO16BitDirectPixels = "-RRRRRGGGGGBBBBB"
     IO32BitDirectPixels = "--------RRRRRRRRGGGGGGGGBBBBBBBB"
-    
+
     encoding = Quartz.CGDisplayModeCopyPixelEncoding(mode)
-    
+
     if encoding == IO8BitIndexedPixels:
         return 8
     if encoding == IO16BitDirectPixels:
@@ -69,10 +69,10 @@ def get_all_modes_for_display(display, verbose=False):
     print("------------------------------------")
 
 def get_mode_for_display(display, exact_scan, find_mode):
-    d_width             = sys.maxint / 2
-    d_height            = sys.maxint / 2
-    d_bpp               = sys.maxint
-    d_refresh           = sys.maxint
+    d_width     = sys.maxint / 2
+    d_height    = sys.maxint / 2
+    d_bpp       = sys.maxint
+    d_refresh   = sys.maxint
     modes           = Quartz.CGDisplayCopyAllDisplayModes(display, None)
     matching_mode   = DisplayMode()
     mode_ref        = Quartz.CGDisplayModeRef.alloc().init()
@@ -81,7 +81,7 @@ def get_mode_for_display(display, exact_scan, find_mode):
         height          = Quartz.CGDisplayModeGetHeight(mode)
         bits_per_pixel  = get_display_bits_per_pixel(mode)
         refresh         = Quartz.CGDisplayModeGetRefreshRate(mode)
-        
+
         if exact_scan:
             # Exact matching.
             if width == find_mode.width and height == find_mode.height and bits_per_pixel == find_mode.bits_per_pixel:
@@ -96,7 +96,7 @@ def get_mode_for_display(display, exact_scan, find_mode):
             dh = abs(height - find_mode.height)
             db = abs(bits_per_pixel - find_mode.bits_per_pixel)
             dr = abs(refresh - find_mode.refresh)
-            
+
             if dw == d_width and dh == d_height and db == d_bpp and dr == d_refresh:
                 matching_mode.bits_per_pixel = bits_per_pixel
                 matching_mode.refresh = refresh
@@ -133,22 +133,22 @@ def set_display(display, mode, mirroring, verbose=False):
     if error:
         print("Cannot begin display configuration ({})".format(error), file=sys.stderr)
         sys.exit(1)
-    
+
     error = Quartz.CGConfigureDisplayWithDisplayMode(config_ref, display, mode, None)
     if error:
         print("Cannot set display configuration ({})".format(error),
         file=sys.stderr)
         sys.exit(1)
-    
+
     if mirroring:
         Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, Quartz.kCGNullDirectDisplay)
     else:
         main_display = Quartz.CGMainDisplayID()
         if (display != main_display):
             Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, main_display)
-    
+
     Quartz.CGCompleteDisplayConfiguration(config_ref, Quartz.kCGConfigurePermanently)
-        
+
 
 def usage():
     pass
@@ -168,27 +168,27 @@ if __name__ == '__main__':
     parser.add_argument('height', nargs='?', help="manual height")
     parser.add_argument('bpp', nargs='?', help="manual bits per pixel")
     parser.add_argument('refresh', nargs='?', help="manual refresh rate")
-    
+
     args = parser.parse_args()
-    
+
     manual = [args.width, args.height, args.bpp, args.refresh]
     if any(manual) and not all(manual):
         raise ValueError("You must supply all of width, height, bpp, and refresh.")
-    
+
     verbose             = args.verbose
     should_show_all     = args.show_all
     should_find_exact   = args.show_exact
     should_find_highest = args.show_highest or args.set_highest
     should_find_closest = args.show_closest
     enable_mirroring    = args.mirroring
-    
+
     should_set_display  = True
-    
+
     if args.no_change or should_show_all or should_find_closest or should_find_exact or (should_find_highest and not args.set_highest):
         should_set_display = False
-    
+
     mode = DisplayMode(1024, 768, 32, 75)
-    
+
     if verbose:
         print("Width: {width} Height: {height} BitsPerPixel: {bpp} Refresh rate: {refresh}".format(
             width   = mode.width,
@@ -196,17 +196,17 @@ if __name__ == '__main__':
             bpp     = mode.bits_per_pixel,
             refresh = mode.refresh
         ))
-    
+
     # Get list of online displays.
     (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(MAX_DISPLAYS, None, None)
-    
+
     if error:
         print("Cannot get displays ({})".format(error), file=sys.stderr)
         sys.exit(1)
-    
+
     if verbose:
         print("{} online display(s) found".format(displays_count))
-    
+
     for index in xrange(displays_count):
         identifier = online_displays[index]
         if verbose and not should_show_all:
@@ -238,6 +238,6 @@ if __name__ == '__main__':
                 print("------------------------------------")
             else:
                 ref_mode = Quartz.CGDisplayModeRef.alloc().init()
-            
+
             if should_set_display:
                 set_display(identifier, ref_mode, enable_mirroring, verbose)
