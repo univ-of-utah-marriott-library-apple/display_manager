@@ -125,6 +125,10 @@ def get_mode_for_display(display, exact_scan, find_mode):
 
 def set_display(display, mode, mirroring, verbose=False):
     print("Setting display {} to mode: ".format(display))
+    # This call exists only to ensure the CGBeginDisplayConfiguration call will
+    # pass successfully. I don't know why it's necessary, but it is.
+    Quartz.CGDisplayBounds(display)
+    # Now start the setup of the display.
     (error, config_ref) = Quartz.CGBeginDisplayConfiguration(None)
     if error:
         print("Cannot begin display configuration ({})".format(error), file=sys.stderr)
@@ -143,7 +147,7 @@ def set_display(display, mode, mirroring, verbose=False):
         if (display != main_display):
             Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, main_display)
     
-    Quartz.CGCompleteDisplayConfiguration(confi_ref, Quartz.kCGConfigurePermanently)
+    Quartz.CGCompleteDisplayConfiguration(config_ref, Quartz.kCGConfigurePermanently)
         
 
 def usage():
@@ -180,7 +184,7 @@ if __name__ == '__main__':
     
     should_set_display  = True
     
-    if args.no_change or should_show_all or should_find_closest or (should_find_highest and not args.set_highest):
+    if args.no_change or should_show_all or should_find_closest or should_find_exact or (should_find_highest and not args.set_highest):
         should_set_display = False
     
     mode = DisplayMode(1024, 768, 32, 75)
