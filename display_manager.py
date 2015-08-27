@@ -3,9 +3,12 @@
 ## Some info should go here.
 
 #TODO: add these features:
+# [ ] works in login window
+# [ ] mirroring
+# [ ] brightness settings
 # [ ] HDMI overscan
 # [ ] AirPlay mirroring
-# [ ] set individual display settings
+# [x] set individual display settings
 
 ## Imports
 import argparse
@@ -32,6 +35,7 @@ class DisplayMode(object):
             self.bpp        = get_pixel_depth_from_encoding(Quartz.CGDisplayModeCopyPixelEncoding(mode))
             self.refresh    = Quartz.CGDisplayModeGetRefreshRate(mode)
             self.raw_mode   = mode
+            self.dpi_scalar = get_hidpi_scalar(mode)
         else:
             for element in [width, height, bpp, refresh]:
                 if element is None:
@@ -41,15 +45,17 @@ class DisplayMode(object):
             self.bpp        = bpp
             self.refresh    = refresh
             self.raw_mode   = None
+            self.dpi_scalar = None
         self.pixels     = self.width * self.height
         self.ratio      = float(self.width) / float(self.height)
     def __str__(self):
-        return "{width}x{height}; pixel depth: {bpp}; refresh rate: {refresh}; ratio: {ratio}:1".format(
+        return "{width}x{height}; pixel depth: {bpp}; refresh rate: {refresh}; ratio: {ratio:.2f}:1{hidpi}".format(
             width   = self.width,
             height  = self.height,
             bpp     = self.bpp,
             refresh = self.refresh,
             ratio   = self.ratio,
+            hidpi   = "; [HiDPI: x{}]".format(self.dpi_scalar) if self.dpi_scalar else ""
         )
     def __repr__(self):
         return self.__str__()
@@ -59,12 +65,25 @@ class DisplayMode(object):
             self.width      == other.width      and
             self.height     == other.height     and
             self.bpp        == other.bpp        and
-            self.refresh    == other.refresh
+            self.refresh    == other.refresh    and
+            self.dpi_scalar == other.dpi_scalar
         )
     def __ne__(self, other):
         return not self.__eq__(other)
 
 ## Helper Functions
+def get_hidpi_scalar(mode):
+    raw_width  = Quartz.CGDisplayModeGetPixelWidth(mode)
+    raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
+    res_width  = Quartz.CGDisplayModeGetWidth(mode)
+    res_height = Quartz.CGDisplayModeGetHeight(mode)
+    if raw_width == res_width and raw_height == res_height:
+        return None
+    else:
+        if raw_width / res_width != raw_height / res_height:
+            raise RuntimeError("Vertical and horizontal dimensions aren't scaled properly... mode: {}".format(mode))
+        return raw_width / res_width
+
 def get_pixel_depth_from_encoding(encoding):
     if encoding == "PPPPPPPP":
         return 8
@@ -81,8 +100,16 @@ def get_displays_list():
         raise RuntimeError("Unable to get displays list.")
     return online_displays
 
-def get_all_modes_for_display(display):
-    modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, None)]
+def get_all_modes_for_display(display, hidpi=True):
+    #TODO: The HiDPI call also gets extra things. Fix those.
+    # Specifically, it includes not just HiDPI settings, but also settings for
+    # different pixel encodings than the standard 8-, 16-, and 32-bit.
+    # Unfortunately, the CGDisplayModeCopyPixelEncoding method cannot see other
+    # encodings, leading to apparently-duplicated values. Not ideal.
+    if hidpi:
+        modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, {Quartz.kCGDisplayShowDuplicateLowResolutionModes: Quartz.kCFBooleanTrue})]
+    else:
+        modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, None)]
     modes.sort(key = lambda mode: mode.refresh, reverse = True)
     modes.sort(key = lambda mode: mode.bpp, reverse = True)
     modes.sort(key = lambda mode: mode.pixels, reverse = True)
@@ -98,10 +125,10 @@ def get_all_current_configurations():
         modes.append( (display, get_current_mode_for_display(display)) )
     return modes
 
-def get_all_modes_for_all_displays():
+def get_all_modes_for_all_displays(hidpi=True):
     modes = []
     for display in get_displays_list():
-        modes.append( (display, get_all_modes_for_display(display)) )
+        modes.append( (display, get_all_modes_for_display(display, hidpi)) )
     return modes
 
 def get_mode_closest_to_values(modes, width, height, depth, refresh):
@@ -112,8 +139,8 @@ def get_mode_closest_to_values(modes, width, height, depth, refresh):
     if not modes:
         return None
     match_mode = DisplayMode(width=width, height=height, bpp=depth, refresh=refresh)
-    ratio = width / height
-    pixels = width * height
+    match_ratio = width / height
+    match_pixels = width * height
     # Search for an exact match.
     for mode in modes:
         if mode == match_mode:
@@ -191,7 +218,7 @@ def get_mode_closest_to_values(modes, width, height, depth, refresh):
     # closest total pixel count.
     close_matches = []
     for mode in modes:
-        if mode.ratio == ratio:
+        if mode.ratio == match_ratio:
             # Got the right width:height ratio.
             close_matches.append(mode)
     if close_matches:
@@ -201,7 +228,7 @@ def get_mode_closest_to_values(modes, width, height, depth, refresh):
         smaller = None
         # Find the closest matches by pixel count.
         for match in close_matches:
-            if match.pixels > pixels:
+            if match.pixels > match_pixels:
                 larger = match
             else:
                 smaller = match
@@ -216,8 +243,70 @@ def get_mode_closest_to_values(modes, width, height, depth, refresh):
             return larger
         # Okay, now we have two elements, and neither is perfect.
         # Find the closer of the two.
-        larger_dif = abs(larger.pixels - pixels)
-        smaller_dif = abs(smaller.pixels - pixels)
+        larger_dif = abs(larger.pixels - match_pixels)
+        smaller_dif = abs(smaller.pixels - match_pixels)
+        if smaller_dif < larger_dif:
+            return smaller
+        else:
+            return larger
+    # Still no good matches. Okay, now we're really reaching.
+    # Let's try to find all of the displays with a sort-of-close aspect ratio,
+    # and then find the one in there that has the closest total pixel count.
+    ratios = []
+    for mode in modes:
+        ratios.append(mode.ratio)
+    ratios = list(set(ratios))
+    ratios.sort(reverse = True)
+    larger_ratio = None
+    smaller_ratio = None
+    ideal_ratio = None
+    for ratio in ratios:
+        if ratio > match_ratio:
+            larger_ratio = ratio
+        else:
+            smaller_ratio = ratio
+            break
+    if smaller_ratio and not larger_ratio:
+        ideal_ratio = smaller_ratio
+    elif larger_ratio and not smaller_ratio:
+        ideal_ratio = larger_ratio
+    else:
+        larger_dif = abs(larger_ratio - match_ratio)
+        smaller_dif = abs(smaller_ratio - match_ratio)
+        if smaller_dif < larger_dif:
+            ideal_ratio = smaller_ratio
+        else:
+            ideal_ratio = larger_ratio
+    # Now find all the matches with the ideal ratio.
+    close_matches = []
+    for mode in modes:
+        if mode.ratio == ideal_ratio:
+            close_matches.append(mode)
+    # And now we look through those for the closest match in pixel count.
+    if close_matches:
+        # Sort by total pixels.
+        close_matches.sort(key = lambda mode: mode.pixels, reverse = True)
+        larger = None
+        smaller = None
+        # Find the closest matches by pixel count.
+        for match in close_matches:
+            if match.pixels > match_pixels:
+                larger = match
+            else:
+                smaller = match
+                break
+        # Check some edge cases.
+        if smaller and not larger:
+            # All the available pixel counts are lesser than the desired.
+            return smaller
+        if larger and not smaller:
+            # There's only one element in the list, and it's larger than we
+            # ideally wanted. Oh well.
+            return larger
+        # Okay, now we have two elements, and neither is perfect.
+        # Find the closer of the two.
+        larger_dif = abs(larger.pixels - match_pixels)
+        smaller_dif = abs(smaller.pixels - match_pixels)
         if smaller_dif < larger_dif:
             return smaller
         else:
@@ -225,17 +314,92 @@ def get_mode_closest_to_values(modes, width, height, depth, refresh):
     # We don't have any good resolutions available. Let's throw an error?
     return None
 
-def sub_set(command, width, height, depth, refresh, display=None):
-    pass
+def set_display(display, mode, mirroring=False):
+    print("Setting display {} to mode: {}".format(display, mode))
+    # Begin the configuration.
+    (error, config_ref) = Quartz.CGBeginDisplayConfiguration(None)
+    # Check there were no errors.
+    if error:
+        print("Could not begin display configuration: error {}".format(error))
+        sys.exit(8)
+    # Enact the desired configuration.
+    error = Quartz.CGConfigureDisplayWithDisplayMode(config_ref, display, mode.raw_mode, None)
+    # Were there errors?
+    if error:
+        print("Failed to set display configuration: error {}".format(error))
+        # Yeah, there were errors. Let's cancel the configuration.
+        error = Quartz.CGCancelDisplayConfiguration(config_ref)
+        if error:
+            # Apparently this can fail too? Huh.
+            print("Failed to cancel display configuraiton setting: error {}".format(error))
+        sys.exit(9)
+    # Did we want mirroring enabled?
+    if mirroring:
+        # Yes, so let's turn it on! We mirror the main display.
+        main_display = Quartz.CGMainDisplayID()
+        if display != main_display:
+            Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, main_display)
+    else:
+        # I guess not. Don't mirror anything!
+        Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, Quartz.kCGNullDirectDisplay)
+    # Finish the configuration.
+    Quartz.CGCompleteDisplayConfiguration(config_ref, Quartz.kCGConfigurePermanently)
 
-def sub_show(command, width, height, depth, refresh, display=None):
+def sub_set(command, width, height, depth, refresh, display=None, hidpi=True):
     main_display = Quartz.CGMainDisplayID()
-    if command == "all":
-        all_modes = get_all_modes_for_all_displays()
+    if command == "closest":
+        for element in [width, height, depth, refresh]:
+            if element is None:
+                usage("set")
+                print("Must have all of (width, height, depth, refresh) for closest setting.")
+                sys.exit(2)
+        all_modes = get_all_modes_for_all_displays(hidpi)
         if display:
             all_modes = [x for x in all_modes if x[0] == display]
         if not all_modes:
             print("No matching displays found.")
+            sys.exit(4)
+        print("Setting closest supported display configuration(s).")
+        # Inform what's going on.
+        print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
+            width   = width,
+            height  = height,
+            ratio   = float(width) / float(height),
+            bpp     = depth,
+            refresh = refresh
+        ))
+        print('-' * 80)
+        for pair in all_modes:
+            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
+            closest = get_mode_closest_to_values(pair[1], width, height, depth, refresh)
+            if closest:
+                print("    {}".format(closest))
+                set_display(pair[0], closest)
+            else:
+                print("    (no close matches found)")
+    elif command == "highest":
+        all_modes = get_all_modes_for_all_displays(hidpi)
+        if display:
+            all_modes = [x for x in all_modes if x[0] == display]
+        if not all_modes:
+            print("No matching displays found.")
+            sys.exit(4)
+        print("Setting highest supported display configuration(s).")
+        print('-' * 80)
+        for pair in all_modes:
+            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
+            print("    {}".format(pair[1][0]))
+            set_display(pair[0], pair[1][0])
+
+
+def sub_show(command, width, height, depth, refresh, display=None, hidpi=True):
+    main_display = Quartz.CGMainDisplayID()
+    if command == "all":
+        all_modes = get_all_modes_for_all_displays(hidpi)
+        if display:
+            all_modes = [x for x in all_modes if x[0] == display]
+        if not all_modes:
+            print("No matching displays found ({}).".format(display))
             sys.exit(4)
         print("Showing all possible display configurations.")
         print('-' * 80)
@@ -246,16 +410,24 @@ def sub_show(command, width, height, depth, refresh, display=None):
     elif command == "closest":
         for element in [width, height, depth, refresh]:
             if element is None:
-                usage()
+                usage("show")
                 print("Must have all of (width, height, depth, refresh) for closest matching.")
                 sys.exit(2)
-        all_modes = get_all_modes_for_all_displays()
+        all_modes = get_all_modes_for_all_displays(hidpi)
         if display:
             all_modes = [x for x in all_modes if x[0] == display]
         if not all_modes:
-            print("No matching displays found.")
+            print("No matching displays found ({}).".format(display))
             sys.exit(4)
-        print("Finding closest supported display configurations.")
+        print("Finding closest supported display configuration(s).")
+        # Inform what's going on.
+        print("Searching for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
+            width   = width,
+            height  = height,
+            ratio   = float(width) / float(height),
+            bpp     = depth,
+            refresh = refresh
+        ))
         print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
@@ -265,20 +437,25 @@ def sub_show(command, width, height, depth, refresh, display=None):
             else:
                 print("    (no close matches found)")
     elif command == "highest":
-        all_modes = get_all_modes_for_all_displays()
+        all_modes = get_all_modes_for_all_displays(hidpi)
         if display:
             all_modes = [x for x in all_modes if x[0] == display]
         if not all_modes:
-            print("No matching displays found.")
+            print("No matching displays found ({}).".format(display))
             sys.exit(4)
-        print("Showing highest supported display configurations.")
+        print("Showing highest supported display configuration(s).")
         print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             print("    {}".format(pair[1][0]))
     elif command == "exact":
         current_modes = get_all_current_configurations()
-        print("Showing current display configurations.")
+        if display:
+            current_modes = [x for x in current_modes if x[0] == display]
+        if not current_modes:
+            print("No matching displays found ({}).".format(display))
+            sys.exit(4)
+        print("Showing current display configuration(s).")
         print('-' * 80)
         for pair in current_modes:
             print("Display: {}".format(pair[0]))
@@ -325,6 +502,8 @@ OPTIONS
     -h height   Resolution height
     -d depth    Color depth
     -r refresh  Refresh rate
+    --display   Specify a particular display
+    --no-hidpi  Don't show HiDPI settings
 ''').format(name=attributes['name'])
     elif command == 'show':
         print('''\
@@ -338,12 +517,15 @@ SUBCOMMANDS
                 values.
     highest     Show the highest supported resolution.
     exact       Show the current display configuration.
+    displays    Just list the current displays and their IDs.
 
 OPTIONS
     -w width    Resolution width
     -h height   Resolution height
     -d depth    Color depth
     -r refresh  Refresh rate
+    --display   Specify a particular display
+    --no-hidpi  Don't show HiDPI settings
 ''')
     else:
         print('''\
@@ -412,6 +594,7 @@ if __name__ == '__main__':
         subparser.add_argument('-d', '--depth', type=int)
         subparser.add_argument('-r', '--refresh', type=int)
         subparser.add_argument('--display', type=int)
+        subparser.add_argument('--no-hidpi', action='store_true')
 
     # Parse the arguments.
     # Note that we have to use the leftover arguments from the
@@ -442,6 +625,6 @@ if __name__ == '__main__':
                 sys.exit(1)
 
     if args.subcommand == 'set':
-        sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display)
+        sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
     else:
-        sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display)
+        sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
