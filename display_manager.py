@@ -5,26 +5,107 @@
 #TODO: add these features:
 # [ ] works in login window
 # [ ] mirroring
-# [ ] brightness settings
+# [x] brightness settings
 # [ ] HDMI overscan
 # [ ] AirPlay mirroring
 # [x] set individual display settings
 
 ## Imports
 import argparse
+import objc
 import os
 import sys
 
+import CoreFoundation
 import Quartz
 
 ## Global Variables
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.5.0'
+    'version'   : '0.6.0'
 }
 
-MAX_DISPLAYS = 32
+## Manual metadata loading.
+def initialize_iokit_functions_and_variables():
+    iokit = objc.initFrameworkWrapper(
+        "IOKit",
+        frameworkIdentifier="com.apple.iokit",
+        frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
+        globals=globals()
+        )
+    functions = [
+        ("IOServiceGetMatchingServices", b"iI@o^I"),
+        ("IODisplayCreateInfoDictionary", b"@II"),
+        ("IODisplayGetFloatParameter", b"iII@o^f"),
+        ("IODisplaySetFloatParameter", b"iII@f"),
+        ("IOObjectRelease", b"iI"),
+        ("IOServiceMatching", b"@or*", "", dict(
+            arguments=
+            {
+                0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
+                        c_array_delimited_by_null=True,
+                        type_modifier=objc._C_IN)
+            }
+        )),
+        ("IOIteratorNext", "II"),
+        ]
+    variables = [
+        ("kIODisplayNoProductName", b"I"),
+        ("kIOMasterPortDefault", b"I"),
+        ("kIODisplayBrightnessKey", b"*"),
+        ("kDisplayVendorID", b"*"),
+        ("kDisplayProductID", b"*"),
+        ("kDisplaySerialNumber", b"*"),
+        ]
+    objc.loadBundleFunctions(iokit, globals(), functions)
+    objc.loadBundleVariables(iokit, globals(), variables)
+    global kDisplayBrightness
+    kDisplayBrightness = CoreFoundation.CFSTR(kIODisplayBrightnessKey)
+
+def CFNumberEqualsUInt32(number, uint32):
+    if number is None:
+        return uint32 == 0
+    return number == uint32
+
+def CGDisplayGetIOServicePort(display):
+    # Get values from current display.
+    vendor = Quartz.CGDisplayVendorNumber(display)
+    model  = Quartz.CGDisplayModelNumber(display)
+    serial = Quartz.CGDisplaySerialNumber(display)
+    # Get matching service name.
+    matching = IOServiceMatching("IODisplayConnect")
+    # Get the iterator for all service ports.
+    error, iterator = IOServiceGetMatchingServices(kIOMasterPortDefault, matching, None)
+    if error:
+        # Did we get an error?
+        return 0
+    # Begin iteration.
+    service = IOIteratorNext(iterator)
+    matching_service = 0
+    while service != 0:
+        # Until we find the desired service, keep iterating.
+        # Get the information for the current service.
+        info = IODisplayCreateInfoDictionary(service, kIODisplayNoProductName)
+        # Get the vendor ID, product ID, and serial number.
+        vendorID        = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(kDisplayVendorID))
+        productID       = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(kDisplayProductID))
+        serialNumber    = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(kDisplaySerialNumber))
+        # Check if everything matches.
+        if (
+            CFNumberEqualsUInt32(vendorID, vendor) and
+            CFNumberEqualsUInt32(productID, model) and
+            CFNumberEqualsUInt32(serialNumber, serial)
+            ):
+            # If it does, then we've found our service port, so break out.
+            matching_service = service
+            break
+        # Otherwise, keep searching.
+        service = IOIteratorNext(iterator)
+    # Return what we've found.
+    return matching_service
+
+kMaxDisplays = 32
 
 ## Struct-like thing for easy display.
 class DisplayMode(object):
@@ -95,7 +176,7 @@ def get_pixel_depth_from_encoding(encoding):
         raise RuntimeError("Unknown pixel encoding: {}".format(encoding))
 
 def get_displays_list():
-    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(MAX_DISPLAYS, None, None)
+    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(kMaxDisplays, None, None)
     if error:
         raise RuntimeError("Unable to get displays list.")
     return online_displays
@@ -464,6 +545,34 @@ def sub_show(command, width, height, depth, refresh, display=None, hidpi=True):
         for display in get_displays_list():
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
 
+def sub_brightness(command, brightness=1, display=None):
+    main_display = Quartz.CGMainDisplayID()
+    initialize_iokit_functions_and_variables()
+    if not display:
+        displays = get_displays_list()
+    else:
+        displays = [display]
+    if command == "show":
+        print("Showing current brightness setting(s).")
+        print('-' * 80)
+        for display in displays:
+            service = CGDisplayGetIOServicePort(display)
+            (error, display_brightness) = IODisplayGetFloatParameter(service, 0, kDisplayBrightness, None)
+            if error:
+                print("Failed to get brightness of display {}; error {}".format(display, error))
+            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+            print("    {:.2f}%".format(display_brightness * 100))
+    elif command == "set":
+        print("Setting display brightness to {:.2f}%".format(brightness * 100))
+        print('-' * 80)
+        for display in displays:
+            service = CGDisplayGetIOServicePort(display)
+            error = IODisplaySetFloatParameter(service, 0, kDisplayBrightness, brightness)
+            if error:
+                print("Failed ot set brightness of display {}; error {}".format(display, error))
+            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+            print("    {:.2f}%".format(brightness * 100))
+
 ## Helpful command-line information
 
 def version():
@@ -487,7 +596,7 @@ def usage(command=None):
     if command == 'set':
         print('''\
 usage: {name} set {{ help | closest | highest | exact }}
-        [-w width] [-h height] [-d depth] [-r refresh]
+        [-w width] [-h height] [-d depth] [-r refresh] [--display display] [--nohidpi]
 
 SUBCOMMANDS
     help        Print this help information.
@@ -498,17 +607,17 @@ SUBCOMMANDS
                 checking whether that resolution is supported by the display.
 
 OPTIONS
-    -w width    Resolution width
-    -h height   Resolution height
-    -d depth    Color depth
-    -r refresh  Refresh rate
-    --display   Specify a particular display
-    --no-hidpi  Don't show HiDPI settings
+    -w width            Resolution width
+    -h height           Resolution height
+    -d depth            Color depth
+    -r refresh          Refresh rate
+    --display display   Specify a particular display
+    --no-hidpi          Don't show HiDPI settings
 ''').format(name=attributes['name'])
     elif command == 'show':
         print('''\
 usage: {name} show {{ help | all | closest | highest | exact }}
-        [-w width] [-h height] [-d depth] [-r refresh]
+        [-w width] [-h height] [-d depth] [-r refresh] [--display display] [--nohidpi]
 
 SUBCOMMANDS
     help        Print this help information.
@@ -520,22 +629,34 @@ SUBCOMMANDS
     displays    Just list the current displays and their IDs.
 
 OPTIONS
-    -w width    Resolution width
-    -h height   Resolution height
-    -d depth    Color depth
-    -r refresh  Refresh rate
-    --display   Specify a particular display
-    --no-hidpi  Don't show HiDPI settings
+    -w width            Resolution width
+    -h height           Resolution height
+    -d depth            Color depth
+    -r refresh          Refresh rate
+    --display display   Specify a particular display
+    --no-hidpi          Don't show HiDPI settings
+''')
+    elif command == 'brightness':
+        print('''\
+usage: {name} brightness {{ show }} [--display display]
+
+SUBCOMMANDS
+    help        Print this help information.
+    show        Show the current brightness setting(s).
+
+OPTIONS
+    --display display   Specify a particular display
 ''')
     else:
         print('''\
 usage: {name} {{ help | version | set | show }}
 
 Use any of the subcommands with 'help' to get more information:
-    help    Print this help information.
-    version Print the version information.
-    set     Set the display configuration.
-    show    See available display configurations.
+    help        Print this help information.
+    version     Print the version information.
+    set         Set the display configuration.
+    show        See available display configurations.
+    brightness  See or set the current display brightness.
 ''').format(name=attributes['name'])
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -576,7 +697,7 @@ if __name__ == '__main__':
 
     # Subparser for 'help'.
     parser_help = subparsers.add_parser('help', add_help=False)
-    parser_help.add_argument('command', choices=['set', 'show'], nargs='?', default=None)
+    parser_help.add_argument('command', choices=['set', 'show', 'brightness'], nargs='?', default=None)
 
     # Subparser for 'set'.
     parser_set = subparsers.add_parser('set', add_help=False)
@@ -586,15 +707,20 @@ if __name__ == '__main__':
     parser_show = subparsers.add_parser('show', add_help=False)
     parser_show.add_argument('command', choices=['help', 'all', 'closest', 'highest', 'exact', 'displays'], nargs='?', default='all')
 
-    # Both 'set' and 'show' have similar supported arguments.
-    for subparser in [parser_set, parser_show]:
-        subparser.add_argument('--help', action='store_true')
+    # Subparser for 'brightness'.
+    parser_brightness = subparsers.add_parser('brightness', add_help=False)
+    parser_brightness.add_argument('command', choices=['help', 'show', 'set'])
+    parser_brightness.add_argument('brightness', type=float, nargs='?')
+
+    # All of the subcommands have some similar arguments.
+    for subparser in [parser_set, parser_show, parser_brightness]:
         subparser.add_argument('-w', '--width', type=int)
         subparser.add_argument('-h', '--height', type=int)
         subparser.add_argument('-d', '--depth', type=int)
         subparser.add_argument('-r', '--refresh', type=int)
-        subparser.add_argument('--display', type=int)
         subparser.add_argument('--no-hidpi', action='store_true')
+        subparser.add_argument('--help', action='store_true')
+        subparser.add_argument('--display', type=int)
 
     # Parse the arguments.
     # Note that we have to use the leftover arguments from the
@@ -618,6 +744,10 @@ if __name__ == '__main__':
     # Check we have either all or none of the manual specifications.
     manual = [args.width, args.height, args.depth, args.refresh]
     if any(manual):
+        if subcommand not in ['set', 'show']:
+            usage()
+            print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
+            sys.exit(1)
         for element in manual:
             if element is None:
                 usage()
@@ -626,5 +756,7 @@ if __name__ == '__main__':
 
     if args.subcommand == 'set':
         sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
-    else:
+    elif args.subcommand == 'show':
         sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
+    elif args.subcommand == 'brightness':
+        sub_brightness(args.command, args.brightness, args.display)
