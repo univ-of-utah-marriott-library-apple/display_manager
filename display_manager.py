@@ -4,7 +4,7 @@
 
 #TODO: add these features:
 # [ ] works in login window
-# [ ] mirroring
+# [x] mirroring
 # [x] brightness settings
 # [ ] HDMI overscan
 # [ ] AirPlay mirroring
@@ -23,7 +23,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.6.0'
+    'version'   : '0.7.0'
     }
 
 kMaxDisplays = 32
@@ -301,8 +301,7 @@ def get_current_mode_for_display(display):
     :param: The identifier of the desired display.
     :return: The current DisplayMode used by that display.
     """
-    mode = DisplayMode(mode=Quartz.CGDisplayCopyDisplayMode(display))
-    return mode
+    return DisplayMode(mode=Quartz.CGDisplayCopyDisplayMode(display))
 
 def get_all_current_configurations():
     """
@@ -735,7 +734,7 @@ def sub_show(command, width, height, depth, refresh, display=None, hidpi=True):
 
 def sub_brightness(command, brightness=1, display=None):
     """
-    Handles all the optinos for the "brightness" subcommand.
+    Handles all the options for the "brightness" subcommand.
 
     :param command: The command passed in.
     :param brightness: The level of brightness to change to.
@@ -774,6 +773,37 @@ def sub_brightness(command, brightness=1, display=None):
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
             print("    {:.2f}%".format(brightness * 100))
 
+def sub_mirroring(command, display, display_to_mirror=Quartz.CGMainDisplayID()):
+    """
+    Handles all the options for the "mirroring" subcommand.
+
+    :param command: The command passed in.
+    :param display: The display to configure mirroring on.
+    :param display_to_mirror: The display to become a mirror of.
+    """
+    main_display = Quartz.CGMainDisplayID()
+    if not display:
+        displays = get_displays_list()
+    else:
+        displays = [display]
+    # Get the current modes for each display.
+    modes = []
+    for display in displays:
+        modes.append( (display, get_current_mode_for_display(display)) )
+    # If we're disabling, then set the mirror target to the null display.
+    if command == "enable":
+        enable_mirroring = True
+        print("Enabling mirroring with target display: {}{}".format(display_to_mirror, " (Main Display)" if display_to_mirror == main_display else ""))
+    if command == "disable":
+        print("Disabling mirroring.")
+        display_to_mirror = Quartz.kCGNullDirectDisplay
+        enable_mirroring = False
+    print('-' * 80)
+    # Effect the changes!
+    for display, mode in modes:
+        print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+        set_display(display, mode, enable_mirroring, display_to_mirror)
+
 ## Helpful command-line information
 
 def version():
@@ -794,11 +824,11 @@ def usage(command=None):
     # Give the version information always.
     print(version())
 
-    if command == 'set':
-        print('''\
+    information = {}
+    information['set'] = '''\
 usage: {name} set {{ help | closest | highest | exact }}
-        [-w width] [-h height] [-d depth] [-r refresh]
-        [--display display] [--nohidpi]
+    [-w width] [-h height] [-d depth] [-r refresh]
+    [--display display] [--nohidpi]
 
 SUBCOMMANDS
     help        Print this help information.
@@ -809,18 +839,18 @@ SUBCOMMANDS
                 checking whether that resolution is supported by the display.
 
 OPTIONS
-    -w width            Resolution width
-    -h height           Resolution height
-    -d depth            Color depth
-    -r refresh          Refresh rate
-    --display display   Specify a particular display
-    --no-hidpi          Don't show HiDPI settings
-''').format(name=attributes['name'])
-    elif command == 'show':
-        print('''\
+    -w width            Resolution width.
+    -h height           Resolution height.
+    -d depth            Color depth.
+    -r refresh          Refresh rate.
+    --display display   Specify a particular display.
+    --no-hidpi          Don't show HiDPI settings.
+'''.format(name=attributes['name'])
+
+    information['show'] = '''\
 usage: {name} show {{ help | all | closest | highest | exact }}
-        [-w width] [-h height] [-d depth] [-r refresh]
-        [--display display] [--nohidpi]
+    [-w width] [-h height] [-d depth] [-r refresh]
+    [--display display] [--nohidpi]
 
 SUBCOMMANDS
     help        Print this help information.
@@ -832,24 +862,42 @@ SUBCOMMANDS
     displays    Just list the current displays and their IDs.
 
 OPTIONS
-    -w width            Resolution width
-    -h height           Resolution height
-    -d depth            Color depth
-    -r refresh          Refresh rate
-    --display display   Specify a particular display
-    --no-hidpi          Don't show HiDPI settings
-''').format(name=attributes['name'])
-    elif command == 'brightness':
-        print('''\
-usage: {name} brightness {{ show }} [--display display]
+    -w width            Resolution width.
+    -h height           Resolution height.
+    -d depth            Color depth.
+    -r refresh          Refresh rate.
+    --display display   Specify a particular display.
+    --no-hidpi          Don't show HiDPI settings.
+'''.format(name=attributes['name'])
+
+    information['brightness'] = '''\
+usage: {name} brightness {{ help | show }}
+    [--display display]
 
 SUBCOMMANDS
     help        Print this help information.
     show        Show the current brightness setting(s).
 
 OPTIONS
-    --display display   Specify a particular display
-''').format(name=attributes['name'])
+    --display display   Specify a particular display.
+'''.format(name=attributes['name'])
+
+    information['mirroring'] = '''\
+usage: {name} brightness {{ help | enable | disable }}
+    [--diplay display] [--mirror-of-display display]
+
+SUBCOMMANDS
+    help        Print this help information.
+    enable      Activate mirroring.
+    disable     Deactivate mirroring.
+
+OPTIONS
+    --display display               Change mirroring settings for 'display'.
+    --mirror-of-display display     Set the display to mirror 'display'.
+'''.format(name=attributes['name'])
+
+    if command in information:
+        print(information[command])
     else:
         print('''\
 usage: {name} {{ help | version | set | show }}
@@ -900,7 +948,7 @@ if __name__ == '__main__':
 
     # Subparser for 'help'.
     parser_help = subparsers.add_parser('help', add_help=False)
-    parser_help.add_argument('command', choices=['set', 'show', 'brightness'], nargs='?', default=None)
+    parser_help.add_argument('command', choices=['set', 'show', 'brightness', 'mirroring'], nargs='?', default=None)
 
     # Subparser for 'set'.
     parser_set = subparsers.add_parser('set', add_help=False)
@@ -915,15 +963,22 @@ if __name__ == '__main__':
     parser_brightness.add_argument('command', choices=['help', 'show', 'set'])
     parser_brightness.add_argument('brightness', type=float, nargs='?')
 
+    # Subparser for 'mirroring'.
+    parser_mirroring = subparsers.add_parser('mirroring', add_help=False)
+    parser_mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
+    parser_mirroring.add_argument('--mirror-of-display', type=int, default=Quartz.CGMainDisplayID())
+
     # All of the subcommands have some similar arguments.
-    for subparser in [parser_set, parser_show, parser_brightness]:
+    for subparser in [parser_set, parser_show, parser_brightness, parser_mirroring]:
+        subparser.add_argument('--help', action='store_true')
+        subparser.add_argument('--display', type=int)
+    # These two subparsers have similar arguments.
+    for subparser in [parser_set, parser_show]:
         subparser.add_argument('-w', '--width', type=int)
         subparser.add_argument('-h', '--height', type=int)
         subparser.add_argument('-d', '--depth', type=int)
         subparser.add_argument('-r', '--refresh', type=int)
         subparser.add_argument('--no-hidpi', action='store_true')
-        subparser.add_argument('--help', action='store_true')
-        subparser.add_argument('--display', type=int)
 
     # Parse the arguments.
     # Note that we have to use the leftover arguments from the
@@ -945,17 +1000,25 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # Check we have either all or none of the manual specifications.
-    manual = [args.width, args.height, args.depth, args.refresh]
-    if any(manual):
-        if args.subcommand not in ['set', 'show']:
-            usage()
-            print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
-            sys.exit(1)
-        for element in manual:
-            if element is None:
+    try:
+        manual = [args.width, args.height, args.depth, args.refresh]
+        if any(manual):
+            if args.subcommand not in ['set', 'show']:
                 usage()
-                print("Error: Must have either all or none of the manual specifications.")
+                print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
                 sys.exit(1)
+            for element in manual:
+                if element is None:
+                    usage()
+                    print("Error: Must have either all or none of the manual specifications.")
+                    sys.exit(1)
+    except AttributeError:
+        # Evidently we're using a subparser without these attributes.
+        # Not an issue.
+        pass
+
+    # print(args)
+    # sys.exit(0)
 
     if args.subcommand == 'set':
         sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
@@ -963,3 +1026,5 @@ if __name__ == '__main__':
         sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
     elif args.subcommand == 'brightness':
         sub_brightness(args.command, args.brightness, args.display)
+    elif args.subcommand == 'mirroring':
+        sub_mirroring(args.command, args.display, args.mirror_of_display)
