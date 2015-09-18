@@ -24,7 +24,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.8.1'
+    'version'   : '0.9.1'
     }
 
 kMaxDisplays = 32
@@ -660,7 +660,30 @@ def sub_set(command, width, height, depth, refresh, display=None, hidpi=1):
             set_display(pair[0], pair[1][0])
     elif command == "exact":
         # Set the exact mode or don't set it at all.
-        pass
+        all_modes = get_all_modes_for_all_displays(hidpi)
+        # Create a fake exact mode to match against.
+        exact = DisplayMode(
+            width   = width,
+            height  = height,
+            bpp     = depth,
+            refresh = refresh
+            )
+        # They only wanted to set one display.
+        if display:
+            all_modes = [x for x in all_modes if x[0] == display]
+        if not all_modes:
+            print("No matching displays found.")
+            sys.exit(4)
+        print("Setting exact mode or quitting.")
+        print('-' * 80)
+        for pair in all_modes:
+            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
+            closest = get_mode_closest_to_values(pair[1], width, height, depth, refresh)
+            if closest and closest == exact:
+                print("    {}".format(closest))
+                set_display(pair[0], closest)
+            else:
+                print("    (no exact matches found)")
 
 def sub_show(command, width, height, depth, refresh, display=None, hidpi=1):
     """
@@ -857,8 +880,8 @@ SUBCOMMANDS
     closest     Set the display settings to the supported resolution that is
                 closest to the specified values.
     highest     Set the display settings to the highest supported resolution.
-    exact       Set the display settings to the specified values without
-                checking whether that resolution is supported by the display.
+    exact       Set the display settings to the specified values if they are
+                supported. If they are not, don't change the display.
 
 OPTIONS
     -w width            Resolution width.
