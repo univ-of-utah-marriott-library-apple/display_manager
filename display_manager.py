@@ -9,6 +9,7 @@
 # [ ] HDMI overscan
 # [ ] AirPlay mirroring
 # [x] set individual display settings
+# [x] HiDPI/no HiDPI options
 
 ## Imports
 import argparse
@@ -23,7 +24,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.7.0'
+    'version'   : '0.8.0'
     }
 
 kMaxDisplays = 32
@@ -241,6 +242,23 @@ def get_hidpi_scalar(mode):
             raise RuntimeError("Vertical and horizontal dimensions aren't scaled properly... mode: {}".format(mode))
         return raw_width / res_width
 
+def get_hidpi_value(no_hidpi, only_hidpi):
+    """
+    Returns a numeric value describing the HiDPI mode desired.
+
+    :param no_hidpi: Whether to exclude HiDPI modes from the search.
+    :param only_hidpi: Whether to only include HiDPI modes.
+    :return: An integer describing the combination of these.
+    """
+    if no_hidpi and not only_hidpi:
+        return 0
+    elif not no_hidpi and not only_hidpi:
+        return 1
+    elif not no_hidpi and only_hidpi:
+        return 2
+    else:
+        raise ValueError("Error: Cannot require both no HiDPI and only HiDPI. Make up your mind.")
+
 def get_pixel_depth_from_encoding(encoding):
     """
     Takes a pixel encoding and returns an integer representing that encoding.
@@ -270,7 +288,7 @@ def get_displays_list():
         raise RuntimeError("Unable to get displays list.")
     return online_displays
 
-def get_all_modes_for_display(display, hidpi=True):
+def get_all_modes_for_display(display, hidpi=1):
     """
     Given a display, this finds all of the available supported display modes.
     The resulting list is sorted so that the highest resolution, highest pixel
@@ -289,6 +307,8 @@ def get_all_modes_for_display(display, hidpi=True):
         modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, {Quartz.kCGDisplayShowDuplicateLowResolutionModes: Quartz.kCFBooleanTrue})]
     else:
         modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, None)]
+    if hidpi == 2:
+        modes = [mode for mode in modes if mode.dpi_scalar is not None]
     modes.sort(key = lambda mode: mode.refresh, reverse = True)
     modes.sort(key = lambda mode: mode.bpp, reverse = True)
     modes.sort(key = lambda mode: mode.pixels, reverse = True)
@@ -315,7 +335,7 @@ def get_all_current_configurations():
         modes.append( (display, get_current_mode_for_display(display)) )
     return modes
 
-def get_all_modes_for_all_displays(hidpi=True):
+def get_all_modes_for_all_displays(hidpi=1):
     """
     Gets a list of displays and all available modes for each display.
 
@@ -570,7 +590,7 @@ def set_display(display, mode, mirroring=False, mirror_display=Quartz.CGMainDisp
     # Finish the configuration.
     Quartz.CGCompleteDisplayConfiguration(config_ref, Quartz.kCGConfigurePermanently)
 
-def sub_set(command, width, height, depth, refresh, display=None, hidpi=True):
+def sub_set(command, width, height, depth, refresh, display=None, hidpi=1):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -580,7 +600,7 @@ def sub_set(command, width, height, depth, refresh, display=None, hidpi=True):
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
     :param display: Specific display to configure.
-    :param hidpi: Whether to use HiDPI settings.
+    :param hidpi: Description of HiDPI settings from get_hidpi_value().
     """
     # Get the main display's identifier (since it gets used a lot).
     main_display = Quartz.CGMainDisplayID()
@@ -640,7 +660,7 @@ def sub_set(command, width, height, depth, refresh, display=None, hidpi=True):
         # Set the exact mode or don't set it at all.
         pass
 
-def sub_show(command, width, height, depth, refresh, display=None, hidpi=True):
+def sub_show(command, width, height, depth, refresh, display=None, hidpi=1):
     """
     Handles all the options for the "show" subcommand.
 
@@ -650,7 +670,7 @@ def sub_show(command, width, height, depth, refresh, display=None, hidpi=True):
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
     :param display: Specific display to configure.
-    :param hidpi: Whether to use HiDPI settings.
+    :param hidpi: Description of HiDPI settings from get_hidpi_value().
     """
     # Get the main display's identifier since it gets used a lot.
     main_display = Quartz.CGMainDisplayID()
@@ -979,6 +999,7 @@ if __name__ == '__main__':
         subparser.add_argument('-d', '--depth', type=int)
         subparser.add_argument('-r', '--refresh', type=int)
         subparser.add_argument('--no-hidpi', action='store_true')
+        subparser.add_argument('--only-hidpi', action='store_true')
 
     # Parse the arguments.
     # Note that we have to use the leftover arguments from the
@@ -1017,13 +1038,21 @@ if __name__ == '__main__':
         # Not an issue.
         pass
 
+    # Check if we have specified both not to use HiDPI and only to use HiDPI.
+    try:
+        hidpi = get_hidpi_value(args.no_hidpi, args.only_hidpi)
+    except AttributeError:
+        # Probably using a subparser that doesn't check HiDPI settings.
+        # And that's okay.
+        pass
+
     # print(args)
     # sys.exit(0)
 
     if args.subcommand == 'set':
-        sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
+        sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'show':
-        sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display, not args.no_hidpi)
+        sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'brightness':
         sub_brightness(args.command, args.brightness, args.display)
     elif args.subcommand == 'mirroring':
