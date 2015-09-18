@@ -24,7 +24,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.8.0'
+    'version'   : '0.8.1'
     }
 
 kMaxDisplays = 32
@@ -295,7 +295,7 @@ def get_all_modes_for_display(display, hidpi=1):
     depth, highest refresh rate modes are at the top.
 
     :param display: The identifier of the desired display.
-    :param hidpi: Whether to include additional, "duplicate" modes.
+    :param hidpi: The HiDPI usage mode, specified by get_hidpi_value().
     :return: A list of DisplayMode objects, sorted.
     """
     #TODO: The HiDPI call also gets extra things. Fix those.
@@ -308,7 +308,9 @@ def get_all_modes_for_display(display, hidpi=1):
     else:
         modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, None)]
     if hidpi == 2:
+        # This removes extra modes, so only HiDPI-scaled modes are displayed.
         modes = [mode for mode in modes if mode.dpi_scalar is not None]
+    # Sort the modes!
     modes.sort(key = lambda mode: mode.refresh, reverse = True)
     modes.sort(key = lambda mode: mode.bpp, reverse = True)
     modes.sort(key = lambda mode: mode.pixels, reverse = True)
@@ -920,13 +922,14 @@ OPTIONS
         print(information[command])
     else:
         print('''\
-usage: {name} {{ help | version | set | show }}
+usage: {name} {{ help | version | set | show | mirroring | brightness }}
 
 Use any of the subcommands with 'help' to get more information:
     help        Print this help information.
     version     Print the version information.
     set         Set the display configuration.
     show        See available display configurations.
+    mirroring   Set mirroring configuration.
     brightness  See or set the current display brightness.
 ''').format(name=attributes['name'])
 
