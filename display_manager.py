@@ -24,7 +24,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.9.1'
+    'version'   : '0.9.2'
     }
 
 kMaxDisplays = 32
@@ -890,6 +890,7 @@ OPTIONS
     -r refresh          Refresh rate.
     --display display   Specify a particular display.
     --no-hidpi          Don't show HiDPI settings.
+    --only-hidpi        Only show HiDPI settings.
 '''.format(name=attributes['name'])
 
     information['show'] = '''\
@@ -913,6 +914,7 @@ OPTIONS
     -r refresh          Refresh rate.
     --display display   Specify a particular display.
     --no-hidpi          Don't show HiDPI settings.
+    --only-hidpi        Only show HiDPI settings.
 '''.format(name=attributes['name'])
 
     information['brightness'] = '''\
