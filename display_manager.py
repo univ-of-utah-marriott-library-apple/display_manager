@@ -24,7 +24,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.9.2'
+    'version'   : '0.9.3'
     }
 
 kMaxDisplays = 32
@@ -273,6 +273,8 @@ def get_pixel_depth_from_encoding(encoding):
         return 16
     elif encoding == "--------RRRRRRRRGGGGGGGGBBBBBBBB":
         return 32
+    elif encoding == "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB":
+        return 30
     else:
         raise RuntimeError("Unknown pixel encoding: {}".format(encoding))
 

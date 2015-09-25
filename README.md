@@ -1,2 +1,197 @@
-# display_manager
-A handy script to help you manually configure display preferences on OS X.
+Display Manager
+===============
+
+A handy command-line utility to manipulate your Mac's display settings.
+
+## Contents
+
+* [Contact](#contact) - how to reach us
+* [System Requirements](#system-requirements) - what you need
+* [Install](#install) - instructions for installing Display Manager
+* [Uninstall](#uninstall) - removal of Display Manager
+* [Purpose](#purpose) - why does this script exist?
+* [Usage](#usage)
+   * [Set](#set) - set the configuration
+   * [Show](#show) - look at available configurations
+   * [Mirroring](#mirroring) - configure mirroring
+   * [Brightness](#brightness) - change brightness
+
+## Contact
+
+If you have any comments, questions, or other input, either [file an issue](../../issues) or [send us an email](mailto:mlib-its-mac-github@lists.utah.edu). Thanks!
+
+## System Requirements
+
+Display Manager is for Macintosh computers. I'm not sure yet how far back in versions it will work. Currently it is tested for 10.10 "Yosemite" and 10.11 "El Capitan".
+
+Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that do the actual manipulation of the display settings.
+
+If you have replaced the default `/usr/bin/python` binary (which you should never do, by the way), you should ensure that it has the PyObjC bindings set up correctly.
+
+## Install
+
+First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
+
+[Then download the latest installer for Display Manager here!](../../releases/)
+
+Once the download has completed, double-click the `.dmg` file. This will open a window in Finder where you should see two packages (files ending in `.pkg`). Double click the one named "Display Manager [x.x.x].pkg" (where *x.x.x* represents the current version number). This will launch the installer, which will guide you through the installation process. (Follow the on-screen instructions to complete the installation.)
+
+## Uninstall
+
+To remove Display Manager from your system, download the .dmg and run the "Uninstall Display Manager [x.x.x]" package to uninstall it, where *x.x.x* represents the version number. The version is not relevant, as all of the Display Manager uninstallers will work on any version of Display Manager.
+
+At the end it will say "Installation Successful" but don't believe it - this will only remove files.
+
+## Purpose
+
+Display Manager was designed as a replacement to the old SetDisplay.c program that administrators have been using for years. While SetDisplay still works and can do many things, we decided to port the project to Python for a few reasons:
+
+* Greater compatibility
+   * Python is not a compiled language, so any potential architecture changes in the future won't affect it
+* Better readability
+   * For those not well-versed in C-style languages, Python can be easier to read through and modify
+* More features
+   * We support all the features of SetDisplay
+   * Plans for additional features (AirPlay configuration, HDMI underscan settings, etc.)
+
+And also this was a good project for me getting into PyObjC. We have a couple other ideas that I'll be working on, but for now doing a simple port seemed a good way to get a grasp of how it all works.
+
+## Usage
+
+The Display Manager executable supports a few commands, because it seemed more sensical than dozens of extra option flags.
+
+```
+$ display_manager.py { help | version | set | show | mirroring | brightness }
+```
+
+The `help` and `version` options just print out relevant information, and they are interchangeable with `--help` and `--version`, respectively. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
+
+The other commands each have their own usage instructions, which I'll detail below.
+
+### Set
+
+The `set` command is used to change the current configuration on a display or across all displays. It does not ask for confirmation; be smart about what you put in here. I recommend running your desired settings through `show` to be sure they're supported and you don't have issues.
+
+| Subcommand | Purpose                                                                                      |
+|------------|----------------------------------------------------------------------------------------------|
+| `help`     | Prints the usage instructions.                                                               |
+| `closest`  | Set the display to the supported configuration that is closest to the user-supplied values.  |
+| `highest`  | Set the display to the highest supported configuration settings.                             |
+| `exact`    | Set the display to the specified values **if** they form a supported configuration.          |
+
+| Option                            | Purpose                                                               |
+|-----------------------------------|-----------------------------------------------------------------------|
+| `-w width`, `--width width`       | Resolution width.                                                     |
+| `-h height`, `--height height`    | Resolution height.                                                    |
+| `-d depth`, `--depth depth`       | Color depth.                                                          |
+| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz).                                                 |
+| `--display display`               | Only change settings for the display with identifier `display`.       |
+| `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
+| `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
+
+#### Examples
+
+* Set the display to its highest supported configuration:
+```
+$ display_manager.py set highest
+```
+
+* Set the display to the closest value to what you want:
+```
+$ display_manager.py set closest -w 1024 -h 768 -d 32 -r 70
+```
+
+* Set display `478176570` to use the highest HiDPI-scaled configuration:
+```
+$ display_manager.py set highest --display 478176570 --only-hidpi
+```
+
+### Show
+
+Use the `show` command to learn more about the supported display configurations for your hardware.
+
+| Subcommand    | Purpose                                                                                   |
+|---------------|-------------------------------------------------------------------------------------------|
+| `help`        | Prints the usage instructions.                                                            |
+| `all`         | Shows all available supported display configuration.                                      |
+| `closest`     | Shows the closest supported configuration to the given values.                            |
+| `highest`     | Shows the highest available supported display configuration.                              |
+| `exact`       | Shows the current display configuration.                                                  |
+| `displays`    | Shows a list of all attached, configurable displays.                                      |
+
+| Option                            | Purpose                                                               |
+|-----------------------------------|-----------------------------------------------------------------------|
+| `-w width`, `--width width`       | Resolution width.                                                     |
+| `-h height`, `--height height`    | Resolution height.                                                    |
+| `-d depth`, `--depth depth`       | Color depth.                                                          |
+| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz).                                                 |
+| `--display display`               | Only change settings for the display with identifier `display`.       |
+| `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
+| `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
+
+#### Examples
+
+* Show the highest supported configuration:
+```
+$ display_manager.py show highest
+Showing highest supported display configuration(s).
+--------------------------------------------------------------------------------
+Display: 478176570 (Main Display)
+    1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
+```
+
+* Show all connected displays and their identifiers:
+```
+$ display_manager.py show displays
+Display: 478176570 (Main Display)
+Display: 478176723
+Display: 478173192
+Display: 478160349
+```
+
+### Mirroring
+
+The `mirroring` command is used to configure display mirroring.
+
+NOTE: Some functionality of this is not well-documented. I've noticed some odd things happen when I have two external displays connected to my MacBook Pro Retina and I configure External Display A to become a mirror of External Display B without being a mirror of the main display. I imagine this isn't terribly common usage, and I'm working on a permanent solution, but for now just know that you may have to access "Displays" in System Preferences to disable this kind of mirroring configuration.
+
+| Subcommand | Purpose                                                                  |
+|------------|--------------------------------------------------------------------------|
+| `help`     | Prints the usage instructions.                                           |
+| `enable`   | Activate mirroring.                                                      |
+| `disable`  | Deactivate mirroring.                                                    |
+
+| Option                        | Purpose                                               |
+|-------------------------------|-------------------------------------------------------|
+| `--display display`           | Change mirroring settings *for* display `display`.    |
+| `--mirror-of-display display` | Set the display to become a mirror of `display`.      |
+
+#### Examples
+
+* Set display `478176723` to become a mirror of `478176570`:
+```
+$ display_manager.py mirroring enable --display 478176723 --mirror-of-display 478176570
+```
+
+* Set all connected displays that aren't the main display to mirror the main display:
+```
+$ display_manager.py mirroring enable
+```
+
+* Stop mirroring:
+```
+$ display_manager.py mirroring disable
+```
+
+### Brightness
+
+You can set the brightness on your display with the `brightness` command (assuming your display supports it).
+
+| Subcommand    | Purpose                                               |
+|---------------|-------------------------------------------------------|
+| `help`        | Prints the usage instructions.                        |
+| `show`        | Show the current brightness setting(s).               |
+
+| Option                | Purpose                                       |
+|-----------------------|-----------------------------------------------|
+| `--display display`   | Change the brightness on display `display`.   |
