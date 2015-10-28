@@ -6,7 +6,7 @@
 # [ ] works in login window
 # [x] mirroring
 # [x] brightness settings
-# [ ] HDMI overscan
+# [x] HDMI overscan
 # [ ] AirPlay mirroring
 # [x] set individual display settings
 # [x] HiDPI/no HiDPI options
@@ -24,7 +24,7 @@ import Quartz
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.9.3'
+    'version'   : '0.10.0'
     }
 
 kMaxDisplays = 32
@@ -103,6 +103,9 @@ def initialize_iokit_functions_and_variables():
     # Set this key for later use.
     global kDisplayBrightness
     kDisplayBrightness = CoreFoundation.CFSTR(kIODisplayBrightnessKey)
+    # This key is a private API for Apple. Use at your own risk.
+    global kDisplayUnderscan
+    kDisplayUnderscan = CoreFoundation.CFSTR("pscn")
 
 def CFNumberEqualsUInt32(number, uint32):
     """
@@ -820,6 +823,47 @@ def sub_brightness(command, brightness=1, display=None):
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
             print("    {:.2f}%".format(brightness * 100))
 
+def sub_underscan(command, underscan=1, display=None):
+    """
+    Handles all the options for the "underscan" subcommand.
+
+    :param command: The command passed in.
+    :param underscan: The value to set on the underscan slider.
+    :param display: Specific display to configure.
+    """
+    main_display = Quartz.CGMainDisplayID()
+    # We need extra IOKit stuff for this.
+    initialize_iokit_functions_and_variables()
+    if not display:
+        displays = get_displays_list()
+    else:
+        displays = [display]
+    # Iterate over the available options.
+    if command == "show":
+        # Show the current underscan setting.
+        print("Showing current underscan setting(s).")
+        print('-' * 80)
+        for display in displays:
+            service = CGDisplayGetIOServicePort(display)
+            (error, display_underscan) = IODisplayGetFloatParameter(service, 0, kDisplayUnderscan, None)
+            if error:
+                print("Failed to get underscan value of display {}; error {}".format(display, error))
+                continue
+            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+            print("    {:.2f}%".format(display_underscan * 100))
+    elif command == "set":
+        # Set the underscan setting.
+        print("Setting display underscan to {:.2f}%".format(underscan * 100))
+        print('-' * 80)
+        for display in displays:
+            service = CGDisplayGetIOServicePort(display)
+            error = IODisplaySetFloatParameter(service, 0, kDisplayUnderscan, underscan)
+            if error:
+                print("Failed to set underscan of display {}; error {}".format(display, error))
+                continue
+            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+            print("    {:.2f}%".format(underscan * 100))
+
 def sub_mirroring(command, display, display_to_mirror=Quartz.CGMainDisplayID()):
     """
     Handles all the options for the "mirroring" subcommand.
@@ -872,93 +916,116 @@ def usage(command=None):
     print(version())
 
     information = {}
-    information['set'] = '''\
-usage: {name} set {{ help | closest | highest | exact }}
-    [-w width] [-h height] [-d depth] [-r refresh]
-    [--display display] [--nohidpi]
+    information['set'] = '\n'.join([
+        "usage: {name} set {{ help | closest | highest | exact }}",
+        "    [-w width] [-h height] [-d depth] [-r refresh]",
+        "    [--display display] [--nohidpi]",
+        "",
+        "SUBCOMMANDS",
+        "    help        Print this help information.",
+        "    closest     Set the display settings to the supported resolution that is",
+        "                closest to the specified values.",
+        "    highest     Set the display settings to the highest supported resolution.",
+        "    exact       Set the display settings to the specified values if they are",
+        "                supported. If they are not, don't change the display.",
+        "",
+        "OPTIONS",
+        "    -w width            Resolution width.",
+        "    -h height           Resolution height.",
+        "    -d depth            Color depth.",
+        "    -r refresh          Refresh rate.",
+        "    --display display   Specify a particular display.",
+        "    --no-hidpi          Don't show HiDPI settings.",
+        "    --only-hidpi        Only show HiDPI settings.",
+        "",
+    ]).format(name=attributes['name'])
 
-SUBCOMMANDS
-    help        Print this help information.
-    closest     Set the display settings to the supported resolution that is
-                closest to the specified values.
-    highest     Set the display settings to the highest supported resolution.
-    exact       Set the display settings to the specified values if they are
-                supported. If they are not, don't change the display.
+    information['show'] = '\n'.join([
+        "usage: {name} show {{ help | all | closest | highest | exact }}",
+        "    [-w width] [-h height] [-d depth] [-r refresh]",
+        "    [--display display] [--nohidpi]",
+        "",
+        "SUBCOMMANDS",
+        "    help        Print this help information.",
+        "    all         Show all supported resolutions for the display.",
+        "    closest     Show the closest matching supported resolution to the specified",
+        "                values.",
+        "    highest     Show the highest supported resolution.",
+        "    exact       Show the current display configuration.",
+        "    displays    Just list the current displays and their IDs.",
+        "",
+        "OPTIONS",
+        "    -w width            Resolution width.",
+        "    -h height           Resolution height.",
+        "    -d depth            Color depth.",
+        "    -r refresh          Refresh rate.",
+        "    --display display   Specify a particular display.",
+        "    --no-hidpi          Don't show HiDPI settings.",
+        "    --only-hidpi        Only show HiDPI settings.",
+        "",
+    ]).format(name=attributes['name'])
 
-OPTIONS
-    -w width            Resolution width.
-    -h height           Resolution height.
-    -d depth            Color depth.
-    -r refresh          Refresh rate.
-    --display display   Specify a particular display.
-    --no-hidpi          Don't show HiDPI settings.
-    --only-hidpi        Only show HiDPI settings.
-'''.format(name=attributes['name'])
+    information['brightness'] = '\n'.join([
+        "usage: {name} brightness {{ help | show | set [value] }}",
+        "    [--display display]",
+        "",
+        "SUBCOMMANDS",
+        "    help        Print this help information.",
+        "    show        Show the current brightness setting(s).",
+        "    set [value] Sets the brightness to the given value. Must be between 0 and 1.",
+        "",
+        "OPTIONS",
+        "    --display display   Specify a particular display.",
+        "",
+    ]).format(name=attributes['name'])
 
-    information['show'] = '''\
-usage: {name} show {{ help | all | closest | highest | exact }}
-    [-w width] [-h height] [-d depth] [-r refresh]
-    [--display display] [--nohidpi]
+    information['underscan'] = '\n'.join([
+        "usage: {name} underscan {{ help | show | set [value] }}",
+        "    [--display display]",
+        "",
+        "SUBCOMMANDS",
+        "    help        Print this help information.",
+        "    show        Show the current underscan setting(s).",
+        "    set [value] Sets the underscan to the given value. Must be between 0 and 1.",
+        "",
+        "NOTES",
+        "    The underscan setting is provided for by a private Apple API. This means that,",
+        "    while it works fine for now, they could change the functionality at any point",
+        "    without warning.",
+        "",
+    ]).format(name=attributes['name'])
 
-SUBCOMMANDS
-    help        Print this help information.
-    all         Show all supported resolutions for the display.
-    closest     Show the closest matching supported resolution to the specified
-                values.
-    highest     Show the highest supported resolution.
-    exact       Show the current display configuration.
-    displays    Just list the current displays and their IDs.
-
-OPTIONS
-    -w width            Resolution width.
-    -h height           Resolution height.
-    -d depth            Color depth.
-    -r refresh          Refresh rate.
-    --display display   Specify a particular display.
-    --no-hidpi          Don't show HiDPI settings.
-    --only-hidpi        Only show HiDPI settings.
-'''.format(name=attributes['name'])
-
-    information['brightness'] = '''\
-usage: {name} brightness {{ help | show }}
-    [--display display]
-
-SUBCOMMANDS
-    help        Print this help information.
-    show        Show the current brightness setting(s).
-
-OPTIONS
-    --display display   Specify a particular display.
-'''.format(name=attributes['name'])
-
-    information['mirroring'] = '''\
-usage: {name} brightness {{ help | enable | disable }}
-    [--diplay display] [--mirror-of-display display]
-
-SUBCOMMANDS
-    help        Print this help information.
-    enable      Activate mirroring.
-    disable     Deactivate mirroring.
-
-OPTIONS
-    --display display               Change mirroring settings for 'display'.
-    --mirror-of-display display     Set the display to mirror 'display'.
-'''.format(name=attributes['name'])
+    information['mirroring'] = '\n'.join([
+        "usage: {name} brightness {{ help | enable | disable }}",
+        "    [--diplay display] [--mirror-of-display display]",
+        "",
+        "SUBCOMMANDS",
+        "    help        Print this help information.",
+        "    enable      Activate mirroring.",
+        "    disable     Deactivate mirroring.",
+        "",
+        "OPTIONS",
+        "    --display display               Change mirroring settings for 'display'.",
+        "    --mirror-of-display display     Set the display to mirror 'display'.",
+        "",
+    ]).format(name=attributes['name'])
 
     if command in information:
         print(information[command])
     else:
-        print('''\
-usage: {name} {{ help | version | set | show | mirroring | brightness }}
-
-Use any of the subcommands with 'help' to get more information:
-    help        Print this help information.
-    version     Print the version information.
-    set         Set the display configuration.
-    show        See available display configurations.
-    mirroring   Set mirroring configuration.
-    brightness  See or set the current display brightness.
-''').format(name=attributes['name'])
+        print('\n'.join([
+            "usage: {name} {{ help | version | set | show | mirroring | brightness }}",
+            "",
+            "Use any of the subcommands with 'help' to get more information:",
+            "    help        Print this help information.",
+            "    version     Print the version information.",
+            "    set         Set the display configuration.",
+            "    show        See available display configurations.",
+            "    brightness  See or set the current display brightness.",
+            "    underscan   See or set the current display underscan.",
+            "    mirroring   Set mirroring configuration.",
+            "",
+        ])).format(name=attributes['name'])
 
 class ArgumentParser(argparse.ArgumentParser):
     """
@@ -998,20 +1065,58 @@ if __name__ == '__main__':
 
     # Subparser for 'help'.
     parser_help = subparsers.add_parser('help', add_help=False)
-    parser_help.add_argument('command', choices=['set', 'show', 'brightness', 'mirroring'], nargs='?', default=None)
+    parser_help.add_argument(
+        'command',
+        choices = [
+            'set',
+            'show',
+            'brightness',
+            'underscan',
+            'mirroring'
+        ],
+        nargs = '?',
+        default = None
+    )
 
     # Subparser for 'set'.
     parser_set = subparsers.add_parser('set', add_help=False)
-    parser_set.add_argument('command', choices=['help', 'closest', 'highest', 'exact'], nargs='?', default='closest')
+    parser_set.add_argument(
+        'command',
+        choices = [
+            'help',
+            'closest',
+            'highest',
+            'exact'
+        ],
+        nargs = '?',
+        default = 'closest'
+    )
 
     # Subparser for 'show'.
     parser_show = subparsers.add_parser('show', add_help=False)
-    parser_show.add_argument('command', choices=['help', 'all', 'closest', 'highest', 'exact', 'displays'], nargs='?', default='all')
+    parser_show.add_argument(
+        'command',
+        choices = [
+            'help',
+            'all',
+            'closest',
+            'highest',
+            'exact',
+            'displays'
+        ],
+        nargs = '?',
+        default = 'all'
+    )
 
     # Subparser for 'brightness'.
     parser_brightness = subparsers.add_parser('brightness', add_help=False)
     parser_brightness.add_argument('command', choices=['help', 'show', 'set'])
     parser_brightness.add_argument('brightness', type=float, nargs='?')
+
+    # Subparser for 'underscan'.
+    parser_underscan = subparsers.add_parser('underscan', add_help=False)
+    parser_underscan.add_argument('command', choices=['help', 'show', 'set'])
+    parser_underscan.add_argument('underscan', type=float, nargs='?')
 
     # Subparser for 'mirroring'.
     parser_mirroring = subparsers.add_parser('mirroring', add_help=False)
@@ -1019,7 +1124,7 @@ if __name__ == '__main__':
     parser_mirroring.add_argument('--mirror-of-display', type=int, default=Quartz.CGMainDisplayID())
 
     # All of the subcommands have some similar arguments.
-    for subparser in [parser_set, parser_show, parser_brightness, parser_mirroring]:
+    for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring]:
         subparser.add_argument('--help', action='store_true')
         subparser.add_argument('--display', type=int)
     # These two subparsers have similar arguments.
@@ -1076,14 +1181,13 @@ if __name__ == '__main__':
         # And that's okay.
         pass
 
-    # print(args)
-    # sys.exit(0)
-
     if args.subcommand == 'set':
         sub_set(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'show':
         sub_show(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'brightness':
         sub_brightness(args.command, args.brightness, args.display)
+    elif args.subcommand == 'underscan':
+        sub_underscan(args.command, args.underscan, args.display)
     elif args.subcommand == 'mirroring':
         sub_mirroring(args.command, args.display, args.mirror_of_display)
