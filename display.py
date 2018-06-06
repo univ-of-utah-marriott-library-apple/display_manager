@@ -8,12 +8,25 @@ import re
 import subprocess
 import plistlib
 from pprint import pprint
-
 import Quartz
-
 import fractions
-
 import time
+
+# Useful functions from Quartz (source: 
+# https://developer.apple.com/documentation/coregraphics/quartz_display_services)
+#   CGMainDisplayID()
+#   CGGetOnlineDisplayList() 
+#   - Provides a list of displays that are online (active, mirrored, or sleeping).
+#   CGGetActiveDisplayList()
+#   - Provides a list of displays that are active (or drawable).
+#   CGDisplayPixesHigh
+#   - Returns the display height in pixel units.
+#   CGDisplayPixelsWide
+#   - Returns the display width in pixel units.
+#   CGDisplayBitsPerPixel
+#   - Returns the number of bits used to represent a pixel in the framebuffer.
+#   CGDisplayScreenSize
+#   - Returns the width and height of a display in millimeters.
 
 class Resolution(object):
     '''Simple class to represent a resolution
@@ -71,34 +84,8 @@ class Resolution(object):
             f = fractions.Fraction(self.width, self.height)
             self._ratio = "{0}:{1}".format(f.numerator, f.denominator)
         return self._ratio
-
-
-def resolutionFromString(r):
-    '''Returns a resolution object from string (e.g. '1440x900')
-    '''
-    w, h = r.split('x')
-    return Resolution(w, h)
-
-# https://developer.apple.com/documentation/coregraphics/quartz_display_services
-# Useful functions from Quartz
-#   CGMainDisplayID()
-#   CGGetOnlineDisplayList() 
-#   - Provides a list of displays that are online (active, mirrored, or sleeping).
-#   CGGetActiveDisplayList()
-#   - Provides a list of displays that are active (or drawable).
-#   CGDisplayPixesHigh
-#   - Returns the display height in pixel units.
-#   CGDisplayPixelsWide
-#   - Returns the display width in pixel units.
-#   CGDisplayBitsPerPixel
-#   - Returns the number of bits used to represent a pixel in the framebuffer.
-#   CGDisplayScreenSize
-#   - Returns the width and height of a display in millimeters.
-
-class DisplayError(Exception):
-    pass
-
-
+    
+    
 class Display(object):
     '''Convienence class wrapping useful functions from Apple's Quartz 
     using CGDDirectDisplayID (i.e. display id)
@@ -216,11 +203,10 @@ class Display(object):
         #        mirroring set
         primary_id = Quartz.CGDisplayMirrorsDisplay(self.id)
         return Display(primary_id)
-        
 
-## Struct-like thing for easy display.
+
 class DisplayMode(object):
-    '''Class with some convienence functions
+    '''Struct-like thing for easy display (via convenience functions)
     '''
     def __init__(self, mode):
         if not isinstance(mode, Quartz.CGDisplayModeRef):
@@ -310,6 +296,16 @@ class DisplayMode(object):
         return (self.resolution, self.HiDPI) <= (x.resolution, x.HiDPI)
 
 
+def resolutionFromString(r):
+    '''Returns a resolution object from string (e.g. '1440x900')
+    '''
+    w, h = r.split('x')
+    return Resolution(w, h)
+
+
+class DisplayError(Exception):
+    pass
+
 
 def allDisplayModes(id, dupLowRes=True, usable=True):
     '''Return list of all DisplayModes for displayID
@@ -335,10 +331,12 @@ def allDisplayModes(id, dupLowRes=True, usable=True):
 
     return usable_modes
 
+
 def mainDisplayID():
     '''return display id of main display
     '''
     return Quartz.CGMainDisplayID()
+
 
 def onlineDisplayIDs():
     '''Return list of "Online" displayIDs
@@ -362,12 +360,14 @@ def onlineDisplayIDs():
     # list of displayIDs (integers)
     return [i for i in ids]
 
+
 def cancelDisplayChange(conf):
     
     err = Quartz.CGCancelDisplayConfiguration(conf)
     if err:
         e = "CGCancelDisplayConfiguration failed: {0}".format(err)
         raise DisplayError(e)
+
 
 def setDisplayMode(id, mode):
     # Start the configuration, get CGDisplayConfigRef
@@ -392,6 +392,7 @@ def setDisplayMode(id, mode):
     options = Quartz.kCGConfigurePermanently
     Quartz.CGCompleteDisplayConfiguration(conf, options)
 
+
 def setDisplayMode2(id, mode):
     '''NOT VIABLE
     Only able to change the DisplayMode for the duration of the script
@@ -402,6 +403,7 @@ def setDisplayMode2(id, mode):
     if err:
         e = "CGDisplaySetDisplayMode failed: {0}".format(err)
         raise DisplayError(e)
+
         
 def main():
     id = Quartz.CGMainDisplayID()
@@ -441,8 +443,6 @@ def main():
         else:
             print("skipping: {0}".format(m))
 
-#     time.sleep(30)
 
 if __name__ == '__main__':
     main()
-

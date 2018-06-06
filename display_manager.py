@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-## Some info should go here.
-
 #TODO: add these features:
 # [ ] works in login window
 # [x] mirroring
@@ -11,16 +9,15 @@
 # [x] set individual display settings
 # [x] HiDPI/no HiDPI options
 
-## Imports
+
 import argparse
 import objc
 import os
 import sys
-
 import CoreFoundation
 import Quartz
 
-## Global Variables
+# Global Variables
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
@@ -29,7 +26,74 @@ attributes = {
 
 kMaxDisplays = 32
 
-## Manual metadata loading.
+
+class DisplayMode(object):
+    """
+    This class describes a display mode, at least as I like to look at them.
+
+    It has width, height, bits per pixel (pixel encoding), and refresh rate.
+    It can also have the raw mode (if it's based on a real mode from the system)
+    and a HiDPI scalar value (if the mode represents a scaled mode).
+
+    This also calculates the total pixel count (width * height) and the display
+    ratio (width / height). These are used to help with matching of different
+    display modes with similar properties.
+    """
+    def __init__(self, mode=None, width=None, height=None, bpp=None, refresh=None):
+        if mode:
+            self.width      = Quartz.CGDisplayModeGetWidth(mode)
+            self.height     = Quartz.CGDisplayModeGetHeight(mode)
+            self.bpp        = get_pixel_depth_from_encoding(Quartz.CGDisplayModeCopyPixelEncoding(mode))
+            self.refresh    = Quartz.CGDisplayModeGetRefreshRate(mode)
+            self.raw_mode   = mode
+            self.dpi_scalar = get_hidpi_scalar(mode)
+        else:
+            for element in [width, height, bpp, refresh]:
+                if element is None:
+                    raise ValueError("Must give all of width, height, bits per pixel, and refresh rate to construct DisplayMode.")
+            self.width      = width
+            self.height     = height
+            self.bpp        = bpp
+            self.refresh    = refresh
+            self.raw_mode   = None
+            self.dpi_scalar = None
+        self.pixels     = self.width * self.height
+        self.ratio      = float(self.width) / float(self.height)
+    def __str__(self):
+        return "{width}x{height}; pixel depth: {bpp}; refresh rate: {refresh}; ratio: {ratio:.2f}:1{hidpi}".format(
+            width   = self.width,
+            height  = self.height,
+            bpp     = self.bpp,
+            refresh = self.refresh,
+            ratio   = self.ratio,
+            hidpi   = "; [HiDPI: x{}]".format(self.dpi_scalar) if self.dpi_scalar else ""
+            )
+    def __repr__(self):
+        return self.__str__()
+    def __eq__(self, other):
+        return (
+            isinstance(other, self.__class__)   and
+            self.width      == other.width      and
+            self.height     == other.height     and
+            self.bpp        == other.bpp        and
+            self.refresh    == other.refresh    and
+            self.dpi_scalar == other.dpi_scalar
+            )
+    def __ne__(self, other):
+        return not self.__eq__(other)
+        
+
+class ArgumentParser(argparse.ArgumentParser):
+    """
+    Custom argument parser for printing error messages a bit more nicely.
+    """
+    def error(self, message):
+        print("Error: {}\n".format(message))
+        usage()
+        self.exit(2)
+
+
+# Manual metadata loading.
 def initialize_iokit_functions_and_variables():
     """
     This handles the importing of specific functions and variables from the
@@ -107,6 +171,7 @@ def initialize_iokit_functions_and_variables():
     global kDisplayUnderscan
     kDisplayUnderscan = CoreFoundation.CFSTR("pscn")
 
+
 def CFNumberEqualsUInt32(number, uint32):
     """
     Determines whether a number and a uint32_t are equivalent.
@@ -120,6 +185,7 @@ def CFNumberEqualsUInt32(number, uint32):
     if number is None:
         return uint32 == 0
     return number == uint32
+
 
 def CGDisplayGetIOServicePort(display):
     """
@@ -141,6 +207,7 @@ def CGDisplayGetIOServicePort(display):
     matching = IOServiceMatching("IODisplayConnect")
     # Get the iterator for all service ports.
     error, iterator = IOServiceGetMatchingServices(kIOMasterPortDefault, matching, None)
+
     if error:
         # Did we get an error?
         return 0
@@ -169,63 +236,8 @@ def CGDisplayGetIOServicePort(display):
     # Return what we've found.
     return matching_service
 
-## Struct-like thing for easy display.
-class DisplayMode(object):
-    """
-    This class describes a display mode, at least as I like to look at them.
 
-    It has width, height, bits per pixel (pixel encoding), and refresh rate.
-    It can also have the raw mode (if it's based on a real mode from the system)
-    and a HiDPI scalar value (if the mode represents a scaled mode).
-
-    This also calculates the total pixel count (width * height) and the display
-    ratio (width / height). These are used to help with matching of different
-    display modes with similar properties.
-    """
-    def __init__(self, mode=None, width=None, height=None, bpp=None, refresh=None):
-        if mode:
-            self.width      = Quartz.CGDisplayModeGetWidth(mode)
-            self.height     = Quartz.CGDisplayModeGetHeight(mode)
-            self.bpp        = get_pixel_depth_from_encoding(Quartz.CGDisplayModeCopyPixelEncoding(mode))
-            self.refresh    = Quartz.CGDisplayModeGetRefreshRate(mode)
-            self.raw_mode   = mode
-            self.dpi_scalar = get_hidpi_scalar(mode)
-        else:
-            for element in [width, height, bpp, refresh]:
-                if element is None:
-                    raise ValueError("Must give all of width, height, bits per pixel, and refresh rate to construct DisplayMode.")
-            self.width      = width
-            self.height     = height
-            self.bpp        = bpp
-            self.refresh    = refresh
-            self.raw_mode   = None
-            self.dpi_scalar = None
-        self.pixels     = self.width * self.height
-        self.ratio      = float(self.width) / float(self.height)
-    def __str__(self):
-        return "{width}x{height}; pixel depth: {bpp}; refresh rate: {refresh}; ratio: {ratio:.2f}:1{hidpi}".format(
-            width   = self.width,
-            height  = self.height,
-            bpp     = self.bpp,
-            refresh = self.refresh,
-            ratio   = self.ratio,
-            hidpi   = "; [HiDPI: x{}]".format(self.dpi_scalar) if self.dpi_scalar else ""
-            )
-    def __repr__(self):
-        return self.__str__()
-    def __eq__(self, other):
-        return (
-            isinstance(other, self.__class__)   and
-            self.width      == other.width      and
-            self.height     == other.height     and
-            self.bpp        == other.bpp        and
-            self.refresh    == other.refresh    and
-            self.dpi_scalar == other.dpi_scalar
-            )
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-## Helper Functions
+# Helper Functions
 def get_hidpi_scalar(mode):
     """
     Uses extra methods to find the HiDPI scalar for a display.
@@ -245,6 +257,7 @@ def get_hidpi_scalar(mode):
             raise RuntimeError("Vertical and horizontal dimensions aren't scaled properly... mode: {}".format(mode))
         return raw_width / res_width
 
+
 def get_hidpi_value(no_hidpi, only_hidpi):
     """
     Returns a numeric value describing the HiDPI mode desired.
@@ -261,6 +274,7 @@ def get_hidpi_value(no_hidpi, only_hidpi):
         return 2
     else:
         raise ValueError("Error: Cannot require both no HiDPI and only HiDPI. Make up your mind.")
+
 
 def get_pixel_depth_from_encoding(encoding):
     """
@@ -281,6 +295,7 @@ def get_pixel_depth_from_encoding(encoding):
     else:
         raise RuntimeError("Unknown pixel encoding: {}".format(encoding))
 
+
 def get_displays_list():
     """
     Gets a list of all current displays.
@@ -292,6 +307,7 @@ def get_displays_list():
     if error:
         raise RuntimeError("Unable to get displays list.")
     return online_displays
+
 
 def get_all_modes_for_display(display, hidpi=1):
     """
@@ -321,6 +337,7 @@ def get_all_modes_for_display(display, hidpi=1):
     modes.sort(key = lambda mode: mode.pixels, reverse = True)
     return modes
 
+
 def get_current_mode_for_display(display):
     """
     Gets the current display mode for a given display.
@@ -329,6 +346,7 @@ def get_current_mode_for_display(display):
     :return: The current DisplayMode used by that display.
     """
     return DisplayMode(mode=Quartz.CGDisplayCopyDisplayMode(display))
+
 
 def get_all_current_configurations():
     """
@@ -342,6 +360,7 @@ def get_all_current_configurations():
         modes.append( (display, get_current_mode_for_display(display)) )
     return modes
 
+
 def get_all_modes_for_all_displays(hidpi=1):
     """
     Gets a list of displays and all available modes for each display.
@@ -354,6 +373,7 @@ def get_all_modes_for_all_displays(hidpi=1):
     for display in get_displays_list():
         modes.append( (display, get_all_modes_for_display(display, hidpi)) )
     return modes
+
 
 def get_mode_closest_to_values(modes, width, height, depth, refresh):
     """
@@ -559,6 +579,7 @@ def get_mode_closest_to_values(modes, width, height, depth, refresh):
     # We don't have any good resolutions available. Let's throw an error?
     return None
 
+
 def set_display(display, mode, mirroring=False, mirror_display=Quartz.CGMainDisplayID()):
     """
     Sets a display to a given configuration.
@@ -596,6 +617,7 @@ def set_display(display, mode, mirroring=False, mirror_display=Quartz.CGMainDisp
         Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, Quartz.kCGNullDirectDisplay)
     # Finish the configuration.
     Quartz.CGCompleteDisplayConfiguration(config_ref, Quartz.kCGConfigurePermanently)
+
 
 def sub_set(command, width, height, depth, refresh, display=None, hidpi=1):
     """
@@ -690,6 +712,7 @@ def sub_set(command, width, height, depth, refresh, display=None, hidpi=1):
             else:
                 print("    (no exact matches found)")
 
+
 def sub_show(command, width, height, depth, refresh, display=None, hidpi=1):
     """
     Handles all the options for the "show" subcommand.
@@ -782,6 +805,7 @@ def sub_show(command, width, height, depth, refresh, display=None, hidpi=1):
         for display in get_displays_list():
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
 
+
 def sub_brightness(command, brightness=1, display=None):
     """
     Handles all the options for the "brightness" subcommand.
@@ -822,6 +846,7 @@ def sub_brightness(command, brightness=1, display=None):
                 continue
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
             print("    {:.2f}%".format(brightness * 100))
+
 
 def sub_underscan(command, underscan=1, display=None):
     """
@@ -864,6 +889,7 @@ def sub_underscan(command, underscan=1, display=None):
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
             print("    {:.2f}%".format(underscan * 100))
 
+
 def sub_mirroring(command, display, display_to_mirror=Quartz.CGMainDisplayID()):
     """
     Handles all the options for the "mirroring" subcommand.
@@ -895,16 +921,17 @@ def sub_mirroring(command, display, display_to_mirror=Quartz.CGMainDisplayID()):
         print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
         set_display(display, mode, enable_mirroring, display_to_mirror)
 
-## Helpful command-line information
 
 def version():
     """
+    Helpful command-line information
     :return: A string containing the version information for this program.
     """
     return ("{name}, version {version}\n".format(
         name    = attributes['long_name'],
         version = attributes['version']
         ))
+
 
 def usage(command=None):
     """
@@ -1026,18 +1053,10 @@ def usage(command=None):
             "    mirroring   Set mirroring configuration.",
             "",
         ])).format(name=attributes['name'])
+        
 
-class ArgumentParser(argparse.ArgumentParser):
-    """
-    Custom argument parser for printing error messages a bit more nicely.
-    """
-    def error(self, message):
-        print("Error: {}\n".format(message))
-        usage()
-        self.exit(2)
-
-if __name__ == '__main__':
-    # If they don't give any arguments, help them out.
+def main():
+	# If they don't give any arguments, help them out.
     if len(sys.argv) < 2:
         usage()
         sys.exit(1)
@@ -1191,3 +1210,7 @@ if __name__ == '__main__':
         sub_underscan(args.command, args.underscan, args.display)
     elif args.subcommand == 'mirroring':
         sub_mirroring(args.command, args.display, args.mirror_of_display)
+
+
+if __name__ == '__main__':
+    main()
