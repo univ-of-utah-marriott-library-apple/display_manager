@@ -7,10 +7,10 @@ import sys
 import re
 import subprocess
 import plistlib
-from pprint import pprint
-import Quartz
 import fractions
 import time
+from pprint import pprint
+import Quartz
 
 # Useful functions from Quartz (source: 
 # https://developer.apple.com/documentation/coregraphics/quartz_display_services)
@@ -27,6 +27,7 @@ import time
 #   - Returns the number of bits used to represent a pixel in the framebuffer.
 #   CGDisplayScreenSize
 #   - Returns the width and height of a display in millimeters.
+
 
 class Resolution(object):
     '''Simple class to represent a resolution

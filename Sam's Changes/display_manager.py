@@ -341,7 +341,7 @@ def get_all_modes_for_display(display, hidpi=1):
     depth, highest refresh rate modes are at the top.
 
     :param display: The identifier of the desired display.
-    :param hidpi: The HiDPI usage mode, specified by get_hidpi_value().
+    :param hidpi: The HiDPI usage mode, specified by getHidpiValue().
     :return: A list of DisplayMode objects, sorted.
     """
     #TODO: The HiDPI call also gets extra things. Fix those.
@@ -666,7 +666,7 @@ def sub_set(command, width, height, depth, refresh, display=None, hidpi=1):
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
     :param display: Specific display to configure.
-    :param hidpi: Description of HiDPI settings from get_hidpi_value().
+    :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
     # Get the main display's identifier (since it gets used a lot).
     main_display = Quartz.CGMainDisplayID()
@@ -759,7 +759,7 @@ def sub_show(command, width, height, depth, refresh, display=None, hidpi=1, plis
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
     :param display: Specific display to configure.
-    :param hidpi: Description of HiDPI settings from get_hidpi_value().
+    :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
     debug = "DEBUG:\n" \
           + "   command: {}\n".format(command) \
