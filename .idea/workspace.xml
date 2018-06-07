@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sam's Changes/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sam's Changes/display_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display.py" beforeDir="false" afterPath="$PROJECT_DIR$/display.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,8 +16,8 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
-              <caret line="1013" column="44" lean-forward="true" selection-start-line="1013" selection-start-column="44" selection-end-line="1013" selection-end-column="44" />
+            <state>
+              <caret column="17" selection-start-column="17" selection-end-column="17" />
               <folding>
                 <element signature="e#229#244#0" expanded="true" />
                 <element signature="e#520#3007#0" />
@@ -178,6 +174,7 @@
       <find>usage:</find>
       <find>version</find>
       <find>attributes</find>
+      <find>width</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -457,8 +454,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="1013" column="44" lean-forward="true" selection-start-line="1013" selection-start-column="44" selection-end-line="1013" selection-end-column="44" />
+        <state>
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
           <folding>
             <element signature="e#229#244#0" expanded="true" />
             <element signature="e#520#3007#0" />

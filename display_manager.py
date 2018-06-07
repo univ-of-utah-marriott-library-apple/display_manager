@@ -1,14 +1,5 @@
 #!/usr/bin/python
 
-#TODO: add these features:
-# [ ] works in login window
-# [x] mirroring
-# [x] brightness settings
-# [x] HDMI overscan
-# [ ] AirPlay mirroring
-# [x] set individual display settings
-# [x] HiDPI/no HiDPI options
-
 
 import argparse
 import objc
@@ -94,7 +85,7 @@ class ArgumentParser(argparse.ArgumentParser):
         self.exit(2)
 
 
-## CoreFoundation functions
+## CoreFoundation-related functions
 def iokitInit():
     """
     This handles the importing of specific functions and variables from the
@@ -930,7 +921,7 @@ def main():
     earlyExit()  # exits if the user didn't give enough information, or just wanted help
     args = parse()  # returns parsed args
 
-    # If they used the 'help' subcommand, use it smartly.
+    # If they used the 'help' subcommand, display that subcommand's help information
     if args.subcommand == 'help':
         usage(command=args.command)
         sys.exit(0)
@@ -944,10 +935,12 @@ def main():
     try:
         manual = [args.width, args.height, args.depth, args.refresh]
         if any(manual):
-            if args.subcommand not in ['set', 'show']:
-                usage()
-                print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
-                sys.exit(1)
+            # The code below cannot be reached:
+
+            # if args.subcommand not in ['set', 'show']:
+            #     usage()
+            #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
+            #     sys.exit(1)
             for element in manual:
                 if element is None:
                     usage()
@@ -1003,47 +996,48 @@ def parse():
     # Add the subparsers.
     subparsers = parser.add_subparsers(dest='subcommand')
 
-    # Subparser for 'help'.
+    # Subparser for 'help'
     parser_help = subparsers.add_parser('help', add_help=False)
     parser_help.add_argument('command',
                              choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
                              nargs='?',
                              default=None)
 
-    # Subparser for 'set'.
+    # Subparser for 'set'
     parser_set = subparsers.add_parser('set', add_help=False)
     parser_set.add_argument('command',
                             choices=['help', 'closest', 'highest', 'exact'],
                             nargs='?',
                             default='closest')
 
-    # Subparser for 'show'.
+    # Subparser for 'show'
     parser_show = subparsers.add_parser('show', add_help=False)
     parser_show.add_argument('command',
                              choices=['help', 'all', 'closest', 'highest', 'exact', 'displays'],
                              nargs='?',
                              default='all')
 
-    # Subparser for 'brightness'.
+    # Subparser for 'brightness'
     parser_brightness = subparsers.add_parser('brightness', add_help=False)
     parser_brightness.add_argument('command', choices=['help', 'show', 'set'])
     parser_brightness.add_argument('brightness', type=float, nargs='?')
 
-    # Subparser for 'underscan'.
+    # Subparser for 'underscan'
     parser_underscan = subparsers.add_parser('underscan', add_help=False)
     parser_underscan.add_argument('command', choices=['help', 'show', 'set'])
     parser_underscan.add_argument('underscan', type=float, nargs='?')
 
-    # Subparser for 'mirroring'.
+    # Subparser for 'mirroring'
     parser_mirroring = subparsers.add_parser('mirroring', add_help=False)
     parser_mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
     parser_mirroring.add_argument('--mirror-of-display', type=int, default=Quartz.CGMainDisplayID())
 
-    # All of the subcommands have some similar arguments.
+    # All of the subcommands have some similar arguments
     for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring]:
         subparser.add_argument('--help', action='store_true')
         subparser.add_argument('--display', type=int)
-    # These two subparsers have similar arguments.
+
+    # These two subparsers have similar arguments
     for subparser in [parser_set, parser_show]:
         subparser.add_argument('-w', '--width', type=int)
         subparser.add_argument('-h', '--height', type=int)
@@ -1052,9 +1046,8 @@ def parse():
         subparser.add_argument('--no-hidpi', action='store_true')
         subparser.add_argument('--only-hidpi', action='store_true')
 
-    # Parse the arguments.
-    # Note that we have to use the leftover arguments from the
-    # parser.parse_known_args() call up above.
+    # Parse the arguments
+    # Note that we have to use the leftover arguments from the parser.parse_known_args() call up above
     return parser.parse_args(args[1])
 
 
