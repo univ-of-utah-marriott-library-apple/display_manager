@@ -111,7 +111,7 @@ def iokitInit():
             Prevents IODisplayCreateInfoDictionary from including the
             kIODisplayProductName property.
         kIOMasterPortDefault
-            The default mach port used to initiate communication with IOKit.
+            The setDefault mach port used to initiate communication with IOKit.
         kIODisplayBrightnessKey
             The key used to get brightness from IODisplayGetFloatParameter.
         kDisplayVendorID
@@ -917,60 +917,6 @@ def setDisplay(display, mode, mirroring=False, mirror_display=Quartz.CGMainDispl
 
 
 ## main() and its helper functions
-def main():
-    earlyExit()  # exits if the user didn't give enough information, or just wanted help
-    args = parse()  # returns parsed args
-
-    # If they used the 'help' subcommand, display that subcommand's help information
-    if args.subcommand == 'help':
-        usage(command=args.command)
-        sys.exit(0)
-
-    # Check if they wanted help with the subcommand.
-    if args.command == 'help' or args.help:
-        usage(command=args.subcommand)
-        sys.exit(0)
-
-    # Check we have either all or none of the manual specifications.
-    try:
-        manual = [args.width, args.height, args.depth, args.refresh]
-        if any(manual):
-            # The code below cannot be reached:
-
-            # if args.subcommand not in ['set', 'show']:
-            #     usage()
-            #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
-            #     sys.exit(1)
-            for element in manual:
-                if element is None:
-                    usage()
-                    print("Error: Must have either all or none of the manual specifications.")
-                    sys.exit(1)
-    except AttributeError:
-        # Evidently we're using a subparser without these attributes.
-        # Not an issue.
-        pass
-
-    # Check if we have specified both not to use HiDPI and only to use HiDPI.
-    try:
-        hidpi = getHidpiValue(args.no_hidpi, args.only_hidpi)
-    except AttributeError:
-        # Probably using a subparser that doesn't check HiDPI settings.
-        # And that's okay.
-        pass
-
-    if args.subcommand == 'set':
-        setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
-    elif args.subcommand == 'show':
-        showHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
-    elif args.subcommand == 'brightness':
-        brightnessHandler(args.command, args.brightness, args.display)
-    elif args.subcommand == 'underscan':
-        underscanHandler(args.command, args.underscan, args.display)
-    elif args.subcommand == 'mirroring':
-        mirroringHandler(args.command, args.display, args.mirror_of_display)
-
-
 def earlyExit():
     """
     Exits early in specific cases; exit return value sensitive to specific conditions
@@ -998,24 +944,30 @@ def parse():
 
     # Subparser for 'help'
     parser_help = subparsers.add_parser('help', add_help=False)
-    parser_help.add_argument('command',
-                             choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
-                             nargs='?',
-                             default=None)
+    parser_help.add_argument(
+        'command',
+        choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
+        nargs='?',
+        default=None
+    )
 
     # Subparser for 'set'
     parser_set = subparsers.add_parser('set', add_help=False)
-    parser_set.add_argument('command',
-                            choices=['help', 'closest', 'highest', 'exact'],
-                            nargs='?',
-                            default='closest')
+    parser_set.add_argument(
+        'command',
+        choices=['help', 'closest', 'highest', 'exact'],
+        nargs='?',
+        default='closest'
+    )
 
     # Subparser for 'show'
     parser_show = subparsers.add_parser('show', add_help=False)
-    parser_show.add_argument('command',
-                             choices=['help', 'all', 'closest', 'highest', 'exact', 'displays'],
-                             nargs='?',
-                             default='all')
+    parser_show.add_argument(
+        'command',
+        choices=['help', 'all', 'closest', 'highest', 'exact', 'displays'],
+        nargs='?',
+        default='all'
+    )
 
     # Subparser for 'brightness'
     parser_brightness = subparsers.add_parser('brightness', add_help=False)
@@ -1182,6 +1134,60 @@ def usage(command=None):
             "    mirroring   Set mirroring configuration.",
             "",
         ])).format(name=attributes['name'])
+
+
+def main():
+    earlyExit()  # exits if the user didn't give enough information, or just wanted help
+    args = parse()  # returns parsed args
+
+    # If they used the 'help' subcommand, display that subcommand's help information
+    if args.subcommand == 'help':
+        usage(command=args.command)
+        sys.exit(0)
+
+    # Check if they wanted help with the subcommand.
+    if args.command == 'help' or args.help:
+        usage(command=args.subcommand)
+        sys.exit(0)
+
+    # Check we have either all or none of the manual specifications.
+    try:
+        manual = [args.width, args.height, args.depth, args.refresh]
+        if any(manual):
+            # The code below cannot be reached:
+
+            # if args.subcommand not in ['set', 'show']:
+            #     usage()
+            #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
+            #     sys.exit(1)
+            for element in manual:
+                if element is None:
+                    usage()
+                    print("Error: Must have either all or none of the manual specifications.")
+                    sys.exit(1)
+    except AttributeError:
+        # Evidently we're using a subparser without these attributes.
+        # Not an issue.
+        pass
+
+    # Check if we have specified both not to use HiDPI and only to use HiDPI.
+    try:
+        hidpi = getHidpiValue(args.no_hidpi, args.only_hidpi)
+    except AttributeError:
+        # Probably using a subparser that doesn't check HiDPI settings.
+        # And that's okay.
+        pass
+
+    if args.subcommand == 'set':
+        setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
+    elif args.subcommand == 'show':
+        showHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
+    elif args.subcommand == 'brightness':
+        brightnessHandler(args.command, args.brightness, args.display)
+    elif args.subcommand == 'underscan':
+        underscanHandler(args.command, args.underscan, args.display)
+    elif args.subcommand == 'mirroring':
+        mirroringHandler(args.command, args.display, args.mirror_of_display)
 
 
 if __name__ == '__main__':

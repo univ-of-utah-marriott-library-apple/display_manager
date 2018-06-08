@@ -26,7 +26,7 @@ Display Manager is for Macintosh computers. I'm not sure yet how far back in ver
 
 Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that do the actual manipulation of the display settings.
 
-If you have replaced the default `/usr/bin/python` binary (which you should never do, by the way), you should ensure that it has the PyObjC bindings set up correctly.
+If you have replaced the setDefault `/usr/bin/python` binary (which you should never do, by the way), you should ensure that it has the PyObjC bindings set up correctly.
 
 ## Install
 

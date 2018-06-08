@@ -57,7 +57,7 @@ def initialize_iokit_functions_and_variables():
             Prevents IODisplayCreateInfoDictionary from including the
             kIODisplayProductName property.
         kIOMasterPortDefault
-            The default mach port used to initiate communication with IOKit.
+            The setDefault mach port used to initiate communication with IOKit.
         kIODisplayBrightnessKey
             The key used to get brightness from IODisplayGetFloatParameter.
         kDisplayVendorID
