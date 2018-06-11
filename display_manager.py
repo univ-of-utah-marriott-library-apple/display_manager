@@ -583,7 +583,7 @@ def getAllModesAllDisplays(hidpi=1):
 
 
 ## Subcommand handlers
-def setHandler(command, width, height, depth, refresh, display=None, hidpi=1):
+def setHandler(command, width, height, depth=32, refresh=0, display=None, hidpi=1):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -1030,8 +1030,8 @@ def usage(command=None):
         "OPTIONS",
         "    -w width            Resolution width.",
         "    -h height           Resolution height.",
-        "    -d depth            Color depth.",
-        "    -r refresh          Refresh rate.",
+        "    -d depth            Pixel color depth (default: 32).",
+        "    -r refresh          Refresh rate (default: 0).",
         "    --display display   Specify a particular display.",
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
