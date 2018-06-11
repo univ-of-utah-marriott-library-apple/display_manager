@@ -24,8 +24,10 @@ def get_display_info(id):
 
     print("ratio: {}".format(ratio))
 
+
 def analyze_modes(modes):
     pass
+
 
 def main_display_id():
     '''
@@ -38,6 +40,7 @@ def main_display_id():
     # print("type: {}".format(type(main_display_id)))
     return main_display_id
 
+
 def display_bounds(id):
     '''
     Returns CGRect with bounds from display id
@@ -46,18 +49,17 @@ def display_bounds(id):
     displayBounds = Quartz.CGDisplayBounds(id)
     print("Raw: {}".format(display_bounds))
 
+
 def current_mode(id):
     mode = Quartz.CGDisplayCopyDisplayMode(id)
     return mode
+
 
 def screen_size(id):
     '''
     Returns NSSize object with width and height in millimeters
     '''
     return Quartz.CGDisplayScreenSize(id)
-
-
-
 
 
 class Resolution(object):
@@ -209,6 +211,7 @@ def all_display_modes_test(id):
         
     return display_modes
 
+
 # def debug(mode):
 #     s = "   width: {}\n".format(mode['width']) \
 #         + "  height: {}\n".format(mode['height']) \
@@ -244,7 +247,6 @@ def get_hidpi_scalar(raw_width, raw_height, res_width, res_height):
         return raw_width / res_width
 
 
-
 # useful function
 def set_display(id, mode):
     (err, config) = Quartz.CGBeginDisplayConfiguration(None)
@@ -263,9 +265,6 @@ def set_display(id, mode):
         sys.exit(9)
 
     Quartz.CGCompleteDisplayConfiguration(config, Quartz.kCGConfigurePermanently)
-
-
-
 
 
 def main():

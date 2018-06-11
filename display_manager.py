@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+# Display Manager, version 1.0.0
+
+# Manages macOS displays through the Objective-C bridge
+# Controlled via command line arguments
+# Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness
+
 
 import argparse
 import objc
@@ -8,11 +14,15 @@ import sys
 import CoreFoundation
 import Quartz
 
-# Global Variables
+# todo: figure this out
+# from management_tools import loggers
+
+# TODO: remove these
+## Global Variables
 attributes = {
     'long_name' : 'Display Manager',
     'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '0.10.0'
+    'version'   : '1.0.0'
     }
 
 kMaxDisplays = 32
@@ -604,15 +614,15 @@ def setHandler(command, width, height, depth, refresh, display=None, hidpi=1):
             print("No matching displays found.")
             sys.exit(4)
         print("Setting closest supported display configuration(s).")
+        # todo: remove
         # Inform what's going on.
-        print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
-            width   = width,
-            height  = height,
-            ratio   = float(width) / float(height),
-            bpp     = depth,
-            refresh = refresh
-            ))
-        print('-' * 80)
+        # print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
+        #     width   = width,
+        #     height  = height,
+        #     ratio   = float(width) / float(height),
+        #     bpp     = depth,
+        #     refresh = refresh
+        #     ))
         # Make it so!
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
@@ -631,8 +641,6 @@ def setHandler(command, width, height, depth, refresh, display=None, hidpi=1):
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
-        print("Setting highest supported display configuration(s).")
-        print('-' * 80)
         for pair in all_modes:
             # This uses the first mode in the all_modes list, because it is
             # guaranteed that the list is sorted.
@@ -655,8 +663,6 @@ def setHandler(command, width, height, depth, refresh, display=None, hidpi=1):
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
-        print("Setting exact mode or quitting.")
-        print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -691,8 +697,6 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
         if not all_modes:
             print("No matching displays found ({}).".format(display))
             sys.exit(4)
-        print("Showing all possible display configurations.")
-        print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             for mode in pair[1]:
@@ -712,15 +716,16 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
             print("No matching displays found ({}).".format(display))
             sys.exit(4)
         print("Finding closest supported display configuration(s).")
+        # todo: delete
         # Inform what's going on.
-        print("Searching for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
-            width   = width,
-            height  = height,
-            ratio   = float(width) / float(height),
-            bpp     = depth,
-            refresh = refresh
-            ))
-        print('-' * 80)
+        # print("Searching for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
+        #     width   = width,
+        #     height  = height,
+        #     ratio   = float(width) / float(height),
+        #     bpp     = depth,
+        #     refresh = refresh
+        #     ))
+        # print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -736,8 +741,6 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
         if not all_modes:
             print("No matching displays found ({}).".format(display))
             sys.exit(4)
-        print("Showing highest supported display configuration(s).")
-        print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             print("    {}".format(pair[1][0]))
@@ -749,8 +752,6 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
         if not current_modes:
             print("No matching displays found ({}).".format(display))
             sys.exit(4)
-        print("Showing current display configuration(s).")
-        print('-' * 80)
         for pair in current_modes:
             print("Display: {}".format(pair[0]))
             print("    {}".format(pair[1]))
@@ -777,9 +778,6 @@ def brightnessHandler(command, brightness=1, display=None):
         displays = [display]
     # Iterate over the available options.
     if command == "show":
-        # Show the current brightness setting.
-        print("Showing current brightness setting(s).")
-        print('-' * 80)
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             (error, display_brightness) = IODisplayGetFloatParameter(service, 0, kDisplayBrightness, None)
@@ -790,8 +788,6 @@ def brightnessHandler(command, brightness=1, display=None):
             print("    {:.2f}%".format(display_brightness * 100))
     elif command == "set":
         # Set the brightness setting.
-        print("Setting display brightness to {:.2f}%".format(brightness * 100))
-        print('-' * 80)
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             error = IODisplaySetFloatParameter(service, 0, kDisplayBrightness, brightness)
@@ -820,8 +816,6 @@ def underscanHandler(command, underscan=1, display=None):
     # Iterate over the available options.
     if command == "show":
         # Show the current underscan setting.
-        print("Showing current underscan setting(s).")
-        print('-' * 80)
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             (error, display_underscan) = IODisplayGetFloatParameter(service, 0, kDisplayUnderscan, None)
@@ -832,8 +826,6 @@ def underscanHandler(command, underscan=1, display=None):
             print("    {:.2f}%".format(display_underscan * 100))
     elif command == "set":
         # Set the underscan setting.
-        print("Setting display underscan to {:.2f}%".format(underscan * 100))
-        print('-' * 80)
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             error = IODisplaySetFloatParameter(service, 0, kDisplayUnderscan, underscan)
@@ -869,7 +861,6 @@ def mirroringHandler(command, display, display_to_mirror=Quartz.CGMainDisplayID(
         print("Disabling mirroring.")
         display_to_mirror = Quartz.kCGNullDirectDisplay
         enable_mirroring = False
-    print('-' * 80)
     # Effect the changes!
     for display, mode in modes:
         print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
@@ -1154,8 +1145,7 @@ def main():
     try:
         manual = [args.width, args.height, args.depth, args.refresh]
         if any(manual):
-            # The code below cannot be reached:
-
+            # todo: remove deprecated
             # if args.subcommand not in ['set', 'show']:
             #     usage()
             #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
@@ -1178,6 +1168,17 @@ def main():
         # And that's okay.
         pass
 
+    scriptname = os.path.basename(sys.argv[0])
+
+    # todo: look into how this works (log)
+    # Actual logger:
+    # logger = loggers.FileLogger(name=scriptname, level=loggers.DEBUG)
+
+    # Debug logger:
+    # logger = loggers.StreamLogger(name=scriptname, level=loggers.DEBUG)
+
+    # loggers.debug("{0} started".format(scriptname))
+
     if args.subcommand == 'set':
         setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'show':
@@ -1188,6 +1189,8 @@ def main():
         underscanHandler(args.command, args.underscan, args.display)
     elif args.subcommand == 'mirroring':
         mirroringHandler(args.command, args.display, args.mirror_of_display)
+
+    # loggers.debug("{0} finished".format(scriptname))
 
 
 if __name__ == '__main__':
