@@ -614,16 +614,14 @@ def setHandler(command, width, height, depth, refresh, display=None, hidpi=1):
             print("No matching displays found.")
             sys.exit(4)
         print("Setting closest supported display configuration(s).")
-        # todo: remove
-        # Inform what's going on.
-        # print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
-        #     width   = width,
-        #     height  = height,
-        #     ratio   = float(width) / float(height),
-        #     bpp     = depth,
-        #     refresh = refresh
-        #     ))
-        # Make it so!
+        # Print out what we ended up picking for "closest".
+        print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
+            width   = width,
+            height  = height,
+            ratio   = float(width) / float(height),
+            bpp     = depth,
+            refresh = refresh
+            ))
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -716,7 +714,7 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
             print("No matching displays found ({}).".format(display))
             sys.exit(4)
         print("Finding closest supported display configuration(s).")
-        # todo: delete
+        # todo: delete? this one might actually be useful
         # Inform what's going on.
         # print("Searching for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
         #     width   = width,
