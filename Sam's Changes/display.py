@@ -8,15 +8,30 @@ import re
 import subprocess
 import plistlib
 from pprint import pprint
-
+import fractions
+import time
 import Quartz
 
-import fractions
+# https://developer.apple.com/documentation/coregraphics/quartz_display_services
+# Useful functions from Quartz
+#   CGMainDisplayID()
+#   CGGetOnlineDisplayList()
+#   - Provides a list of displays that are online (active, mirrored, or sleeping).
+#   CGGetActiveDisplayList()
+#   - Provides a list of displays that are active (or drawable).
+#   CGDisplayPixesHigh
+#   - Returns the display height in pixel units.
+#   CGDisplayPixelsWide
+#   - Returns the display width in pixel units.
+#   CGDisplayBitsPerPixel
+#   - Returns the number of bits used to represent a pixel in the framebuffer.
+#   CGDisplayScreenSize
+#   - Returns the width and height of a display in millimeters.
 
-import time
 
 class Resolution(object):
-    '''Simple class to represent a resolution
+    '''
+    Simple class to represent a resolution
     '''
 
     def __init__(self, width, height):
@@ -73,34 +88,8 @@ class Resolution(object):
         return self._ratio
 
 
-def resolutionFromString(r):
-    '''Returns a resolution object from string (e.g. '1440x900')
-    '''
-    w, h = r.split('x')
-    return Resolution(w, h)
-
-# https://developer.apple.com/documentation/coregraphics/quartz_display_services
-# Useful functions from Quartz
-#   CGMainDisplayID()
-#   CGGetOnlineDisplayList() 
-#   - Provides a list of displays that are online (active, mirrored, or sleeping).
-#   CGGetActiveDisplayList()
-#   - Provides a list of displays that are active (or drawable).
-#   CGDisplayPixesHigh
-#   - Returns the display height in pixel units.
-#   CGDisplayPixelsWide
-#   - Returns the display width in pixel units.
-#   CGDisplayBitsPerPixel
-#   - Returns the number of bits used to represent a pixel in the framebuffer.
-#   CGDisplayScreenSize
-#   - Returns the width and height of a display in millimeters.
-
-class DisplayError(Exception):
-    pass
-
-
 class Display(object):
-    '''Convienence class wrapping useful functions from Apple's Quartz 
+    '''Convenience class wrapping useful functions from Apple's Quartz
     using CGDDirectDisplayID (i.e. display id)
     
     Also calculates physical display measurements
@@ -218,9 +207,8 @@ class Display(object):
         return Display(primary_id)
         
 
-## Struct-like thing for easy display.
 class DisplayMode(object):
-    '''Class with some convienence functions
+    '''Class with some convenience functions
     '''
     def __init__(self, mode):
         if not isinstance(mode, Quartz.CGDisplayModeRef):
@@ -257,7 +245,6 @@ class DisplayMode(object):
         
         return "{0:9} [refresh: {1}, ratio: {2}{3}".format(
                  res, rate, ratio, hidpi)
-    
      
     @property
     def ratio(self):
@@ -265,15 +252,6 @@ class DisplayMode(object):
         '''
         return self.resolution.ratio
 
-#     @property
-#     def HiDPI(self):
-#         '''Calculate HiDPI (if its needed)
-#         '''
-#         return self.resolution.ratio
-
-    # Use rich comparison from Resolution() class to most of 
-    # the heavy lifting for comparing DisplayModes, adding HiDPI as the
-    # tie-breaker
     def __eq__(self, x):
         '''x.__eq__(y) <==> (x.resolution, x.HiDPI) == (y.resolution, y.HiDPI)
         '''
@@ -310,8 +288,19 @@ class DisplayMode(object):
         return (self.resolution, self.HiDPI) <= (x.resolution, x.HiDPI)
 
 
+class DisplayError(Exception):
+    pass
 
-def allDisplayModes(id, dupLowRes=True, usable=True):
+
+## Helper functions
+def resolutionFromString(r):
+    '''Returns a resolution object from string (e.g. '1440x900')
+    '''
+    w, h = r.split('x')
+    return Resolution(w, h)
+
+
+def getAllDisplays(id, dupLowRes=True, returnUnusable=True):
     '''Return list of all DisplayModes for displayID
     '''
     # Include duplicate Low Resolution Modes
@@ -329,18 +318,20 @@ def allDisplayModes(id, dupLowRes=True, usable=True):
         modes.append(DisplayMode(m))
 
     # filter out unusable modes unless usable=False
-    usable_modes = []
-    if usable:
+    if returnUnusable:
+        return modes
+    else:
         usable_modes = [m for m in modes if m.usable]
+        return usable_modes
 
-    return usable_modes
 
-def mainDisplayID():
+def getMainDisplayID():
     '''return display id of main display
     '''
     return Quartz.CGMainDisplayID()
 
-def onlineDisplayIDs():
+
+def getOnlineDisplayIDs():
     '''Return list of "Online" displayIDs
     Online <==> displays that are active, mirrored, or sleeping
     '''
@@ -362,12 +353,14 @@ def onlineDisplayIDs():
     # list of displayIDs (integers)
     return [i for i in ids]
 
+
 def cancelDisplayChange(conf):
     
     err = Quartz.CGCancelDisplayConfiguration(conf)
     if err:
         e = "CGCancelDisplayConfiguration failed: {0}".format(err)
         raise DisplayError(e)
+
 
 def setDisplayMode(id, mode):
     # Start the configuration, get CGDisplayConfigRef
@@ -392,57 +385,27 @@ def setDisplayMode(id, mode):
     options = Quartz.kCGConfigurePermanently
     Quartz.CGCompleteDisplayConfiguration(conf, options)
 
-def setDisplayMode2(id, mode):
-    '''NOT VIABLE
-    Only able to change the DisplayMode for the duration of the script
-    '''
-    opt = None
-    m = mode.mode
-    err = Quartz.CGDisplaySetDisplayMode(id, m, opt)
-    if err:
-        e = "CGDisplaySetDisplayMode failed: {0}".format(err)
-        raise DisplayError(e)
-        
+
+# todo: remove deprecated?
+# def setDisplayMode2(id, mode):
+#     '''NOT VIABLE
+#     Only able to change the DisplayMode for the duration of the script
+#     '''
+#     opt = None
+#     m = mode.mode
+#     err = Quartz.CGDisplaySetDisplayMode(id, m, opt)
+#     if err:
+#         e = "CGDisplaySetDisplayMode failed: {0}".format(err)
+#         raise DisplayError(e)
+
+
 def main():
     id = Quartz.CGMainDisplayID()
-    modes = allDisplayModes(id, dupLowRes=True, usable=False)
-#     modes = allDisplayModes(id)
+    modes = getAllDisplays(id, dupLowRes=True, returnUnusable=False)
 
-    r = resolutionFromString('2560x1600')
-#     r = resolutionFromString('1680x1050')
-#     r = resolutionFromString('1440x900')
-#     r = resolutionFromString('1280x800')
-#     r = resolutionFromString('1024x640')
-#     r = resolutionFromString('825x525')
-#     r = resolutionFromString('720x450')
+    for mode in sorted(modes, reverse=True):
+        print(mode)
 
-#     for x in sorted([m for m in modes if m.HiDPI], reverse=True):
-#         print(x)
-    biggest = sorted([m for m in modes if m.HiDPI], reverse=True)[0]
-    print(biggest)
-    
-    raise SystemExit()
-#     
-#     res = [m for m in modes if m == r]
-    
-    
-    
-    
-#     for m in sorted(modes, reverse=True):
-#         print(m)
-#     raise SystemExit()
-
-    for m in sorted(modes, reverse=True):
-#         print(m)
-        if m.resolution == r:
-            print("setting resolution as: {0}".format(m))
-            setDisplayMode(id, m)
-            break
-        else:
-            print("skipping: {0}".format(m))
-
-#     time.sleep(30)
 
 if __name__ == '__main__':
     main()
-

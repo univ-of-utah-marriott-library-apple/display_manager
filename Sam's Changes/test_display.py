@@ -24,23 +24,23 @@ class TestDisplayModeInitializationFailure(unittest.TestCase):
 
 
 class TestMainDisplayID(unittest.TestCase):
-    '''Tests for getting mainDisplayID() need to run before other tests
+    '''Tests for getting getMainDisplayID() need to run before other tests
     '''
 
     def test_main_display_id(self):
-        '''test that mainDisplayID() doesn't fail
+        '''test that getMainDisplayID() doesn't fail
         '''
         id = display.mainDisplayID()
 
     def test_main_display_id_type(self):
-        '''test that mainDisplayID() returns integer
+        '''test that getMainDisplayID() returns integer
         '''
         id = display.mainDisplayID()
         self.assertIsInstance(id, int)
     
     @unittest.skip("need to create scenario without main display")
     def test_main_display_id_failure(self):
-        '''test that mainDisplayID() doesn't fail
+        '''test that getMainDisplayID() doesn't fail
         '''
         # need to figure out a way to test without displays
         with self.assertRaises(DisplayError):
