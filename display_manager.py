@@ -1119,7 +1119,7 @@ def usage(command=None):
         "    disable     Deactivate mirroring.",
         "",
         "OPTIONS",
-        "    --display display               Change mirroring settings for 'display' (default: main display).",
+        "    --display display               Change mirroring settings for 'display'.",
         "    --mirror-of-display display     Set the display to mirror 'display' (default: main display).",
         "",
     ]).format(name=attributes['name'])
