@@ -692,7 +692,7 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
-        
+
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -808,10 +808,11 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
     # Set default if it's not given (function definition overridden in certain cases)
     if display is None:
         display = getMainDisplayID()
+
     # We need extra IOKit stuff for this.
     iokitInit()
     displays = getDisplaysList()
-    # Iterate over the available options.
+
     if command == "show":
         for thisDisplay in displays:
             service = CGDisplayGetIOServicePort(thisDisplay)
@@ -821,12 +822,30 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
                 continue
             print("Display: {}{}".format(display, " (Main Display)" if thisDisplay == main_display else ""))
             print("    {:.2f}%".format(display_brightness * 100))
+
     elif command == "set":
         # Set the brightness setting.
         service = CGDisplayGetIOServicePort(display)
         error = IODisplaySetFloatParameter(service, 0, kDisplayBrightness, brightness)
         if error:
             print("Failed to set brightness of display {}; error {}".format(display, error))
+            # External display brightness probably can't be managed this way
+            print("External displays may not be compatible with Display Manager. \n"
+                  "If this is an external display, try setting manually on device hardware.")
+
+
+def rotateHandler(command, rotation=0, display=getMainDisplayID()):
+    """
+    Handles all the options for the "rotation" subcommand.
+
+    :param command: The command passed in.
+    :param rotation: The display to configure rotation on.
+    :param display: The display to configure rotation on.
+    """
+    if display is None:
+        display = getMainDisplayID()
+
+    print(command, rotation, display)
 
 
 def underscanHandler(command, underscan=1, display=getMainDisplayID()):
@@ -997,6 +1016,21 @@ def parse():
     parser_brightness.add_argument('command', choices=['help', 'show', 'set'])
     parser_brightness.add_argument('brightness', type=float, nargs='?')
 
+    # Subparser for 'rotate'
+    parser_rotate = subparsers.add_parser('rotate', add_help=False)
+    parser_rotate.add_argument(
+        'command',
+        choices=['help', 'set', 'show'],
+        nargs='?',
+        default='show'
+    )
+    parser_rotate.add_argument(
+        'rotation',
+        type=int,
+        default=0,
+        nargs='?'
+    )
+
     # Subparser for 'underscan'
     parser_underscan = subparsers.add_parser('underscan', add_help=False)
     parser_underscan.add_argument('command', choices=['help', 'show', 'set'])
@@ -1008,7 +1042,7 @@ def parse():
     parser_mirroring.add_argument('--mirror-of-display', type=int, default=getMainDisplayID())
 
     # All of the subcommands have some similar arguments
-    for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring]:
+    for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring, parser_rotate]:
         subparser.add_argument('--help', action='store_true')
         subparser.add_argument('--display', type=int)
 
@@ -1111,6 +1145,19 @@ def usage(command=None):
         "",
     ]).format(name=attributes['name'])
 
+    information['rotate'] = '\n'.join([
+        "usage: {name} rotate {{ help | show | set }}"
+        "    [--display display]",
+        "SUBCOMMANDS",
+        "    help        Print this help information.",
+        "    show        Show the current display rotation.",
+        "    set [value] Set the rotation to the given value (in degrees). Must be a multiple of 90.",
+        "",
+        "OPTIONS",
+        "    --display display   Specify a particular display (default: main display).",
+        ""
+    ]).format(name=attributes['name'])
+
     information['underscan'] = '\n'.join([
         "usage: {name} underscan {{ help | show | set [value] }}",
         "    [--display display]",
@@ -1146,14 +1193,15 @@ def usage(command=None):
         print(information[command])
     else:
         print('\n'.join([
-            "usage: {name} {{ help | set | show | mirroring | brightness }}",
+            "usage: {name} {{ help | set | show | mirroring | brightness | rotate }}",
             "",
             "Use any of the subcommands with 'help' to get more information:",
-            "    help        Print this help information.",
+            "    help        Show this help information.",
             "    set         Set the display configuration.",
-            "    show        See available display configurations.",
-            "    brightness  See or set the current display brightness.",
-            "    underscan   See or set the current display underscan.",
+            "    show        Show available display configurations.",
+            "    brightness  Show or set the current display brightness.",
+            "    rotate      Show or set display rotation.",
+            "    underscan   Show or set the current display underscan.",
             "    mirroring   Set mirroring configuration.",
             "",
         ])).format(name=attributes['name'])
@@ -1200,9 +1248,8 @@ def main():
         # And that's okay.
         pass
 
-    scriptname = os.path.basename(sys.argv[0])
-
     # todo: look into how this works (log)
+    # scriptname = os.path.basename(sys.argv[0])
     # Actual logger:
     # logger = loggers.FileLogger(name=scriptname, level=loggers.DEBUG)
 
@@ -1212,7 +1259,6 @@ def main():
     # loggers.debug("{0} started".format(scriptname))
 
     if args.subcommand == 'set':
-        print(args.command)
         setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'show':
         showHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
@@ -1222,6 +1268,8 @@ def main():
         underscanHandler(args.command, args.underscan, args.display)
     elif args.subcommand == 'mirroring':
         mirroringHandler(args.command, args.display, args.mirror_of_display)
+    elif args.subcommand == 'rotate':
+        rotateHandler(args.command, args.rotation, args.display)
 
     # loggers.debug("{0} finished".format(scriptname))
 
