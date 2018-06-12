@@ -582,8 +582,14 @@ def getAllModesAllDisplays(hidpi=1):
     return modes
 
 
+def getMainDisplayID():
+    '''return display id of main display
+    '''
+    return Quartz.CGMainDisplayID()
+
+
 ## Subcommand handlers
-def setHandler(command, width, height, depth=32, refresh=0, display=None, hidpi=1):
+def setHandler(command, width, height, depth=32, refresh=0, display=getMainDisplayID(), hidpi=1):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -595,16 +601,24 @@ def setHandler(command, width, height, depth=32, refresh=0, display=None, hidpi=
     :param display: Specific display to configure.
     :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
-    # Get the main display's identifier (since it gets used a lot).
-    main_display = Quartz.CGMainDisplayID()
+    main_display = getMainDisplayID()
+    # Set defaults if they're not given (function definition overridden in certain cases)
+    if depth is None:
+        depth = 32
+    if refresh is None:
+        refresh = 0
+    if display is None:
+        display = getMainDisplayID()
+    if hidpi is None:
+        hidpi = 1
     # Iterate over the supported commands.
     if command == "closest":
         # Find the closest matching configuration and apply it.
-        for element in [width, height, depth, refresh]:
+        for element in [width, height]:
             # Make sure they supplied all of the necessary info.
             if element is None:
                 usage("set")
-                print("Must have all of (width, height, depth, refresh) for closest setting.")
+                print("Must have both width and height for closest setting.")
                 sys.exit(2)
         all_modes = getAllModesAllDisplays(hidpi)
         # They only wanted to set one display.
@@ -613,15 +627,15 @@ def setHandler(command, width, height, depth=32, refresh=0, display=None, hidpi=
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
-        print("Setting closest supported display configuration(s).")
+        # todo: decide whether to delete or not
         # Print out what we ended up picking for "closest".
-        print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
-            width   = width,
-            height  = height,
-            ratio   = float(width) / float(height),
-            bpp     = depth,
-            refresh = refresh
-            ))
+        # print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
+        #     width   = width,
+        #     height  = height,
+        #     ratio   = float(width) / float(height),
+        #     bpp     = depth,
+        #     refresh = refresh
+        #     ))
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -671,7 +685,7 @@ def setHandler(command, width, height, depth=32, refresh=0, display=None, hidpi=
                 print("    (no exact matches found)")
 
 
-def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
+def showHandler(command, width, height, depth=32, refresh=0, display=getMainDisplayID(), hidpi=1):
     """
     Handles all the options for the "show" subcommand.
 
@@ -684,14 +698,20 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
     :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
     # Get the main display's identifier since it gets used a lot.
-    main_display = Quartz.CGMainDisplayID()
+    main_display = getMainDisplayID()
+    # Set defaults if they're not given (function definition overridden in certain cases)
+    if depth is None:
+        depth = 32
+    if refresh is None:
+        refresh = 0
+    if display is None:
+        display = getMainDisplayID()
+    if hidpi is None:
+        hidpi = 1
     # Iterate over the supported commands.
     if command == "all":
         # Show all the modes.
         all_modes = getAllModesAllDisplays(hidpi)
-        # Check if they only wanted to show one display's configuration.
-        if display:
-            all_modes = [x for x in all_modes if x[0] == display]
         if not all_modes:
             print("No matching displays found ({}).".format(display))
             sys.exit(4)
@@ -701,10 +721,10 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
                 print("    {}".format(mode))
     elif command == "closest":
         # Only show the closest mode to whatever was specified.
-        for element in [width, height, depth, refresh]:
+        for element in [width, height]:
             if element is None:
                 usage("show")
-                print("Must have all of (width, height, depth, refresh) for closest matching.")
+                print("Must have both width and height for closest matching.")
                 sys.exit(2)
         all_modes = getAllModesAllDisplays(hidpi)
         # They only wanted to show one display's configuration.
@@ -723,7 +743,6 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
         #     bpp     = depth,
         #     refresh = refresh
         #     ))
-        # print('-' * 80)
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -759,7 +778,7 @@ def showHandler(command, width, height, depth, refresh, display=None, hidpi=1):
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
 
 
-def brightnessHandler(command, brightness=1, display=None):
+def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
     """
     Handles all the options for the "brightness" subcommand.
 
@@ -767,36 +786,32 @@ def brightnessHandler(command, brightness=1, display=None):
     :param brightness: The level of brightness to change to.
     :param display: Specific display to configure.
     """
-    main_display = Quartz.CGMainDisplayID()
+    main_display = getMainDisplayID()
+    # Set default if it's not given (function definition overridden in certain cases)
+    if display is None:
+        display = getMainDisplayID()
     # We need extra IOKit stuff for this.
     iokitInit()
-    if not display:
-        displays = getDisplaysList()
-    else:
-        displays = [display]
+    displays = getDisplaysList()
     # Iterate over the available options.
     if command == "show":
-        for display in displays:
-            service = CGDisplayGetIOServicePort(display)
+        for thisDisplay in displays:
+            service = CGDisplayGetIOServicePort(thisDisplay)
             (error, display_brightness) = IODisplayGetFloatParameter(service, 0, kDisplayBrightness, None)
             if error:
-                print("Failed to get brightness of display {}; error {}".format(display, error))
+                print("Failed to get brightness of display {}; error {}".format(thisDisplay, error))
                 continue
-            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+            print("Display: {}{}".format(display, " (Main Display)" if thisDisplay == main_display else ""))
             print("    {:.2f}%".format(display_brightness * 100))
     elif command == "set":
         # Set the brightness setting.
-        for display in displays:
-            service = CGDisplayGetIOServicePort(display)
-            error = IODisplaySetFloatParameter(service, 0, kDisplayBrightness, brightness)
-            if error:
-                print("Failed to set brightness of display {}; error {}".format(display, error))
-                continue
-            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
-            print("    {:.2f}%".format(brightness * 100))
+        service = CGDisplayGetIOServicePort(display)
+        error = IODisplaySetFloatParameter(service, 0, kDisplayBrightness, brightness)
+        if error:
+            print("Failed to set brightness of display {}; error {}".format(display, error))
 
 
-def underscanHandler(command, underscan=1, display=None):
+def underscanHandler(command, underscan=1, display=getMainDisplayID()):
     """
     Handles all the options for the "underscan" subcommand.
 
@@ -804,7 +819,10 @@ def underscanHandler(command, underscan=1, display=None):
     :param underscan: The value to set on the underscan slider.
     :param display: Specific display to configure.
     """
-    main_display = Quartz.CGMainDisplayID()
+    main_display = getMainDisplayID()
+    # Set defaults if they're not given (function definition overridden in certain cases)
+    if display is None:
+        display = getMainDisplayID()
     # We need extra IOKit stuff for this.
     iokitInit()
     if not display:
@@ -834,7 +852,7 @@ def underscanHandler(command, underscan=1, display=None):
             print("    {:.2f}%".format(underscan * 100))
 
 
-def mirroringHandler(command, display, display_to_mirror=Quartz.CGMainDisplayID()):
+def mirroringHandler(command, display, display_to_mirror=getMainDisplayID()):
     """
     Handles all the options for the "mirroring" subcommand.
 
@@ -842,7 +860,7 @@ def mirroringHandler(command, display, display_to_mirror=Quartz.CGMainDisplayID(
     :param display: The display to configure mirroring on.
     :param display_to_mirror: The display to become a mirror of.
     """
-    main_display = Quartz.CGMainDisplayID()
+    main_display = getMainDisplayID()
     if not display:
         displays = getDisplaysList()
     else:
@@ -856,7 +874,6 @@ def mirroringHandler(command, display, display_to_mirror=Quartz.CGMainDisplayID(
         enable_mirroring = True
         print("Enabling mirroring with target display: {}{}".format(display_to_mirror, " (Main Display)" if display_to_mirror == main_display else ""))
     if command == "disable":
-        print("Disabling mirroring.")
         display_to_mirror = Quartz.kCGNullDirectDisplay
         enable_mirroring = False
     # Effect the changes!
@@ -866,7 +883,7 @@ def mirroringHandler(command, display, display_to_mirror=Quartz.CGMainDisplayID(
 
 
 ## Actually set display
-def setDisplay(display, mode, mirroring=False, mirror_display=Quartz.CGMainDisplayID()):
+def setDisplay(display, mode, mirroring=False, mirror_display=getMainDisplayID()):
     """
     Sets a display to a given configuration.
 
@@ -875,7 +892,6 @@ def setDisplay(display, mode, mirroring=False, mirror_display=Quartz.CGMainDispl
     :param mirroring: Whether to activate mirroring.
     :param mirror_display: The identifier of the display to mirror.
     """
-    print("Setting display {} to mode: {}".format(display, mode))
     # Begin the configuration.
     (error, config_ref) = Quartz.CGBeginDisplayConfiguration(None)
     # Check there were no errors.
@@ -971,7 +987,7 @@ def parse():
     # Subparser for 'mirroring'
     parser_mirroring = subparsers.add_parser('mirroring', add_help=False)
     parser_mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
-    parser_mirroring.add_argument('--mirror-of-display', type=int, default=Quartz.CGMainDisplayID())
+    parser_mirroring.add_argument('--mirror-of-display', type=int, default=getMainDisplayID())
 
     # All of the subcommands have some similar arguments
     for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring]:
@@ -1032,7 +1048,7 @@ def usage(command=None):
         "    -h height           Resolution height.",
         "    -d depth            Pixel color depth (default: 32).",
         "    -r refresh          Refresh rate (default: 0).",
-        "    --display display   Specify a particular display.",
+        "    --display display   Specify a particular display (default: main display).",
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
@@ -1055,9 +1071,9 @@ def usage(command=None):
         "OPTIONS",
         "    -w width            Resolution width.",
         "    -h height           Resolution height.",
-        "    -d depth            Color depth.",
-        "    -r refresh          Refresh rate.",
-        "    --display display   Specify a particular display.",
+        "    -d depth            Pixel color depth (default: 32).",
+        "    -r refresh          Refresh rate (default: 32).",
+        "    --display display   Specify a particular display (default: main display).",
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
@@ -1073,7 +1089,7 @@ def usage(command=None):
         "    set [value] Sets the brightness to the given value. Must be between 0 and 1.",
         "",
         "OPTIONS",
-        "    --display display   Specify a particular display.",
+        "    --display display   Specify a particular display (default: main display).",
         "",
     ]).format(name=attributes['name'])
 
@@ -1103,8 +1119,8 @@ def usage(command=None):
         "    disable     Deactivate mirroring.",
         "",
         "OPTIONS",
-        "    --display display               Change mirroring settings for 'display'.",
-        "    --mirror-of-display display     Set the display to mirror 'display'.",
+        "    --display display               Change mirroring settings for 'display' (default: main display).",
+        "    --mirror-of-display display     Set the display to mirror 'display' (default: main display).",
         "",
     ]).format(name=attributes['name'])
 
@@ -1141,7 +1157,7 @@ def main():
 
     # Check we have either all or none of the manual specifications.
     try:
-        manual = [args.width, args.height, args.depth, args.refresh]
+        manual = [args.width, args.height]
         if any(manual):
             # todo: remove deprecated
             # if args.subcommand not in ['set', 'show']:
