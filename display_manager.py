@@ -349,6 +349,7 @@ def getClosestMode(modes, width, height, depth, refresh):
     # Check we don't have an empty list of modes.
     if not modes:
         return None
+
     match_mode = DisplayMode(width=width, height=height, bpp=depth, refresh=refresh)
     match_ratio = width / height
     match_pixels = width * height
@@ -356,6 +357,7 @@ def getClosestMode(modes, width, height, depth, refresh):
     for mode in modes:
         if mode == match_mode:
             return mode
+
     # No exact match, so let's check if there's a resolution and bit depth match.
     close_matches = []
     for mode in modes:
@@ -390,8 +392,8 @@ def getClosestMode(modes, width, height, depth, refresh):
             return smaller
         else:
             return larger
+
     # No matches for WHD, so let's check that bit depth.
-    close_matches = []
     for mode in modes:
         if mode.width == width and mode.height == height:
             # Found one with the right resolution.
@@ -424,10 +426,10 @@ def getClosestMode(modes, width, height, depth, refresh):
             return smaller
         else:
             return larger
+
     # At this point, we don't even have a good resolution match.
     # Let's find all the modes with the appropriate ratio, and then find the
     # closest total pixel count.
-    close_matches = []
     for mode in modes:
         if mode.ratio == match_ratio:
             # Got the right width:height ratio.
@@ -460,6 +462,7 @@ def getClosestMode(modes, width, height, depth, refresh):
             return smaller
         else:
             return larger
+
     # Still no good matches. Okay, now we're really reaching.
     # Let's try to find all of the displays with a sort-of-close aspect ratio,
     # and then find the one in there that has the closest total pixel count.
@@ -470,13 +473,20 @@ def getClosestMode(modes, width, height, depth, refresh):
     ratios.sort(reverse = True)
     larger_ratio = None
     smaller_ratio = None
-    ideal_ratio = None
+    # todo: remove unnecessary?
+    # ideal_ratio = None
+
+    #####################################################################
+    # TODO: FIGURE THE NEXT SIX LINES OUT; THEY'RE PROBABLY THE PROBLEM #
     for ratio in ratios:
         if ratio > match_ratio:
             larger_ratio = ratio
         else:
             smaller_ratio = ratio
             break
+    #                                                                   #
+    #####################################################################
+
     if smaller_ratio and not larger_ratio:
         ideal_ratio = smaller_ratio
     elif larger_ratio and not smaller_ratio:
@@ -488,8 +498,8 @@ def getClosestMode(modes, width, height, depth, refresh):
             ideal_ratio = smaller_ratio
         else:
             ideal_ratio = larger_ratio
+
     # Now find all the matches with the ideal ratio.
-    close_matches = []
     for mode in modes:
         if mode.ratio == ideal_ratio:
             close_matches.append(mode)
@@ -522,7 +532,8 @@ def getClosestMode(modes, width, height, depth, refresh):
             return smaller
         else:
             return larger
-    # We don't have any good resolutions available. Let's throw an error?
+
+    # We don't have any good resolutions available.
     return None
 
 
@@ -602,7 +613,7 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
     :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
     main_display = getMainDisplayID()
-    # Set defaults if they're not given (function definition overridden in certain cases)
+    # Set defaults if they're not given (defaults in function definition overridden in certain cases)
     if depth is None:
         depth = 32
     if refresh is None:
@@ -611,7 +622,7 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
         display = getMainDisplayID()
     if hidpi is None:
         hidpi = 1
-    # Iterate over the supported commands.
+
     if command == "closest":
         # Find the closest matching configuration and apply it.
         for element in [width, height]:
@@ -620,13 +631,15 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
                 usage("set")
                 print("Must have both width and height for closest setting.")
                 sys.exit(2)
+
         all_modes = getAllModesAllDisplays(hidpi)
-        # They only wanted to set one display.
         if display:
             all_modes = [x for x in all_modes if x[0] == display]
+
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
+
         # todo: decide whether to delete or not
         # Print out what we ended up picking for "closest".
         # print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
@@ -636,6 +649,7 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
         #     bpp     = depth,
         #     refresh = refresh
         #     ))
+
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -644,21 +658,24 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
                 setDisplay(pair[0], closest)
             else:
                 print("    (no close matches found)")
+
     elif command == "highest":
         # Find the highest display mode and set it.
         all_modes = getAllModesAllDisplays(hidpi)
-        # They only wanted to set one display.
         if display:
             all_modes = [x for x in all_modes if x[0] == display]
+
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
+
         for pair in all_modes:
             # This uses the first mode in the all_modes list, because it is
             # guaranteed that the list is sorted.
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             print("    {}".format(pair[1][0]))
             setDisplay(pair[0], pair[1][0])
+
     elif command == "exact":
         # Set the exact mode or don't set it at all.
         all_modes = getAllModesAllDisplays(hidpi)
@@ -669,12 +686,13 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
             bpp     = depth,
             refresh = refresh
             )
-        # They only wanted to set one display.
         if display:
             all_modes = [x for x in all_modes if x[0] == display]
+
         if not all_modes:
             print("No matching displays found.")
             sys.exit(4)
+        
         for pair in all_modes:
             print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
             closest = getClosestMode(pair[1], width, height, depth, refresh)
@@ -1155,24 +1173,24 @@ def main():
         usage(command=args.subcommand)
         sys.exit(0)
 
+    # todo: remove deprecated
     # Check we have either all or none of the manual specifications.
-    try:
-        manual = [args.width, args.height]
-        if any(manual):
-            # todo: remove deprecated
-            # if args.subcommand not in ['set', 'show']:
-            #     usage()
-            #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
-            #     sys.exit(1)
-            for element in manual:
-                if element is None:
-                    usage()
-                    print("Error: Must have either all or none of the manual specifications.")
-                    sys.exit(1)
-    except AttributeError:
-        # Evidently we're using a subparser without these attributes.
-        # Not an issue.
-        pass
+    # try:
+    #     manual = [args.width, args.height]
+    #     if any(manual):
+    #         # if args.subcommand not in ['set', 'show']:
+    #         #     usage()
+    #         #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
+    #         #     sys.exit(1)
+    #         for element in manual:
+    #             if element is None:
+    #                 usage()
+    #                 print("Error: Must have either all or none of the manual specifications.")
+    #                 sys.exit(1)
+    # except AttributeError:
+    #     # Evidently we're using a subparser without these attributes.
+    #     # Not an issue.
+    #     pass
 
     # Check if we have specified both not to use HiDPI and only to use HiDPI.
     try:
@@ -1194,6 +1212,7 @@ def main():
     # loggers.debug("{0} started".format(scriptname))
 
     if args.subcommand == 'set':
+        print(args.command)
         setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'show':
         showHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
