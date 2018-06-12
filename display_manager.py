@@ -811,16 +811,16 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
 
     # We need extra IOKit stuff for this.
     iokitInit()
-    displays = getDisplaysList()
 
     if command == "show":
-        for thisDisplay in displays:
-            service = CGDisplayGetIOServicePort(thisDisplay)
+        displays = getDisplaysList()
+        for display in displays:
+            service = CGDisplayGetIOServicePort(display)
             (error, display_brightness) = IODisplayGetFloatParameter(service, 0, kDisplayBrightness, None)
             if error:
-                print("Failed to get brightness of display {}; error {}".format(thisDisplay, error))
+                print("Failed to get brightness of display {}; error {}".format(display, error))
                 continue
-            print("Display: {}{}".format(display, " (Main Display)" if thisDisplay == main_display else ""))
+            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
             print("    {:.2f}%".format(display_brightness * 100))
 
     elif command == "set":
@@ -834,6 +834,7 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
                   "If this is an external display, try setting manually on device hardware.")
 
 
+# TODO: THIS WHOLE FUNCTION
 def rotateHandler(command, rotation=0, display=getMainDisplayID()):
     """
     Handles all the options for the "rotation" subcommand.
@@ -842,10 +843,20 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
     :param rotation: The display to configure rotation on.
     :param display: The display to configure rotation on.
     """
+    # Set default if it's not given (function definition overridden in certain cases)
     if display is None:
         display = getMainDisplayID()
 
-    print(command, rotation, display)
+    iokitInit()
+
+    if command == "show":
+        displays = getDisplaysList()
+        for display in displays:
+            service = CGDisplayGetIOServicePort(display)
+        pass
+
+    elif command == "set":
+        pass
 
 
 def underscanHandler(command, underscan=1, display=getMainDisplayID()):
