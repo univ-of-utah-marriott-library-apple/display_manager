@@ -13,6 +13,7 @@ import os
 import sys
 import CoreFoundation
 import Quartz
+import subprocess
 
 # todo: figure this out
 # from management_tools import loggers
@@ -850,13 +851,24 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
     iokitInit()
 
     if command == "show":
-        displays = getDisplaysList()
-        for display in displays:
-            service = CGDisplayGetIOServicePort(display)
         pass
 
     elif command == "set":
-        pass
+        # todo: remove old
+        # displays = getDisplaysList()
+        # for display in displays:
+        #     service = CGDisplayGetIOServicePort(display)
+        #     settings = (0x00000400 | kIOScaleRotate90 << 16)
+        #     notSure = IOServiceRequestProbe(service, settings)  # (service, 32-bit-int options)
+        #     print(notSure)
+        # subprocess.call(["cd", "fb-rotate"])
+
+        if rotation % 90 == 0:
+            display = hex(display)
+            subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display), str(rotation%360)), shell=True)
+        else:
+            print("Can only rotate multiples of 90 degrees.")
+            sys.exit(1)
 
 
 def underscanHandler(command, underscan=1, display=getMainDisplayID()):
