@@ -15,6 +15,7 @@ A handy command-line utility to manipulate your Mac's display settings.
    * [Show](#show) - look at available configurations
    * [Mirroring](#mirroring) - configure mirroring
    * [Brightness](#brightness) - change brightness
+   * [Rotate](#rotate) - change display orientation
 
 ## Contact
 
@@ -22,7 +23,7 @@ If you have any comments, questions, or other input, either [file an issue](../.
 
 ## System Requirements
 
-Display Manager is for Macintosh computers. I'm not sure yet how far back in versions it will work. Currently it is tested for 10.10 "Yosemite" and 10.11 "El Capitan".
+Display Manager is for Apple macOS computers.
 
 Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that do the actual manipulation of the display settings.
 
@@ -61,16 +62,16 @@ And also this was a good project for me getting into PyObjC. We have a couple ot
 The Display Manager executable supports a few commands, because it seemed more sensical than dozens of extra option flags.
 
 ```
-$ display_manager.py { help | version | set | show | mirroring | brightness }
+$ display_manager.py { help | set | show | mirroring | brightness | rotate }
 ```
 
-The `help` and `version` options just print out relevant information, and they are interchangeable with `--help` and `--version`, respectively. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
+The `help` option just prints out relevant information, and is interchangeable with `--help` and `--version`, respectively. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
 
-The other commands each have their own usage instructions, which I'll detail below.
+The other commands each have their own usage instructions, which are detailed below.
 
 ### Set
 
-The `set` command is used to change the current configuration on a display or across all displays. It does not ask for confirmation; be smart about what you put in here. I recommend running your desired settings through `show` to be sure they're supported and you don't have issues.
+The `set` command is used to change the current configuration on a display or across all displays. It does not ask for confirmation; be careful about what you put in here. I recommend running your desired settings through `show` to make sure they're supported.
 
 | Subcommand | Purpose                                                                                      |
 |------------|----------------------------------------------------------------------------------------------|
@@ -195,3 +196,57 @@ You can set the brightness on your display with the `brightness` command (assumi
 | Option                | Purpose                                       |
 |-----------------------|-----------------------------------------------|
 | `--display display`   | Change the brightness on display `display`.   |
+
+#### Examples
+
+* Show the current brightness settings of all displays:
+```
+$ display_manager.py brightness show
+```
+
+* Set the brightness of the main display to its maximum brightness:
+```
+$ display_manager.py brightness set .4
+```
+
+* Set the brightness of display `478176723` to 40% of maximum brightness:
+```
+$ display_manager.py brightness set .4 --display 478176723
+```
+
+### Rotate
+
+You can view and change your display's orientation with the `rotate` command.
+
+| Subcommand    | Purpose                                               |
+|---------------|-------------------------------------------------------|
+| `help`        | Prints the usage instructions.                        |
+| `show`        | Show the current rotation setting(s).                 |
+| `set [value]` | Set display orientation to [value].                   |
+|               | (Note: can only set to multiples of 90 degrees)       |
+
+| Option                | Purpose                                       |
+|-----------------------|-----------------------------------------------|
+| `--display display`   | Change the orientation of display `display`.  |
+
+#### Examples
+
+* Show the current orientation of all displays (in degrees):
+```
+$ display_manager.py rotate show
+```
+
+* Rotate the main display by 90 degrees (counter-clockwise):
+```
+$ display_manager.py rotate set 90
+```
+
+* Flip display `478176723` upside-down:
+```
+$ display_manager.py rotate set 180 --display 478176723
+```
+
+* Restore display `478176723` to default orientation:
+```
+$ display_manager.py rotate set 0 --display 478176723
+```
