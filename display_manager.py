@@ -15,8 +15,6 @@ import CoreFoundation
 import Quartz
 import subprocess
 
-# todo: figure this out
-# from management_tools import loggers
 
 # TODO: remove these
 ## Global Variables
@@ -835,7 +833,6 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
                   "If this is an external display, try setting manually on device hardware.")
 
 
-# TODO: THIS WHOLE FUNCTION
 def rotateHandler(command, rotation=0, display=getMainDisplayID()):
     """
     Handles all the options for the "rotation" subcommand.
@@ -851,7 +848,18 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
     iokitInit()
 
     if command == "show":
-        pass
+        output = subprocess.check_output(["./fb-rotate/fb-rotate -i"], shell=True)
+        outputLines = output.split("\n")
+        parsedOutput = []
+        for line in outputLines[1:]:
+            parsedOutput.append(line.split())
+        for line in parsedOutput:
+            if line:
+                if "main" in line[-1]:
+                    print("Display: {0}    Rotation: {1}    Main Display".format(line[0], line[-2]))
+                    # print(line[0], line[-2], line[-1])
+                elif line[0].isdigit():
+                    print("Display: {0}    Rotation: {1}".format(line[0], line[-1]))
 
     elif command == "set":
         # todo: remove old
@@ -861,13 +869,13 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
         #     settings = (0x00000400 | kIOScaleRotate90 << 16)
         #     notSure = IOServiceRequestProbe(service, settings)  # (service, 32-bit-int options)
         #     print(notSure)
-        # subprocess.call(["cd", "fb-rotate"])
 
         if rotation % 90 == 0:
             display = hex(display)
-            subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display), str(rotation%360)), shell=True)
+            subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
+                str(rotation % 360)), shell=True)
         else:
-            print("Can only rotate multiples of 90 degrees.")
+            print("Can only rotate by multiples of 90 degrees.")
             sys.exit(1)
 
 
