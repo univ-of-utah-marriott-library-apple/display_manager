@@ -222,7 +222,7 @@ You can view and change your display's orientation with the `rotate` command.
 |---------------|-------------------------------------------------------|
 | `help`        | Prints the usage instructions.                        |
 | `show`        | Show the current rotation setting(s).                 |
-| `set [value]` | Set display orientation to [value] (in degrees).      |
+| `set [value]` | Set display orientation to [value] \(in degrees\).    |
 
 | Option                | Purpose                                       |
 |-----------------------|-----------------------------------------------|
