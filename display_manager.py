@@ -855,11 +855,12 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
             parsedOutput.append(line.split())
         for line in parsedOutput:
             if line:
-                if "main" in line[-1]:
-                    print("Display: {0}    Rotation: {1}    Main Display".format(line[0], line[-2]))
-                    # print(line[0], line[-2], line[-1])
-                elif line[0].isdigit():
-                    print("Display: {0}    Rotation: {1}".format(line[0], line[-1]))
+                if "main" in line[-1]:  # main display
+                    print("Display: {0} (Main Display)".format(str(int(line[1], 16))))
+                    print("    Rotation: {0} degrees".format(line[-2]))
+                elif line[0].isdigit():  # external display
+                    print("Display: {0}".format(str(int(line[1], 16))))
+                    print("    Rotation: {0} degrees".format(line[-1]))
 
     elif command == "set":
         # todo: remove old
@@ -887,19 +888,18 @@ def underscanHandler(command, underscan=1, display=getMainDisplayID()):
     :param underscan: The value to set on the underscan slider.
     :param display: Specific display to configure.
     """
+    iokitInit()
     main_display = getMainDisplayID()
+
     # Set defaults if they're not given (function definition overridden in certain cases)
     if display is None:
         display = getMainDisplayID()
-    # We need extra IOKit stuff for this.
-    iokitInit()
     if not display:
         displays = getDisplaysList()
     else:
         displays = [display]
-    # Iterate over the available options.
+
     if command == "show":
-        # Show the current underscan setting.
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             (error, display_underscan) = IODisplayGetFloatParameter(service, 0, kDisplayUnderscan, None)
@@ -908,8 +908,8 @@ def underscanHandler(command, underscan=1, display=getMainDisplayID()):
                 continue
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
             print("    {:.2f}%".format(display_underscan * 100))
+
     elif command == "set":
-        # Set the underscan setting.
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             error = IODisplaySetFloatParameter(service, 0, kDisplayUnderscan, underscan)
