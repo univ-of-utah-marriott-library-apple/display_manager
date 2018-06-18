@@ -1,7 +1,7 @@
 Display Manager
 ===============
 
-A handy command-line utility to manipulate your Mac's display settings.
+A command-line utility which controls your Mac's display settings.
 
 ## Contents
 
@@ -23,7 +23,7 @@ If you have any comments, questions, or other input, either [file an issue](../.
 
 ## System Requirements
 
-Display Manager is for Apple macOS computers.
+Display Manager is for Mac computers.
 
 Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that do the actual manipulation of the display settings.
 
