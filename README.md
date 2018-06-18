@@ -71,7 +71,7 @@ The other commands each have their own usage instructions, which are detailed be
 
 ### Set
 
-The `set` command is used to change the current configuration on a display or across all displays. It does not ask for confirmation; be careful about what you put in here. I recommend running your desired settings through `show` to make sure they're supported.
+The `set` command is used to change the current configuration on a display or across all displays. It does not ask for confirmation; be careful about what you put in here. Running desired settings through `show` beforehand is recommended.
 
 | Subcommand | Purpose                                                                                      |
 |------------|----------------------------------------------------------------------------------------------|
@@ -135,8 +135,6 @@ Use the `show` command to learn more about the supported display configurations 
 * Show the highest supported configuration:
 ```
 $ display_manager.py show highest
-Showing highest supported display configuration(s).
---------------------------------------------------------------------------------
 Display: 478176570 (Main Display)
     1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
 ```
@@ -153,8 +151,6 @@ Display: 478160349
 ### Mirroring
 
 The `mirroring` command is used to configure display mirroring.
-
-NOTE: Some functionality of this is not well-documented. I've noticed some odd things happen when I have two external displays connected to my MacBook Pro Retina and I configure External Display A to become a mirror of External Display B without being a mirror of the main display. I imagine this isn't terribly common usage, and I'm working on a permanent solution, but for now just know that you may have to access "Displays" in System Preferences to disable this kind of mirroring configuration.
 
 | Subcommand | Purpose                                                                  |
 |------------|--------------------------------------------------------------------------|
