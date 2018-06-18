@@ -55,17 +55,15 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
    * We support all the features of SetDisplay
    * Plans for additional features (AirPlay configuration, HDMI underscan settings, etc.)
 
-And also this was a good project for me getting into PyObjC. We have a couple other ideas that I'll be working on, but for now doing a simple port seemed a good way to get a grasp of how it all works.
-
 ## Usage
 
-The Display Manager executable supports a few commands, because it seemed more sensical than dozens of extra option flags.
+The Display Manager executable supports the following commands:
 
 ```
 $ display_manager.py { help | set | show | mirroring | brightness | rotate }
 ```
 
-The `help` option just prints out relevant information, and is interchangeable with `--help` and `--version`, respectively. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
+The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
 
 The other commands each have their own usage instructions, which are detailed below.
 
