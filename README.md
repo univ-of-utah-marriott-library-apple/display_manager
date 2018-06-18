@@ -1,7 +1,7 @@
 Display Manager
 ===============
 
-A command-line utility which controls your Mac's display settings.
+A command-line utility which can modify your Mac's display settings.
 
 ## Contents
 
