@@ -307,7 +307,7 @@ def getAllConfigs():
         (display identifier, [current DisplayMode for that display])
     """
     modes = []
-    for display in getDisplaysList():
+    for display in getAllDisplayIDs():
         modes.append((display, GetCurrentMode(display)))
     return modes
 
@@ -538,19 +538,6 @@ def getClosestMode(modes, width, height, depth, refresh):
     return None
 
 
-def getDisplaysList():
-    """
-    Gets a list of all current displays.
-
-    :return: A tuple containing all currently-online displays.
-        Each object in the tuple is a display identifier (as an integer).
-    """
-    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(kMaxDisplays, None, None)
-    if error:
-        raise RuntimeError("Unable to get displays list.")
-    return online_displays
-
-
 def getAllModes(display, hidpi=1):
     """
     Given a display, this finds all of the available supported display modes.
@@ -589,7 +576,7 @@ def getAllModesAllDisplays(hidpi=1):
         (display identifier, [all valid DisplayModes for that display])
     """
     modes = []
-    for display in getDisplaysList():
+    for display in getAllDisplayIDs():
         modes.append((display, getAllModes(display, hidpi)))
     return modes
 
@@ -598,6 +585,19 @@ def getMainDisplayID():
     '''return display id of main display
     '''
     return Quartz.CGMainDisplayID()
+
+
+def getAllDisplayIDs():
+    """
+    Gets a list of all current displays.
+
+    :return: A tuple containing all currently-online displays.
+        Each object in the tuple is a display identifier (as an integer).
+    """
+    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(kMaxDisplays, None, None)
+    if error:
+        raise RuntimeError("Unable to get displays list.")
+    return online_displays
 
 
 ## Subcommand handlers
@@ -793,7 +793,7 @@ def showHandler(command, width, height, depth=32, refresh=0, display=getMainDisp
             print("    {}".format(pair[1]))
     elif command == "displays":
         # Print a list of online displays.
-        for display in getDisplaysList():
+        for display in getAllDisplayIDs():
             print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
 
 
@@ -814,7 +814,7 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
     iokitInit()
 
     if command == "show":
-        displays = getDisplaysList()
+        displays = getAllDisplayIDs()
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
             (error, display_brightness) = IODisplayGetFloatParameter(service, 0, kDisplayBrightness, None)
@@ -843,38 +843,24 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
     :param rotation: The display to configure rotation on.
     :param display: The display to configure rotation on.
     """
-    # Set default if it's not given (function definition overridden in certain cases)
-    if display is None:
-        display = getMainDisplayID()
-
-    iokitInit()
-
     if command == "show":
-        output = subprocess.check_output(["./fb-rotate/fb-rotate -i"], shell=True)
-        outputLines = output.split("\n")
-        parsedOutput = []
-        for line in outputLines[1:]:
-            parsedOutput.append(line.split())
-        for line in parsedOutput:
-            if line:
-                if "main" in line[-1]:  # main display
-                    print("Display: {0} (Main Display)".format(str(int(line[1], 16))))
-                    print("    Rotation: {0} degrees".format(line[-2]))
-                elif line[0].isdigit():  # external display
-                    print("Display: {0}".format(str(int(line[1], 16))))
-                    print("    Rotation: {0} degrees".format(line[-1]))
-
-        Quartz.CGDisplayRotation(display)
+        # Show main display rotation
+        mainDisplay = getMainDisplayID()
+        rotation = Quartz.CGDisplayRotation(mainDisplay)
+        print("Display: {0} (Main Display)".format(str(mainDisplay)))
+        print("    Rotation: {0} degrees".format(str(int(rotation))))
+        # Show other display rotations, if any
+        for externalDisplay in getAllDisplayIDs():
+            if externalDisplay != display:
+                rotation = Quartz.CGDisplayRotation(externalDisplay)
+                print("Display: {0}".format(str(externalDisplay)))
+                print("    Rotation: {0} degrees".format(str(int(rotation))))
 
     elif command == "set":
-        # todo: remove old
-        # displays = getDisplaysList()
-        # for display in displays:
-        #     service = CGDisplayGetIOServicePort(display)
-        #     settings = (0x00000400 | kIOScaleRotate90 << 16)
-        #     notSure = IOServiceRequestProbe(service, settings)  # (service, 32-bit-int options)
-        #     print(notSure)
-
+        # Setup
+        if display is None:
+            display = getMainDisplayID()
+        iokitInit()
         if rotation % 90 == 0:
             display = hex(display)
             subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
@@ -882,8 +868,8 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
         else:
             print("Can only rotate by multiples of 90 degrees.")
             sys.exit(1)
-
-        service = Quartz.CGDisplayIOServicePort(display)
+        # todo: IMPLEMENT THIS
+        # service = Quartz.CGDisplayIOServicePort(display)
 
 
 def underscanHandler(command, underscan=1, display=getMainDisplayID()):
@@ -901,7 +887,7 @@ def underscanHandler(command, underscan=1, display=getMainDisplayID()):
     if display is None:
         display = getMainDisplayID()
     if not display:
-        displays = getDisplaysList()
+        displays = getAllDisplayIDs()
     else:
         displays = [display]
 
@@ -936,7 +922,7 @@ def mirroringHandler(command, display, display_to_mirror=getMainDisplayID()):
     """
     main_display = getMainDisplayID()
     if not display:
-        displays = getDisplaysList()
+        displays = getAllDisplayIDs()
     else:
         displays = [display]
     # Get the current modes for each display.
