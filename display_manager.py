@@ -2,7 +2,7 @@
 
 # Display Manager, version 1.0.0
 
-# Manages macOS displays through the Objective-C bridge
+# Manages Mac displays through the Objective-C bridge
 # Controlled via command line arguments
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness
 
@@ -128,14 +128,16 @@ def iokitInit():
         kDisplaySerialNumber
             These are keys used to access display information.
     """
-    # Grab the IOKit framework.
+
+    # Retrieve the IOKit framework
     iokit = objc.initFrameworkWrapper(
         "IOKit",
         frameworkIdentifier="com.apple.iokit",
         frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
         globals=globals()
         )
-    # These are the functions we're going to need.
+
+    # These are the Objective-C functions required
     functions = [
         ("IOServiceGetMatchingServices", b"iI@o^I"),
         ("IODisplayCreateInfoDictionary", b"@II"),
@@ -153,7 +155,8 @@ def iokitInit():
         )),
         ("IOIteratorNext", "II"),
         ]
-    # Variables we'll need.
+
+    # The Objective-C variables required
     variables = [
         ("kIODisplayNoProductName", b"I"),
         ("kIOMasterPortDefault", b"I"),
@@ -162,13 +165,12 @@ def iokitInit():
         ("kDisplayProductID", b"*"),
         ("kDisplaySerialNumber", b"*"),
         ]
-    # Load the things!
+
+    # Load variables, functions, and keys from Objective-C into the global namespace
     objc.loadBundleFunctions(iokit, globals(), functions)
     objc.loadBundleVariables(iokit, globals(), variables)
-    # Set this key for later use.
     global kDisplayBrightness
     kDisplayBrightness = CoreFoundation.CFSTR(kIODisplayBrightnessKey)
-    # This key is a private API for Apple. Use at your own risk.
     global kDisplayUnderscan
     kDisplayUnderscan = CoreFoundation.CFSTR("pscn")
 
@@ -862,6 +864,8 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
                     print("Display: {0}".format(str(int(line[1], 16))))
                     print("    Rotation: {0} degrees".format(line[-1]))
 
+        Quartz.CGDisplayRotation(display)
+
     elif command == "set":
         # todo: remove old
         # displays = getDisplaysList()
@@ -878,6 +882,8 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
         else:
             print("Can only rotate by multiples of 90 degrees.")
             sys.exit(1)
+
+        service = Quartz.CGDisplayIOServicePort(display)
 
 
 def underscanHandler(command, underscan=1, display=getMainDisplayID()):
@@ -950,7 +956,7 @@ def mirroringHandler(command, display, display_to_mirror=getMainDisplayID()):
         setDisplay(display, mode, enable_mirroring, display_to_mirror)
 
 
-## Actually set display
+## Actually set display (resolution and mirroring)
 def setDisplay(display, mode, mirroring=False, mirror_display=getMainDisplayID()):
     """
     Sets a display to a given configuration.
