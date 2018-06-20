@@ -308,11 +308,11 @@ def getAllConfigs():
     """
     modes = []
     for display in getAllDisplayIDs():
-        modes.append((display, GetCurrentMode(display)))
+        modes.append((display, getCurrentMode(display)))
     return modes
 
 
-def GetCurrentMode(display):
+def getCurrentMode(display):
     """
     Gets the current display mode for a given display.
 
@@ -863,8 +863,11 @@ def rotateHandler(command, rotation=0, display=getMainDisplayID()):
         iokitInit()
         if rotation % 90 == 0:
             display = hex(display)
-            subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
+            # subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
+            #     str(rotation % 360)), shell=True)
+            temp = subprocess.check_output("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
                 str(rotation % 360)), shell=True)
+            print(temp)
         else:
             print("Can only rotate by multiples of 90 degrees.")
             sys.exit(1)
@@ -928,7 +931,7 @@ def mirroringHandler(command, display, display_to_mirror=getMainDisplayID()):
     # Get the current modes for each display.
     modes = []
     for display in displays:
-        modes.append((display, GetCurrentMode(display)))
+        modes.append((display, getCurrentMode(display)))
     # If we're disabling, then set the mirror target to the null display.
     if command == "enable":
         enable_mirroring = True

@@ -1,15 +1,15 @@
 // fb-rotate.c
 //
-// Compile with: 
+// Compile with:
 // gcc -w -o fb-rotate fb-rotate.c -framework IOKit -framework ApplicationServices
-   
+
 #include <getopt.h>
 #include <IOKit/graphics/IOGraphicsLib.h>
 #include <ApplicationServices/ApplicationServices.h>
-   
+
 #define PROGNAME "fb-rotate"
 #define MAX_DISPLAYS 16
-   
+
 // kIOFBSetTransform comes from <IOKit/graphics/IOGraphicsTypesPrivate.h>
 // in the source for the IOGraphics family
 
@@ -17,7 +17,7 @@
 enum {
     kIOFBSetTransform = 0x00000400,
 };
-   
+
 void
 usage(void)
 {
@@ -34,7 +34,7 @@ usage(void)
                     PROGNAME, PROGNAME, PROGNAME, PROGNAME);
     exit(1);
 }
-   
+
 void
 listDisplays(void)
 {
@@ -43,15 +43,15 @@ listDisplays(void)
     CGDirectDisplayID mainDisplay;
     CGDisplayCount    maxDisplays = MAX_DISPLAYS;
     CGDirectDisplayID onlineDisplays[MAX_DISPLAYS];
-   
+
     mainDisplay = CGMainDisplayID();
-   
+
     dErr = CGGetOnlineDisplayList(maxDisplays, onlineDisplays, &displayCount);
     if (dErr != kCGErrorSuccess) {
         fprintf(stderr, "CGGetOnlineDisplayList: error %d.\n", dErr);
         exit(1);
     }
-   
+
     printf("Display ID       Resolution\n");
     for (i = 0; i < displayCount; i++) {
         CGDirectDisplayID dID = onlineDisplays[i];
@@ -59,10 +59,10 @@ listDisplays(void)
                CGDisplayPixelsWide(dID), CGDisplayPixelsHigh(dID),
                (dID == mainDisplay) ? "[main display]\n" : "\n");
     }
-   
+
     exit(0);
 }
-   
+
 void
 infoDisplays(void)
 {
@@ -71,20 +71,20 @@ infoDisplays(void)
     CGDirectDisplayID mainDisplay;
     CGDisplayCount    maxDisplays = MAX_DISPLAYS;
     CGDirectDisplayID onlineDisplays[MAX_DISPLAYS];
-    
+
     CGEventRef ourEvent = CGEventCreate(NULL);
     CGPoint ourLoc = CGEventGetLocation(ourEvent);
-    
+
     CFRelease(ourEvent);
-    
+
     mainDisplay = CGMainDisplayID();
-   
+
     dErr = CGGetOnlineDisplayList(maxDisplays, onlineDisplays, &displayCount);
     if (dErr != kCGErrorSuccess) {
         fprintf(stderr, "CGGetOnlineDisplayList: error %d.\n", dErr);
         exit(1);
     }
-   
+
     printf("#  Display_ID    Resolution  ____Display_Bounds____  Rotation\n");
     for (i = 0; i < displayCount; i++) {
         CGDirectDisplayID dID = onlineDisplays[i];
@@ -94,16 +94,16 @@ infoDisplays(void)
                CGRectGetMinX (CGDisplayBounds (dID)),
                CGRectGetMinY (CGDisplayBounds (dID)),
                CGRectGetMaxX (CGDisplayBounds (dID)),
-               CGRectGetMaxY (CGDisplayBounds (dID)),           
+               CGRectGetMaxY (CGDisplayBounds (dID)),
                CGDisplayRotation (dID),
                (CGDisplayIsActive (dID)) ? "" : "[inactive]",
                (dID == mainDisplay) ? "[main]" : "",
                (CGDisplayIsBuiltin (dID)) ? "[internal]\n" : "\n");
     }
-    
+
     printf("Mouse Cursor Position:  ( %5.0f , %5.0f )\n",
                (float)ourLoc.x, (float)ourLoc.y);
-   
+
     exit(0);
 }
 
@@ -115,26 +115,26 @@ setMainDisplay(CGDirectDisplayID targetDisplay)
     CGDisplayCount     displayCount, i;
     CGDirectDisplayID mainDisplay;
     CGDisplayCount     maxDisplays = MAX_DISPLAYS;
-    CGDirectDisplayID  onlineDisplays[MAX_DISPLAYS]; 
+    CGDirectDisplayID  onlineDisplays[MAX_DISPLAYS];
 	CGDisplayConfigRef config;
 
 	mainDisplay = CGMainDisplayID();
-	
+
 	if (mainDisplay == targetDisplay) {
 	exit(0);
 	}
-	
+
     dErr = CGGetOnlineDisplayList(maxDisplays, onlineDisplays, &displayCount);
     if (dErr != kCGErrorSuccess) {
         fprintf(stderr, "CGGetOnlineDisplayList: error %d.\n", dErr);
         exit(1);
     }
-	
+
 	flag = 0;
     for (i = 0; i < displayCount; i++) {
     	CGDirectDisplayID dID = onlineDisplays[i];
 			if (dID == targetDisplay) { flag = 1; }
-	}	
+	}
 	if (flag == 0) {
         fprintf(stderr, "No such display ID: 0x%-10x.\n", targetDisplay);
         exit(1);
@@ -144,18 +144,18 @@ setMainDisplay(CGDirectDisplayID targetDisplay)
     deltaY = -CGRectGetMinY (CGDisplayBounds (targetDisplay));
 
     CGBeginDisplayConfiguration (&config);
-    
+
     for (i = 0; i < displayCount; i++) {
         CGDirectDisplayID dID = onlineDisplays[i];
-    
+
     CGConfigureDisplayOrigin (config, dID,
     	CGRectGetMinX (CGDisplayBounds (dID)) + deltaX,
     	CGRectGetMinY (CGDisplayBounds (dID)) + deltaY );
 	}
 
     CGCompleteDisplayConfiguration (config, kCGConfigureForSession);
-   
-   
+
+
     exit(0);
 }
 
@@ -215,7 +215,7 @@ cgIDfromU32(uint32_t preId)
     CGDisplayCount    maxDisplays = MAX_DISPLAYS;
     CGDirectDisplayID onlineDisplays[MAX_DISPLAYS];
     CGDirectDisplayID postId = preId;
-    
+
     dErr = CGGetOnlineDisplayList(maxDisplays, onlineDisplays, &displayCount);
     if (dErr != kCGErrorSuccess) {
         fprintf(stderr, "CGGetOnlineDisplayList: error %d.\n", dErr);
@@ -241,25 +241,25 @@ angle2options(long angle)
                (kIOFBSetTransform | (kIOScaleRotate180) << 16),
                (kIOFBSetTransform | (kIOScaleRotate270) << 16)
            };
-                                 
+
     if ((angle % 90) != 0) // Map arbitrary angles to a rotation reset
         return anglebits[0];
-   
+
     return anglebits[(angle / 90) % 4];
 }
-   
+
 int
 main(int argc, char **argv)
 {
     int  i;
     long angle = 0;
     long currentRotation = 0;
-   
+
     io_service_t      service;
     CGDisplayErr      dErr;
     CGDirectDisplayID targetDisplay = 0;
     IOOptionBits      options;
-   
+
     while ((i = getopt(argc, argv, "d:limr:")) != -1) {
         switch (i) {
         case 'd':
@@ -292,7 +292,7 @@ main(int argc, char **argv)
             break;
         }
     }
-   
+
     if (targetDisplay == 0)
         usage();
 
@@ -304,9 +304,9 @@ main(int argc, char **argv)
           angle = 0;
 	}
     }
-   
+
     options = angle2options(angle);
-   
+
     // Get the I/O Kit service port of the target display
     // Since the port is owned by the graphics system, we should not destroy it
 
@@ -315,7 +315,7 @@ main(int argc, char **argv)
     // otherwise this program can hang.
     CGDirectDisplayID td2 = cgIDfromU32(targetDisplay);
     service = CGDisplayIOServicePort(td2);
-   
+
     // We will get an error if the target display doesn't support the
     // kIOFBSetTransform option for IOServiceRequestProbe()
     dErr = IOServiceRequestProbe(service, options);
@@ -323,6 +323,6 @@ main(int argc, char **argv)
         fprintf(stderr, "IOServiceRequestProbe: error %d\n", dErr);
         exit(1);
     }
-   
+
     exit(0);
 }
