@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/u1036693.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/temp.py" beforeDir="false" afterPath="$PROJECT_DIR$/temp.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,11 +16,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="32" lean-forward="true" selection-start-line="32" selection-end-line="32" />
+            <state relative-caret-position="-211">
+              <caret line="183" column="21" selection-start-line="183" selection-start-column="21" selection-end-line="183" selection-end-column="21" />
+              <folding>
+                <element signature="e#569#3001#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -26,17 +31,17 @@
       <file leaf-file-name="fb-rotate.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fb-rotate/fb-rotate.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="847">
-              <caret line="239" column="61" selection-start-line="239" selection-start-column="61" selection-end-line="239" selection-end-column="61" />
+            <state relative-caret-position="397">
+              <caret line="138" column="73" lean-forward="true" selection-start-line="138" selection-start-column="73" selection-end-line="138" selection-end-column="73" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="temp.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="temp.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/temp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="77" column="39" lean-forward="true" selection-start-line="77" selection-start-column="39" selection-end-line="77" selection-end-column="39" />
+            <state relative-caret-position="450">
+              <caret line="30" column="30" lean-forward="true" selection-start-line="30" selection-start-column="30" selection-end-line="30" selection-end-column="30" />
               <folding>
                 <element signature="e#95#127#0" expanded="true" />
               </folding>
@@ -158,8 +163,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>getalldis</find>
-      <find>closest</find>
       <find>args.width, args.height</find>
       <find>width, height</find>
       <find>getallmodesalldis</find>
@@ -188,6 +191,8 @@
       <find>options</find>
       <find>exit</find>
       <find>iooption</find>
+      <find>rotateha</find>
+      <find>kiodisplaybri</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -201,15 +206,15 @@
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/Sam's Changes/display.py" />
         <option value="$PROJECT_DIR$/Sam's Changes/display_test.py" />
-        <option value="$PROJECT_DIR$/display_manager.py" />
         <option value="$PROJECT_DIR$/fb-rotate/fb-rotate.c" />
         <option value="$PROJECT_DIR$/temp.py" />
+        <option value="$PROJECT_DIR$/display_manager.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="412" />
-    <option name="y" value="29" />
+    <option name="x" value="621" />
+    <option name="y" value="24" />
     <option name="width" value="1298" />
     <option name="height" value="976" />
   </component>
@@ -272,12 +277,13 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="412" y="29" width="1298" height="976" extended-state="0" />
+    <frame x="621" y="24" width="1298" height="976" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1587057" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1587057" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32884097" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32815966" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
@@ -291,7 +297,6 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32815966" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -314,6 +319,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2010">
           <caret line="146" column="77" lean-forward="true" selection-start-line="146" selection-start-column="77" selection-end-line="146" selection-end-column="77" />
+          <folding>
+            <element signature="e#569#3001#0" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -437,6 +445,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2115">
           <caret line="141" column="43" lean-forward="true" selection-start-line="141" selection-start-column="43" selection-end-line="141" selection-end-column="49" />
+          <folding>
+            <element signature="e#569#3001#0" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -560,6 +571,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12975">
           <caret line="865" lean-forward="true" selection-start-line="865" selection-end-line="865" />
+          <folding>
+            <element signature="e#569#3001#0" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -666,6 +680,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2040">
           <caret line="136" column="20" selection-start-line="136" selection-start-column="20" selection-end-line="136" selection-end-column="20" />
+          <folding>
+            <element signature="e#569#3001#0" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -691,6 +708,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
           <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+          <folding>
+            <element signature="e#569#3001#0" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -812,20 +832,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fb-rotate/fb-rotate.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="847">
-          <caret line="239" column="61" selection-start-line="239" selection-start-column="61" selection-end-line="239" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/display_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="32" lean-forward="true" selection-start-line="32" selection-end-line="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="476">
@@ -843,12 +849,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/fb-rotate/fb-rotate.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="138" column="73" lean-forward="true" selection-start-line="138" selection-start-column="73" selection-end-line="138" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/temp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="77" column="39" lean-forward="true" selection-start-line="77" selection-start-column="39" selection-end-line="77" selection-end-column="39" />
+        <state relative-caret-position="450">
+          <caret line="30" column="30" lean-forward="true" selection-start-line="30" selection-start-column="30" selection-end-line="30" selection-end-column="30" />
           <folding>
             <element signature="e#95#127#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/display_manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-211">
+          <caret line="183" column="21" selection-start-line="183" selection-start-column="21" selection-end-line="183" selection-end-column="21" />
+          <folding>
+            <element signature="e#569#3001#0" />
           </folding>
         </state>
       </provider>

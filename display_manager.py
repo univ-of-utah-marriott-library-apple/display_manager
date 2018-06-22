@@ -94,8 +94,9 @@ class ArgumentParser(argparse.ArgumentParser):
         self.exit(2)
 
 
+# todo: remove deprecated from this func
 ## CoreFoundation-related functions
-def iokitInit():
+def getIOKit():
     """
     This handles the importing of specific functions and variables from the
     IOKit framework. IOKit is not natively bridged in PyObjC, and so the methods
@@ -129,15 +130,18 @@ def iokitInit():
             These are keys used to access display information.
     """
 
+    # The dictionary which will contain all of the necessary functions and variables from IOKit
+    iokit = {}
+
     # Retrieve the IOKit framework
-    iokit = objc.initFrameworkWrapper(
+    iokitBundle = objc.initFrameworkWrapper(
         "IOKit",
         frameworkIdentifier="com.apple.iokit",
         frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
         globals=globals()
         )
 
-    # These are the Objective-C functions required
+    # The IOKit functions to be retrieved
     functions = [
         ("IOServiceGetMatchingServices", b"iI@o^I"),
         ("IODisplayCreateInfoDictionary", b"@II"),
@@ -153,26 +157,33 @@ def iokitInit():
                         type_modifier=objc._C_IN)
             }
         )),
-        ("IOIteratorNext", "II"),
+        ("IOIteratorNext", "II")
         ]
 
-    # The Objective-C variables required
+    # The IOKit variables to be retrieved
     variables = [
         ("kIODisplayNoProductName", b"I"),
         ("kIOMasterPortDefault", b"I"),
         ("kIODisplayBrightnessKey", b"*"),
         ("kDisplayVendorID", b"*"),
         ("kDisplayProductID", b"*"),
-        ("kDisplaySerialNumber", b"*"),
+        ("kDisplaySerialNumber", b"*")
         ]
 
-    # Load variables, functions, and keys from Objective-C into the global namespace
-    objc.loadBundleFunctions(iokit, globals(), functions)
-    objc.loadBundleVariables(iokit, globals(), variables)
-    global kDisplayBrightness
-    kDisplayBrightness = CoreFoundation.CFSTR(kIODisplayBrightnessKey)
-    global kDisplayUnderscan
-    kDisplayUnderscan = CoreFoundation.CFSTR("pscn")
+    # Load functions from IOKit into the global namespace
+    objc.loadBundleFunctions(iokitBundle, iokit, functions)
+    # Have to treat loadBundleVariables a little differently, because PyObjC
+    # doesn't like putting vars in user-defined dicts
+    objc.loadBundleVariables(iokitBundle, globals(), variables)
+    for var in variables:
+        key = "{}".format(var[0])
+        if key in globals():
+            iokit[key] = globals()[key]
+
+    iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
+    iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
+
+    return iokit
 
 
 def CFNumberEqualsUInt32(number, uint32):
@@ -202,29 +213,33 @@ def CGDisplayGetIOServicePort(display):
     :return: The integer value of the matching service port (or 0 if none can
         be found).
     """
+    iokit = getIOKit()
     # Get values from current display.
     vendor = Quartz.CGDisplayVendorNumber(display)
     model  = Quartz.CGDisplayModelNumber(display)
     serial = Quartz.CGDisplaySerialNumber(display)
     # Get matching service name.
-    matching = IOServiceMatching("IODisplayConnect")
+    matching = iokit["IOServiceMatching"]("IODisplayConnect")
     # Get the iterator for all service ports.
-    error, iterator = IOServiceGetMatchingServices(kIOMasterPortDefault, matching, None)
+    error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
 
     if error:
         # Did we get an error?
         return 0
     # Begin iteration.
-    service = IOIteratorNext(iterator)
+    service = iokit["IOIteratorNext"](iterator)
     matching_service = 0
     while service != 0:
         # Until we find the desired service, keep iterating.
         # Get the information for the current service.
-        info = IODisplayCreateInfoDictionary(service, kIODisplayNoProductName)
+        info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
         # Get the vendor ID, product ID, and serial number.
-        vendorID        = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(kDisplayVendorID))
-        productID       = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(kDisplayProductID))
-        serialNumber    = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(kDisplaySerialNumber))
+        vendorID        = CoreFoundation.CFDictionaryGetValue(info,
+                                                              CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
+        productID       = CoreFoundation.CFDictionaryGetValue(info,
+                                                              CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
+        serialNumber    = CoreFoundation.CFDictionaryGetValue(info,
+                                                              CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
         # Check if everything matches.
         if (
             CFNumberEqualsUInt32(vendorID, vendor) and
@@ -235,7 +250,7 @@ def CGDisplayGetIOServicePort(display):
             matching_service = service
             break
         # Otherwise, keep searching.
-        service = IOIteratorNext(iterator)
+        service = iokit["IOIteratorNext"](iterator)
     # Return what we've found.
     return matching_service
 
@@ -809,15 +824,14 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
     # Set default if it's not given (function definition overridden in certain cases)
     if display is None:
         display = getMainDisplayID()
-
-    # We need extra IOKit stuff for this.
-    iokitInit()
+    iokit = getIOKit()
 
     if command == "show":
         displays = getAllDisplayIDs()
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
-            (error, display_brightness) = IODisplayGetFloatParameter(service, 0, kDisplayBrightness, None)
+            (error, display_brightness) = iokit["IODisplayGetFloatParameter"](service, 0,
+                                                                              iokit["kDisplayBrightness"], None)
             if error:
                 print("Failed to get brightness of display {}; error {}".format(display, error))
                 continue
@@ -827,7 +841,7 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
     elif command == "set":
         # Set the brightness setting.
         service = CGDisplayGetIOServicePort(display)
-        error = IODisplaySetFloatParameter(service, 0, kDisplayBrightness, brightness)
+        error = iokit["IODisplaySetFloatParameter"](service, 0, iokit["kDisplayBrightness"], brightness)
         if error:
             print("Failed to set brightness of display {}; error {}".format(display, error))
             # External display brightness probably can't be managed this way
@@ -835,44 +849,63 @@ def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
                   "If this is an external display, try setting manually on device hardware.")
 
 
-def rotateHandler(command, rotation=0, display=getMainDisplayID()):
+def rotateHandler(command, angle=0, display=getMainDisplayID()):
     """
     Handles all the options for the "rotation" subcommand.
 
     :param command: The command passed in.
-    :param rotation: The display to configure rotation on.
+    :param angle: The display to configure rotation on.
     :param display: The display to configure rotation on.
     """
     if command == "show":
         # Show main display rotation
         mainDisplay = getMainDisplayID()
-        rotation = Quartz.CGDisplayRotation(mainDisplay)
+        angle = Quartz.CGDisplayRotation(mainDisplay)
         print("Display: {0} (Main Display)".format(str(mainDisplay)))
-        print("    Rotation: {0} degrees".format(str(int(rotation))))
+        print("    Rotation: {0} degrees".format(str(int(angle))))
         # Show other display rotations, if any
         for externalDisplay in getAllDisplayIDs():
             if externalDisplay != display:
-                rotation = Quartz.CGDisplayRotation(externalDisplay)
+                angle = Quartz.CGDisplayRotation(externalDisplay)
                 print("Display: {0}".format(str(externalDisplay)))
-                print("    Rotation: {0} degrees".format(str(int(rotation))))
+                print("    Rotation: {0} degrees".format(str(int(angle))))
 
     elif command == "set":
-        # Setup
+        # Default to main display (sometimes calling rotate passes a None and ignores the default value)
         if display is None:
             display = getMainDisplayID()
-        iokitInit()
-        if rotation % 90 == 0:
-            display = hex(display)
-            # subprocess.call("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
-            #     str(rotation % 360)), shell=True)
-            temp = subprocess.check_output("./fb-rotate/fb-rotate -d {0} -r {1}".format(str(display),
-                str(rotation % 360)), shell=True)
-            print(temp)
-        else:
+
+        # Get rotation "options", per user input
+        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
+        rotateCode = 1024
+        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
             print("Can only rotate by multiples of 90 degrees.")
             sys.exit(1)
-        # todo: IMPLEMENT THIS
-        # service = Quartz.CGDisplayIOServicePort(display)
+        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
+        options = rotateCode | (angleCodes[angle % 360] << 16)
+
+        # todo: port this over to normal "getIOKit()", if possible
+        # Set up this dictionary to receive IOServiceRequestProbe from the IOKit framework
+        iokit = {}
+        # the metadata XML that tells PyObjC how to read IOServiceProbe from IOKit
+        metadata = """
+            <?xml version='1.0'?>
+            <!DOCTYPE signatures SYSTEM "file://localhost/System/Library/DTDs/BridgeSupport.dtd">
+            <signatures version='1.0'>
+            <function name='IOServiceRequestProbe'>
+            <arg type='I'/>
+            <arg type='I'/>
+            <retval type='i'/>
+            </function>
+            </signatures>
+            """
+        # Grab IOServiceRequestProbe, per the metadata specs
+        objc.parseBridgeSupport(metadata, iokit,
+                                objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"))
+        service = Quartz.CGDisplayIOServicePort(display)  # gets the right port to send the rotate command to
+
+        # Actually rotate the screen
+        iokit["IOServiceRequestProbe"](service, options)
 
 
 def underscanHandler(command, underscan=1, display=getMainDisplayID()):
@@ -883,9 +916,8 @@ def underscanHandler(command, underscan=1, display=getMainDisplayID()):
     :param underscan: The value to set on the underscan slider.
     :param display: Specific display to configure.
     """
-    iokitInit()
+    iokit = getIOKit()
     main_display = getMainDisplayID()
-
     # Set defaults if they're not given (function definition overridden in certain cases)
     if display is None:
         display = getMainDisplayID()
@@ -897,7 +929,8 @@ def underscanHandler(command, underscan=1, display=getMainDisplayID()):
     if command == "show":
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
-            (error, display_underscan) = IODisplayGetFloatParameter(service, 0, kDisplayUnderscan, None)
+            (error, display_underscan) = iokit["IODisplayGetFloatParameter"](service, 0,
+                                                                             iokit["kDisplayUnderscan"], None)
             if error:
                 print("Failed to get underscan value of display {}; error {}".format(display, error))
                 continue
@@ -907,7 +940,7 @@ def underscanHandler(command, underscan=1, display=getMainDisplayID()):
     elif command == "set":
         for display in displays:
             service = CGDisplayGetIOServicePort(display)
-            error = IODisplaySetFloatParameter(service, 0, kDisplayUnderscan, underscan)
+            error = iokit["IODisplaySetFloatParameter"](service, 0, iokit["kDisplayUnderscan"], underscan)
             if error:
                 print("Failed to set underscan of display {}; error {}".format(display, error))
                 continue
@@ -935,7 +968,8 @@ def mirroringHandler(command, display, display_to_mirror=getMainDisplayID()):
     # If we're disabling, then set the mirror target to the null display.
     if command == "enable":
         enable_mirroring = True
-        print("Enabling mirroring with target display: {}{}".format(display_to_mirror, " (Main Display)" if display_to_mirror == main_display else ""))
+        print("Enabling mirroring with target display: {}{}".format(
+            display_to_mirror, " (Main Display)" if display_to_mirror == main_display else ""))
     if command == "disable":
         display_to_mirror = Quartz.kCGNullDirectDisplay
         enable_mirroring = False
