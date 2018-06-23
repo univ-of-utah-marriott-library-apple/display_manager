@@ -7,24 +7,11 @@
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness
 
 
-import argparse
-import objc
-import os
+import argparse  # read in command-line execution
+import objc  # access Objective-C functions and variables
 import sys
 import CoreFoundation
 import Quartz
-import subprocess
-
-
-# TODO: remove these
-## Global Variables
-attributes = {
-    'long_name' : 'Display Manager',
-    'name'      : os.path.basename(sys.argv[0]),
-    'version'   : '1.0.0'
-    }
-
-kMaxDisplays = 32
 
 
 class DisplayMode(object):
@@ -84,14 +71,14 @@ class DisplayMode(object):
         return not self.__eq__(other)
         
 
-class ArgumentParser(argparse.ArgumentParser):
-    """
-    Custom argument parser for printing error messages a bit more nicely.
-    """
-    def error(self, message):
-        print("Error: {}\n".format(message))
-        usage()
-        self.exit(2)
+# class ArgumentParser(argparse.ArgumentParser):
+#     """
+#     Custom argument parser for printing error messages a bit more nicely.
+#     """
+#     def error(self, message):
+#         print("Error: {}\n".format(message))
+#         usage()
+#         self.exit(2)
 
 
 # todo: remove deprecated from this func
@@ -157,8 +144,9 @@ def getIOKit():
                         type_modifier=objc._C_IN)
             }
         )),
-        ("IOIteratorNext", "II")
-        ]
+        ("IOServiceRequestProbe", b"iII"),
+        ("IOIteratorNext", b"II")
+    ]
 
     # The IOKit variables to be retrieved
     variables = [
@@ -168,13 +156,12 @@ def getIOKit():
         ("kDisplayVendorID", b"*"),
         ("kDisplayProductID", b"*"),
         ("kDisplaySerialNumber", b"*")
-        ]
+    ]
 
     # Load functions from IOKit into the global namespace
     objc.loadBundleFunctions(iokitBundle, iokit, functions)
-    # Have to treat loadBundleVariables a little differently, because PyObjC
-    # doesn't like putting vars in user-defined dicts
-    objc.loadBundleVariables(iokitBundle, globals(), variables)
+    objc.loadBundleVariables(iokitBundle, globals(), variables)  # bridge won't put straight into iokit, so globals()
+    # Move only the desired variables into iokit
     for var in variables:
         key = "{}".format(var[0])
         if key in globals():
@@ -609,7 +596,7 @@ def getAllDisplayIDs():
     :return: A tuple containing all currently-online displays.
         Each object in the tuple is a display identifier (as an integer).
     """
-    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(kMaxDisplays, None, None)
+    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
     if error:
         raise RuntimeError("Unable to get displays list.")
     return online_displays
@@ -874,6 +861,7 @@ def rotateHandler(command, angle=0, display=getMainDisplayID()):
         # Default to main display (sometimes calling rotate passes a None and ignores the default value)
         if display is None:
             display = getMainDisplayID()
+        iokit = getIOKit()
 
         # Get rotation "options", per user input
         angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
@@ -883,25 +871,6 @@ def rotateHandler(command, angle=0, display=getMainDisplayID()):
             sys.exit(1)
         # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
         options = rotateCode | (angleCodes[angle % 360] << 16)
-
-        # todo: port this over to normal "getIOKit()", if possible
-        # Set up this dictionary to receive IOServiceRequestProbe from the IOKit framework
-        iokit = {}
-        # the metadata XML that tells PyObjC how to read IOServiceProbe from IOKit
-        metadata = """
-            <?xml version='1.0'?>
-            <!DOCTYPE signatures SYSTEM "file://localhost/System/Library/DTDs/BridgeSupport.dtd">
-            <signatures version='1.0'>
-            <function name='IOServiceRequestProbe'>
-            <arg type='I'/>
-            <arg type='I'/>
-            <retval type='i'/>
-            </function>
-            </signatures>
-            """
-        # Grab IOServiceRequestProbe, per the metadata specs
-        objc.parseBridgeSupport(metadata, iokit,
-                                objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"))
         service = Quartz.CGDisplayIOServicePort(display)  # gets the right port to send the rotate command to
 
         # Actually rotate the screen
@@ -1036,7 +1005,7 @@ def earlyExit():
 
 def parse():
     # Do actual argument parsing
-    parser = ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser(add_help=False)
 
     # Isolate parser args
     args = parser.parse_known_args()
@@ -1120,17 +1089,6 @@ def parse():
     return parser.parse_args(args[1])
 
 
-def version():
-    """
-    Helpful command-line information
-    :return: A string containing the version information for this program.
-    """
-    return ("{name}, version {version}\n".format(
-        name    = attributes['long_name'],
-        version = attributes['version']
-        ))
-
-
 def usage(command=None):
     """
     Prints out the usage information.
@@ -1138,12 +1096,12 @@ def usage(command=None):
     :param command: The subcommand to print information for.
     """
     # Give the version information always.
-    print(version())
+    print("Display Manager, version 1.0.0")
 
     information = {}
 
     information['set'] = '\n'.join([
-        "usage: {name} set {{ help | closest | highest | exact }}",
+        "usage: display_manager.py set {{ help | closest | highest | exact }}",
         "    [-w width] [-h height] [-d depth] [-r refresh]",
         "    [--display display] [--nohidpi]",
         "",
@@ -1164,10 +1122,10 @@ def usage(command=None):
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
-    ]).format(name=attributes['name'])
+    ])
 
     information['show'] = '\n'.join([
-        "usage: {name} show {{ help | all | closest | highest | exact }}",
+        "usage: display_manager.py show {{ help | all | closest | highest | exact }}",
         "    [-w width] [-h height] [-d depth] [-r refresh]",
         "    [--display display] [--nohidpi]",
         "",
@@ -1189,10 +1147,10 @@ def usage(command=None):
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
-    ]).format(name=attributes['name'])
+    ])
 
     information['brightness'] = '\n'.join([
-        "usage: {name} brightness {{ help | show | set [value] }}",
+        "usage: display_manager.py brightness {{ help | show | set [value] }}",
         "    [--display display]",
         "",
         "SUBCOMMANDS",
@@ -1203,10 +1161,10 @@ def usage(command=None):
         "OPTIONS",
         "    --display display   Specify a particular display (default: main display).",
         "",
-    ]).format(name=attributes['name'])
+    ])
 
     information['rotate'] = '\n'.join([
-        "usage: {name} rotate {{ help | show | set }}"
+        "usage: display_manager.py rotate {{ help | show | set }}"
         "    [--display display]",
         "SUBCOMMANDS",
         "    help        Print this help information.",
@@ -1216,10 +1174,10 @@ def usage(command=None):
         "OPTIONS",
         "    --display display   Specify a particular display (default: main display).",
         ""
-    ]).format(name=attributes['name'])
+    ])
 
     information['underscan'] = '\n'.join([
-        "usage: {name} underscan {{ help | show | set [value] }}",
+        "usage: display_manager.py underscan {{ help | show | set [value] }}",
         "    [--display display]",
         "",
         "SUBCOMMANDS",
@@ -1232,10 +1190,10 @@ def usage(command=None):
         "    while it works fine for now, they could change the functionality at any point",
         "    without warning.",
         "",
-    ]).format(name=attributes['name'])
+    ])
 
     information['mirroring'] = '\n'.join([
-        "usage: {name} brightness {{ help | enable | disable }}",
+        "usage: display_manager.py brightness {{ help | enable | disable }}",
         "    [--diplay display] [--mirror-of-display display]",
         "",
         "SUBCOMMANDS",
@@ -1247,13 +1205,13 @@ def usage(command=None):
         "    --display display               Change mirroring settings for 'display'.",
         "    --mirror-of-display display     Set the display to mirror 'display' (default: main display).",
         "",
-    ]).format(name=attributes['name'])
+    ])
 
     if command in information:
         print(information[command])
     else:
         print('\n'.join([
-            "usage: {name} {{ help | set | show | mirroring | brightness | rotate }}",
+            "usage: display_manager.py {{ help | set | show | mirroring | brightness | rotate }}",
             "",
             "Use any of the subcommands with 'help' to get more information:",
             "    help        Show this help information.",
@@ -1264,7 +1222,7 @@ def usage(command=None):
             "    underscan   Show or set the current display underscan.",
             "    mirroring   Set mirroring configuration.",
             "",
-        ])).format(name=attributes['name'])
+        ]))
 
 
 def main():
