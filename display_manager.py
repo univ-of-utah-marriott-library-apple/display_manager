@@ -2,18 +2,18 @@
 
 # Display Manager, version 1.0.0
 
-# Manages Mac displays through the Objective-C bridge
-# Controlled via command line arguments
+# Programmatically manages Mac displays
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness
 
 
-import argparse  # read in command-line execution
-import objc  # access Objective-C functions and variables
-import sys
-import CoreFoundation
-import Quartz
+import argparse         # read in command-line execution
+import objc             # access Objective-C functions and variables
+import sys              # exit script with the right codes
+import CoreFoundation   # work with Objective-C data types
+import Quartz           # work with system graphics
 
 
+# todo: reorganize; move Sam's code in?
 class DisplayMode(object):
     """
     This class describes a display mode, at least as I like to look at them.
@@ -69,20 +69,55 @@ class DisplayMode(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-        
-
-# class ArgumentParser(argparse.ArgumentParser):
-#     """
-#     Custom argument parser for printing error messages a bit more nicely.
-#     """
-#     def error(self, message):
-#         print("Error: {}\n".format(message))
-#         usage()
-#         self.exit(2)
 
 
-# todo: remove deprecated from this func
-## CoreFoundation-related functions
+def CGDisplayGetIOServicePort(display):
+    """
+    :param display: The display whose port will be returned.
+    :return: The integer value of the matching service port (or 0 if none can
+        be found).
+    """
+    iokit = getIOKit()
+    vendor = Quartz.CGDisplayVendorNumber(display)
+    model  = Quartz.CGDisplayModelNumber(display)
+    serial = Quartz.CGDisplaySerialNumber(display)
+
+    matching = iokit["IOServiceMatching"]("IODisplayConnect")
+    error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
+
+    if error:
+        return 0
+
+    service = iokit["IOIteratorNext"](iterator)
+    matching_service = 0
+
+    def cfEquals(a, b):  # necessary because sometimes CoreFoundation returns Nones in the place of 0s
+        if a == b:
+            return True
+        elif a is None:
+            return b == 0
+        elif b is None:
+            return a == 0
+        else:
+            return False
+
+    # iterate through the iokit's listed services until desired service is found
+    while service != 0:
+        info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
+
+        vendorID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
+        productID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
+        serialNumber = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
+
+        if cfEquals(vendorID, vendor) and cfEquals(productID, model) and cfEquals(serialNumber, serial):
+            matching_service = service
+            break
+
+        service = iokit["IOIteratorNext"](iterator)
+
+    return matching_service
+
+
 def getIOKit():
     """
     This handles the importing of specific functions and variables from the
@@ -173,76 +208,6 @@ def getIOKit():
     return iokit
 
 
-def CFNumberEqualsUInt32(number, uint32):
-    """
-    Determines whether a number and a uint32_t are equivalent.
-
-    :param number: The returned result from a CFDictionaryGetValue call.
-        This call can return "None", which does not match exactly with "0".
-    :param uint32: The result from Quartz library calls for display information.
-        This is an integer of sorts.
-    :return: A boolean; whether the two values are equivalent.
-    """
-    if number is None:
-        return uint32 == 0
-    return number == uint32
-
-
-def CGDisplayGetIOServicePort(display):
-    """
-    Since CGDisplayIOServicePort was deprecated in 10.9, we have to rebuild the
-    equivalent function.
-
-    This is effectively taken from:
-        https://github.com/nriley/brightness/blob/master/brightness.c
-
-    :param display: A display identifier.
-    :return: The integer value of the matching service port (or 0 if none can
-        be found).
-    """
-    iokit = getIOKit()
-    # Get values from current display.
-    vendor = Quartz.CGDisplayVendorNumber(display)
-    model  = Quartz.CGDisplayModelNumber(display)
-    serial = Quartz.CGDisplaySerialNumber(display)
-    # Get matching service name.
-    matching = iokit["IOServiceMatching"]("IODisplayConnect")
-    # Get the iterator for all service ports.
-    error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
-
-    if error:
-        # Did we get an error?
-        return 0
-    # Begin iteration.
-    service = iokit["IOIteratorNext"](iterator)
-    matching_service = 0
-    while service != 0:
-        # Until we find the desired service, keep iterating.
-        # Get the information for the current service.
-        info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
-        # Get the vendor ID, product ID, and serial number.
-        vendorID        = CoreFoundation.CFDictionaryGetValue(info,
-                                                              CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
-        productID       = CoreFoundation.CFDictionaryGetValue(info,
-                                                              CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
-        serialNumber    = CoreFoundation.CFDictionaryGetValue(info,
-                                                              CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
-        # Check if everything matches.
-        if (
-            CFNumberEqualsUInt32(vendorID, vendor) and
-            CFNumberEqualsUInt32(productID, model) and
-            CFNumberEqualsUInt32(serialNumber, serial)
-            ):
-            # If it does, then we've found our service port, so break out.
-            matching_service = service
-            break
-        # Otherwise, keep searching.
-        service = iokit["IOIteratorNext"](iterator)
-    # Return what we've found.
-    return matching_service
-
-
-## Get helpers
 def getHidpiScalar(mode):
     """
     Uses extra methods to find the HiDPI scalar for a display.
