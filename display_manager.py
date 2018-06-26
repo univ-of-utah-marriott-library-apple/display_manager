@@ -59,7 +59,7 @@ class Display(object):
         """
         :return: The current Quartz "DisplayMode" interface for this display.
         """
-        return TempDisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
+        return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
 
     @property
     def allModes(self):
@@ -68,7 +68,7 @@ class Display(object):
         """
         modes = []
         for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, None):
-            modes.append(TempDisplayMode(mode))
+            modes.append(DisplayMode(mode))
         return modes
 
     @property
@@ -190,32 +190,48 @@ class Display(object):
 
     def setMirror(self, mirrorDisplay):
         """
-        :param mirrorDisplay: The display to mirror. Input a NoneType to stop mirroring.
+        :param mirrorDisplay: The display which will mirror this display.
+            Input a NoneType to stop mirroring.
         """
         (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
         if error:
             print("Could not begin display configuration: error {}".format(error))
             sys.exit(1)
 
-        if mirrorDisplay.displayID != self.displayID and mirrorDisplay.displayID is not None:
+        if mirrorDisplay is not None and mirrorDisplay.displayID != self.displayID:
             Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
         else:
             Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, Quartz.kCGNullDirectDisplay)
 
+        Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
+
 
 # todo: rename
-class TempDisplayMode(object):
+class DisplayMode(object):
     """
     Represents a DisplayMode as implemented in Quartz.
     """
 
     def __init__(self, mode):
+        # Low-hanging fruit
         self.width = Quartz.CGDisplayModeGetWidth(mode)
         self.height = Quartz.CGDisplayModeGetHeight(mode)
         self.depth = getPixelDepth(Quartz.CGDisplayModeCopyPixelEncoding(mode))
         self.refresh = Quartz.CGDisplayModeGetRefreshRate(mode)
-        self.hidpi = getHidpiScalar(mode)
         self.raw = mode
+
+        # Hidpi scalar
+        raw_width = Quartz.CGDisplayModeGetPixelWidth(mode)
+        raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
+        res_width = Quartz.CGDisplayModeGetWidth(mode)
+        res_height = Quartz.CGDisplayModeGetHeight(mode)
+        if raw_width == res_width and raw_height == res_height:
+            self.hidpi = None
+        else:
+            if raw_width / res_width == raw_height / res_height:
+                self.hidpi = raw_width / raw_height
+            else:
+                self.hidpi = None
 
     def __str__(self):
         return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}".format(**{
@@ -223,54 +239,55 @@ class TempDisplayMode(object):
         })
 
 
-class DisplayMode(object):
-    """
-    Represents a DisplayMode as implemented in Quartz.
-    """
-
-    def __init__(self, mode=None, width=None, height=None, bpp=None, refresh=None):
-        if mode:
-            self.width      = Quartz.CGDisplayModeGetWidth(mode)
-            self.height     = Quartz.CGDisplayModeGetHeight(mode)
-            self.bpp        = getPixelDepth(Quartz.CGDisplayModeCopyPixelEncoding(mode))
-            self.refresh    = Quartz.CGDisplayModeGetRefreshRate(mode)
-            self.raw_mode   = mode
-            self.dpi_scalar = getHidpiScalar(mode)
-        else:
-            for element in [width, height, bpp, refresh]:
-                if element is None:
-                    raise ValueError("Must give all of width, height, bits per pixel, and refresh rate to construct DisplayMode.")
-            self.width      = width
-            self.height     = height
-            self.bpp        = bpp
-            self.refresh    = refresh
-            self.raw_mode   = None
-            self.dpi_scalar = None
-        self.pixels = self.width * self.height
-        self.ratio  = float(self.width) / float(self.height)
-
-    def __str__(self):
-        return "{width}x{height}; pixel depth: {bpp}; refresh rate: {refresh}; ratio: {ratio:.2f}:1{hidpi}".format(
-            width   = self.width,
-            height  = self.height,
-            bpp     = self.bpp,
-            refresh = self.refresh,
-            ratio   = self.ratio,
-            hidpi   = "; [HiDPI: x{}]".format(self.dpi_scalar) if self.dpi_scalar else "")
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __eq__(self, other):
-        return (isinstance(other, self.__class__) and
-            self.width      == other.width        and
-            self.height     == other.height       and
-            self.bpp        == other.bpp          and
-            self.refresh    == other.refresh      and
-            self.dpi_scalar == other.dpi_scalar)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
+# todo: remove deprecated
+# class DisplayMode(object):
+#     """
+#     Represents a DisplayMode as implemented in Quartz.
+#     """
+#
+#     def __init__(self, mode=None, width=None, height=None, bpp=None, refresh=None):
+#         if mode:
+#             self.width      = Quartz.CGDisplayModeGetWidth(mode)
+#             self.height     = Quartz.CGDisplayModeGetHeight(mode)
+#             self.bpp        = getPixelDepth(Quartz.CGDisplayModeCopyPixelEncoding(mode))
+#             self.refresh    = Quartz.CGDisplayModeGetRefreshRate(mode)
+#             self.raw_mode   = mode
+#             self.dpi_scalar = getHidpiScalar(mode)
+#         else:
+#             for element in [width, height, bpp, refresh]:
+#                 if element is None:
+#                     raise ValueError("Must give all of width, height, bits per pixel, and refresh rate to construct DisplayMode.")
+#             self.width      = width
+#             self.height     = height
+#             self.bpp        = bpp
+#             self.refresh    = refresh
+#             self.raw_mode   = None
+#             self.dpi_scalar = None
+#         self.pixels = self.width * self.height
+#         self.ratio  = float(self.width) / float(self.height)
+#
+#     def __str__(self):
+#         return "{width}x{height}; pixel depth: {bpp}; refresh rate: {refresh}; ratio: {ratio:.2f}:1{hidpi}".format(
+#             width   = self.width,
+#             height  = self.height,
+#             bpp     = self.bpp,
+#             refresh = self.refresh,
+#             ratio   = self.ratio,
+#             hidpi   = "; [HiDPI: x{}]".format(self.dpi_scalar) if self.dpi_scalar else "")
+#
+#     def __repr__(self):
+#         return self.__str__()
+#
+#     def __eq__(self, other):
+#         return (isinstance(other, self.__class__) and
+#             self.width      == other.width        and
+#             self.height     == other.height       and
+#             self.bpp        == other.bpp          and
+#             self.refresh    == other.refresh      and
+#             self.dpi_scalar == other.dpi_scalar)
+#
+#     def __ne__(self, other):
+#         return not self.__eq__(other)
 
 
 def getIOKit():
@@ -339,72 +356,6 @@ def getIOKit():
         return iokit
 
 
-# todo: remove deprecated
-# def CGDisplayGetIOServicePort(display):
-#     """
-#     :param display: The display whose port will be returned.
-#     :return: The integer value of the matching service port (or 0 if none can
-#         be found).
-#     """
-#     vendor = Quartz.CGDisplayVendorNumber(display)
-#     model  = Quartz.CGDisplayModelNumber(display)
-#     serial = Quartz.CGDisplaySerialNumber(display)
-#
-#     matching = iokit["IOServiceMatching"]("IODisplayConnect")
-#     error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
-#
-#     if error:
-#         return 0
-#
-#     service = iokit["IOIteratorNext"](iterator)
-#     matching_service = 0
-#
-#     def cfEquals(a, b):  # necessary because sometimes CoreFoundation returns Nones in the place of 0s
-#         if a == b:
-#             return True
-#         elif a is None:
-#             return b == 0
-#         elif b is None:
-#             return a == 0
-#         else:
-#             return False
-#
-#     # iterate through the iokit's listed services until desired service is found
-#     while service != 0:
-#         info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
-#
-#         vendorID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
-#         productID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
-#         serialNumber = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
-#
-#         if cfEquals(vendorID, vendor) and cfEquals(productID, model) and cfEquals(serialNumber, serial):
-#             matching_service = service
-#             break
-#
-#         service = iokit["IOIteratorNext"](iterator)
-#
-#     return matching_service
-
-
-def getHidpiScalar(mode):
-    """
-    :param mode: The raw currentMode from the Quartz library for the display.
-    :return: Either None if there is no scaling, or else the value of the
-        scaling scalar.
-    """
-    raw_width  = Quartz.CGDisplayModeGetPixelWidth(mode)
-    raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
-    res_width  = Quartz.CGDisplayModeGetWidth(mode)
-    res_height = Quartz.CGDisplayModeGetHeight(mode)
-
-    if raw_width == res_width and raw_height == res_height:
-        return None
-    else:
-        if raw_width / res_width != raw_height / res_height:
-            raise RuntimeError("Vertical and horizontal dimensions aren't scaled properly... currentMode: {}".format(mode))
-        return raw_width / res_width
-
-
 def getHidpiValue(no_hidpi, only_hidpi):
     """
     :param no_hidpi: Whether to exclude HiDPI modes from the search.
@@ -443,275 +394,286 @@ def getPixelDepth(encoding):
 
 
 # todo: remove deprecated
-def getCurrentMode(display):
-    """
-    Gets the current display currentMode for a given display.
+# def getCurrentMode(display):
+#     """
+#     Gets the current display currentMode for a given display.
+#
+#     :param: The identifier of the desired display.
+#     :return: The current DisplayMode used by that display.
+#     """
+#     return DisplayMode(mode=Quartz.CGDisplayCopyDisplayMode(display))
 
-    :param: The identifier of the desired display.
-    :return: The current DisplayMode used by that display.
-    """
-    return DisplayMode(mode=Quartz.CGDisplayCopyDisplayMode(display))
+
+# def getClosestMode(modes, width, height, depth, refresh):
+#     """
+#     Given a set of values and a list of available modes, attempts to find the
+#     closest matching supported currentMode in the list. "Closest matching" is
+#     determined as follows:
+#
+#     1. Is the desired currentMode in the list exactly?
+#     2. If not, is there a currentMode with the desired resolution and bit depth?
+#       a. Find the closest matching refresh rate available.
+#     3. If not, is there a currentMode with the desired resolution?
+#       a. Find the closest matching bit depth available.
+#     4. If not, is there a currentMode with the desired Width:Height ratio?
+#       a. Find the closest resolution available.
+#     5. If not...
+#       a. Find the closest aspect ratio.
+#       b. Find the closest resolution.
+#     6. If there is still nothing, return None.
+#
+#     :param modes: A list containing DisplayMode objects.
+#     :param width: An integer for display width.
+#     :param height: An integer for display height.
+#     :param depth: The pixel depth for the display.
+#     :param refresh: The refresh rate for the display.
+#     :return: The DisplayMode from the list that matches the values best.
+#     """
+#     # Check we don't have an empty list of modes.
+#     if not modes:
+#         return None
+#
+#     match_mode = DisplayMode(width=width, height=height, bpp=depth, refresh=refresh)
+#     match_ratio = width / height
+#     match_pixels = width * height
+#     # Search for an exact match.
+#     for mode in modes:
+#         if mode == match_mode:
+#             return mode
+#
+#     # No exact match, so let's check if there's a resolution and bit depth match.
+#     close_matches = []
+#     for mode in modes:
+#         if mode.width == width and mode.height == height and mode.bpp == depth:
+#             # Found one with the correct resolution.
+#             close_matches.append(mode)
+#     if close_matches:
+#         # There's at least one match at the correct resolution and bit depth.
+#         close_matches.sort(key = lambda mode: mode.refresh, reverse = True)
+#         larger = None
+#         smaller = None
+#         # Find the two closest matches by refresh rate.
+#         for match in close_matches:
+#             if match.refresh > refresh:
+#                 larger = match
+#             else:
+#                 smaller = match
+#                 break
+#         # Check some edge cases.
+#         if smaller and not larger:
+#             # All the available refresh rates are lesser than the desired.
+#             return smaller
+#         if larger and not smaller:
+#             # There's only one element in the list, and it's larger than we
+#             # ideally wanted. Oh well.
+#             return larger
+#         # Okay, now we have two elements, and neither is perfect.
+#         # Find the closer of the two.
+#         larger_dif = abs(larger.refresh - refresh)
+#         smaller_dif = abs(smaller.refresh - refresh)
+#         if smaller_dif < larger_dif:
+#             return smaller
+#         else:
+#             return larger
+#
+#     # No matches for WHD, so let's check that bit depth.
+#     for mode in modes:
+#         if mode.width == width and mode.height == height:
+#             # Found one with the right resolution.
+#             close_matches.append(mode)
+#     if close_matches:
+#         # We have the correct resolution. Let's find the closest bit depth.
+#         close_matches.sort(key = lambda mode: mode.bpp, reverse = True)
+#         larger = None
+#         smaller = None
+#         # Find the two closest matches by bit depth.
+#         for match in close_matches:
+#             if match.bpp > depth:
+#                 larger = match
+#             else:
+#                 smaller = match
+#                 break
+#         # Check some edge cases.
+#         if smaller and not larger:
+#             # All the available bit depths are lesser than the desired.
+#             return smaller
+#         if larger and not smaller:
+#             # There's only one element in the list, and it's larger than we
+#             # ideally wanted. Oh well.
+#             return larger
+#         # Okay, now we have two elements, and neither is perfect.
+#         # Find the closer of the two.
+#         larger_dif = abs(larger.bpp - depth)
+#         smaller_dif = abs(smaller.bpp - depth)
+#         if smaller_dif < larger_dif:
+#             return smaller
+#         else:
+#             return larger
+#
+#     # At this point, we don't even have a good resolution match.
+#     # Let's find all the modes with the appropriate ratio, and then find the
+#     # closest total pixel count.
+#     for mode in modes:
+#         if mode.ratio == match_ratio:
+#             # Got the right width:height ratio.
+#             close_matches.append(mode)
+#     if close_matches:
+#         # Sort by total pixels.
+#         close_matches.sort(key = lambda mode: mode.pixels, reverse = True)
+#         larger = None
+#         smaller = None
+#         # Find the closest matches by pixel count.
+#         for match in close_matches:
+#             if match.pixels > match_pixels:
+#                 larger = match
+#             else:
+#                 smaller = match
+#                 break
+#         # Check some edge cases.
+#         if smaller and not larger:
+#             # All the available pixel counts are lesser than the desired.
+#             return smaller
+#         if larger and not smaller:
+#             # There's only one element in the list, and it's larger than we
+#             # ideally wanted. Oh well.
+#             return larger
+#         # Okay, now we have two elements, and neither is perfect.
+#         # Find the closer of the two.
+#         larger_dif = abs(larger.pixels - match_pixels)
+#         smaller_dif = abs(smaller.pixels - match_pixels)
+#         if smaller_dif < larger_dif:
+#             return smaller
+#         else:
+#             return larger
+#
+#     # Still no good matches. Okay, now we're really reaching.
+#     # Let's try to find all of the displays with a sort-of-close aspect ratio,
+#     # and then find the one in there that has the closest total pixel count.
+#     ratios = []
+#     for mode in modes:
+#         ratios.append(mode.ratio)
+#     ratios = list(set(ratios))
+#     ratios.sort(reverse = True)
+#     larger_ratio = None
+#     smaller_ratio = None
+#     # todo: remove unnecessary?
+#     # ideal_ratio = None
+#
+#     #####################################################################
+#     # TODO: FIGURE THE NEXT SIX LINES OUT; THEY'RE PROBABLY THE PROBLEM #
+#     for ratio in ratios:
+#         if ratio > match_ratio:
+#             larger_ratio = ratio
+#         else:
+#             smaller_ratio = ratio
+#             break
+#     #                                                                   #
+#     #####################################################################
+#
+#     if smaller_ratio and not larger_ratio:
+#         ideal_ratio = smaller_ratio
+#     elif larger_ratio and not smaller_ratio:
+#         ideal_ratio = larger_ratio
+#     else:
+#         larger_dif = abs(larger_ratio - match_ratio)
+#         smaller_dif = abs(smaller_ratio - match_ratio)
+#         if smaller_dif < larger_dif:
+#             ideal_ratio = smaller_ratio
+#         else:
+#             ideal_ratio = larger_ratio
+#
+#     # Now find all the matches with the ideal ratio.
+#     for mode in modes:
+#         if mode.ratio == ideal_ratio:
+#             close_matches.append(mode)
+#     # And now we look through those for the closest match in pixel count.
+#     if close_matches:
+#         # Sort by total pixels.
+#         close_matches.sort(key = lambda mode: mode.pixels, reverse = True)
+#         larger = None
+#         smaller = None
+#         # Find the closest matches by pixel count.
+#         for match in close_matches:
+#             if match.pixels > match_pixels:
+#                 larger = match
+#             else:
+#                 smaller = match
+#                 break
+#         # Check some edge cases.
+#         if smaller and not larger:
+#             # All the available pixel counts are lesser than the desired.
+#             return smaller
+#         if larger and not smaller:
+#             # There's only one element in the list, and it's larger than we
+#             # ideally wanted. Oh well.
+#             return larger
+#         # Okay, now we have two elements, and neither is perfect.
+#         # Find the closer of the two.
+#         larger_dif = abs(larger.pixels - match_pixels)
+#         smaller_dif = abs(smaller.pixels - match_pixels)
+#         if smaller_dif < larger_dif:
+#             return smaller
+#         else:
+#             return larger
+#
+#     # We don't have any good resolutions available.
+#     return None
 
 
 # todo: remove deprecated
-def getClosestMode(modes, width, height, depth, refresh):
+
+
+def getAllDisplays():
     """
-    Given a set of values and a list of available modes, attempts to find the
-    closest matching supported currentMode in the list. "Closest matching" is
-    determined as follows:
-
-    1. Is the desired currentMode in the list exactly?
-    2. If not, is there a currentMode with the desired resolution and bit depth?
-      a. Find the closest matching refresh rate available.
-    3. If not, is there a currentMode with the desired resolution?
-      a. Find the closest matching bit depth available.
-    4. If not, is there a currentMode with the desired Width:Height ratio?
-      a. Find the closest resolution available.
-    5. If not...
-      a. Find the closest aspect ratio.
-      b. Find the closest resolution.
-    6. If there is still nothing, return None.
-
-    :param modes: A list containing DisplayMode objects.
-    :param width: An integer for display width.
-    :param height: An integer for display height.
-    :param depth: The pixel depth for the display.
-    :param refresh: The refresh rate for the display.
-    :return: The DisplayMode from the list that matches the values best.
+    :return: A list containing all currently-online displays.
     """
-    # Check we don't have an empty list of modes.
-    if not modes:
-        return None
-
-    match_mode = DisplayMode(width=width, height=height, bpp=depth, refresh=refresh)
-    match_ratio = width / height
-    match_pixels = width * height
-    # Search for an exact match.
-    for mode in modes:
-        if mode == match_mode:
-            return mode
-
-    # No exact match, so let's check if there's a resolution and bit depth match.
-    close_matches = []
-    for mode in modes:
-        if mode.width == width and mode.height == height and mode.bpp == depth:
-            # Found one with the correct resolution.
-            close_matches.append(mode)
-    if close_matches:
-        # There's at least one match at the correct resolution and bit depth.
-        close_matches.sort(key = lambda mode: mode.refresh, reverse = True)
-        larger = None
-        smaller = None
-        # Find the two closest matches by refresh rate.
-        for match in close_matches:
-            if match.refresh > refresh:
-                larger = match
-            else:
-                smaller = match
-                break
-        # Check some edge cases.
-        if smaller and not larger:
-            # All the available refresh rates are lesser than the desired.
-            return smaller
-        if larger and not smaller:
-            # There's only one element in the list, and it's larger than we
-            # ideally wanted. Oh well.
-            return larger
-        # Okay, now we have two elements, and neither is perfect.
-        # Find the closer of the two.
-        larger_dif = abs(larger.refresh - refresh)
-        smaller_dif = abs(smaller.refresh - refresh)
-        if smaller_dif < larger_dif:
-            return smaller
-        else:
-            return larger
-
-    # No matches for WHD, so let's check that bit depth.
-    for mode in modes:
-        if mode.width == width and mode.height == height:
-            # Found one with the right resolution.
-            close_matches.append(mode)
-    if close_matches:
-        # We have the correct resolution. Let's find the closest bit depth.
-        close_matches.sort(key = lambda mode: mode.bpp, reverse = True)
-        larger = None
-        smaller = None
-        # Find the two closest matches by bit depth.
-        for match in close_matches:
-            if match.bpp > depth:
-                larger = match
-            else:
-                smaller = match
-                break
-        # Check some edge cases.
-        if smaller and not larger:
-            # All the available bit depths are lesser than the desired.
-            return smaller
-        if larger and not smaller:
-            # There's only one element in the list, and it's larger than we
-            # ideally wanted. Oh well.
-            return larger
-        # Okay, now we have two elements, and neither is perfect.
-        # Find the closer of the two.
-        larger_dif = abs(larger.bpp - depth)
-        smaller_dif = abs(smaller.bpp - depth)
-        if smaller_dif < larger_dif:
-            return smaller
-        else:
-            return larger
-
-    # At this point, we don't even have a good resolution match.
-    # Let's find all the modes with the appropriate ratio, and then find the
-    # closest total pixel count.
-    for mode in modes:
-        if mode.ratio == match_ratio:
-            # Got the right width:height ratio.
-            close_matches.append(mode)
-    if close_matches:
-        # Sort by total pixels.
-        close_matches.sort(key = lambda mode: mode.pixels, reverse = True)
-        larger = None
-        smaller = None
-        # Find the closest matches by pixel count.
-        for match in close_matches:
-            if match.pixels > match_pixels:
-                larger = match
-            else:
-                smaller = match
-                break
-        # Check some edge cases.
-        if smaller and not larger:
-            # All the available pixel counts are lesser than the desired.
-            return smaller
-        if larger and not smaller:
-            # There's only one element in the list, and it's larger than we
-            # ideally wanted. Oh well.
-            return larger
-        # Okay, now we have two elements, and neither is perfect.
-        # Find the closer of the two.
-        larger_dif = abs(larger.pixels - match_pixels)
-        smaller_dif = abs(smaller.pixels - match_pixels)
-        if smaller_dif < larger_dif:
-            return smaller
-        else:
-            return larger
-
-    # Still no good matches. Okay, now we're really reaching.
-    # Let's try to find all of the displays with a sort-of-close aspect ratio,
-    # and then find the one in there that has the closest total pixel count.
-    ratios = []
-    for mode in modes:
-        ratios.append(mode.ratio)
-    ratios = list(set(ratios))
-    ratios.sort(reverse = True)
-    larger_ratio = None
-    smaller_ratio = None
-    # todo: remove unnecessary?
-    # ideal_ratio = None
-
-    #####################################################################
-    # TODO: FIGURE THE NEXT SIX LINES OUT; THEY'RE PROBABLY THE PROBLEM #
-    for ratio in ratios:
-        if ratio > match_ratio:
-            larger_ratio = ratio
-        else:
-            smaller_ratio = ratio
-            break
-    #                                                                   #
-    #####################################################################
-
-    if smaller_ratio and not larger_ratio:
-        ideal_ratio = smaller_ratio
-    elif larger_ratio and not smaller_ratio:
-        ideal_ratio = larger_ratio
-    else:
-        larger_dif = abs(larger_ratio - match_ratio)
-        smaller_dif = abs(smaller_ratio - match_ratio)
-        if smaller_dif < larger_dif:
-            ideal_ratio = smaller_ratio
-        else:
-            ideal_ratio = larger_ratio
-
-    # Now find all the matches with the ideal ratio.
-    for mode in modes:
-        if mode.ratio == ideal_ratio:
-            close_matches.append(mode)
-    # And now we look through those for the closest match in pixel count.
-    if close_matches:
-        # Sort by total pixels.
-        close_matches.sort(key = lambda mode: mode.pixels, reverse = True)
-        larger = None
-        smaller = None
-        # Find the closest matches by pixel count.
-        for match in close_matches:
-            if match.pixels > match_pixels:
-                larger = match
-            else:
-                smaller = match
-                break
-        # Check some edge cases.
-        if smaller and not larger:
-            # All the available pixel counts are lesser than the desired.
-            return smaller
-        if larger and not smaller:
-            # There's only one element in the list, and it's larger than we
-            # ideally wanted. Oh well.
-            return larger
-        # Okay, now we have two elements, and neither is perfect.
-        # Find the closer of the two.
-        larger_dif = abs(larger.pixels - match_pixels)
-        smaller_dif = abs(smaller.pixels - match_pixels)
-        if smaller_dif < larger_dif:
-            return smaller
-        else:
-            return larger
-
-    # We don't have any good resolutions available.
-    return None
+    displays = []
+    for displayID in getAllDisplayIDs():
+        displays.append(Display(displayID))
+    return displays
 
 
 # todo: remove deprecated
-def getAllModes(display, hidpi=1):
-    """
-    Given a display, this finds all of the available supported display modes.
-    The resulting list is sorted so that the highest resolution, highest pixel
-    depth, highest refresh rate modes are at the top.
+# def getAllModes(display, hidpi=1):
+#     """
+#     Given a display, this finds all of the available supported display modes.
+#     The resulting list is sorted so that the highest resolution, highest pixel
+#     depth, highest refresh rate modes are at the top.
+#
+#     :param display: The identifier of the desired display.
+#     :param hidpi: The HiDPI usage currentMode, specified by getHidpiValue().
+#     :return: A list of DisplayMode objects, sorted.
+#     """
+#     # Specifically, it includes not just HiDPI settings, but also settings for
+#     # different pixel encodings than the standard 8-, 16-, and 32-bit.
+#     # Unfortunately, the CGDisplayModeCopyPixelEncoding method cannot see other
+#     # encodings, leading to apparently-duplicated values. Not ideal.
+#     if hidpi:
+#         modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, {Quartz.kCGDisplayShowDuplicateLowResolutionModes: Quartz.kCFBooleanTrue})]
+#     else:
+#         modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, None)]
+#     if hidpi == 2:
+#         # This removes extra modes, so only HiDPI-scaled modes are displayed.
+#         modes = [mode for mode in modes if mode.dpi_scalar is not None]
+#     # Sort the modes!
+#     modes.sort(key = lambda mode: mode.refresh, reverse = True)
+#     modes.sort(key = lambda mode: mode.bpp, reverse = True)
+#     modes.sort(key = lambda mode: mode.pixels, reverse = True)
+#     return modes
 
-    :param display: The identifier of the desired display.
-    :param hidpi: The HiDPI usage currentMode, specified by getHidpiValue().
-    :return: A list of DisplayMode objects, sorted.
-    """
-    #TODO: The HiDPI call also gets extra things. Fix those.
-    # Specifically, it includes not just HiDPI settings, but also settings for
-    # different pixel encodings than the standard 8-, 16-, and 32-bit.
-    # Unfortunately, the CGDisplayModeCopyPixelEncoding method cannot see other
-    # encodings, leading to apparently-duplicated values. Not ideal.
-    if hidpi:
-        modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, {Quartz.kCGDisplayShowDuplicateLowResolutionModes: Quartz.kCFBooleanTrue})]
-    else:
-        modes = [DisplayMode(mode=mode) for mode in Quartz.CGDisplayCopyAllDisplayModes(display, None)]
-    if hidpi == 2:
-        # This removes extra modes, so only HiDPI-scaled modes are displayed.
-        modes = [mode for mode in modes if mode.dpi_scalar is not None]
-    # Sort the modes!
-    modes.sort(key = lambda mode: mode.refresh, reverse = True)
-    modes.sort(key = lambda mode: mode.bpp, reverse = True)
-    modes.sort(key = lambda mode: mode.pixels, reverse = True)
-    return modes
 
-
-def getAllModesAllDisplays(hidpi=1):
-    """
-    Gets a list of displays and all available modes for each display.
-
-    :param hidpi: Whether to include additional, "duplicate" modes.
-    :return: A list of tuples as:
-        (display identifier, [all valid DisplayModes for that display])
-    """
-    modes = []
-    for display in getAllDisplayIDs():
-        modes.append((display, getAllModes(display, hidpi)))
-    return modes
+# def getAllModesAllDisplays(hidpi=1):
+#     """
+#     Gets a list of displays and all available modes for each display.
+#
+#     :param hidpi: Whether to include additional, "duplicate" modes.
+#     :return: A list of tuples as:
+#         (display identifier, [all valid DisplayModes for that display])
+#     """
+#     modes = []
+#     for display in getAllDisplayIDs():
+#         modes.append((display, getAllModes(display, hidpi)))
+#     return modes
 
 
 def getMainDisplayID():
@@ -730,16 +692,6 @@ def getAllDisplayIDs():
     if error:
         raise RuntimeError("Unable to get displays list.")
     return online_displays
-
-
-def getAllDisplays():
-    """
-    :return: A list containing all currently-online displays.
-    """
-    displays = []
-    for displayID in getAllDisplayIDs():
-        displays.append(Display(displayID))
-    return displays
 
 
 ## Subcommand handlers
@@ -962,10 +914,11 @@ def mirroringHandler(command, displayID, mirrorDisplayID=getMainDisplayID()):
     display = Display(displayID)
 
     if command == "enable":
-        display.setMirror(mirrorDisplay)
+        mirrorDisplay.setMirror(display)
 
     if command == "disable":
-        display.setMirror(None)
+        for display in getAllDisplays():
+            display.setMirror(None)
 
 
 ## main() and its helper functions
@@ -1049,7 +1002,7 @@ def parse():
     # Subparser for 'mirroring'
     parser_mirroring = subparsers.add_parser('mirroring', add_help=False)
     parser_mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
-    parser_mirroring.add_argument('--mirror-of-display', type=int, default=getMainDisplayID())
+    parser_mirroring.add_argument('--mirror', type=int, default=getMainDisplayID())
 
     # All of the subcommands have some similar arguments
     for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring, parser_rotate]:
@@ -1175,16 +1128,16 @@ def usage(command=None):
 
     information['mirroring'] = '\n'.join([
         "usage: display_manager.py brightness {{ help | enable | disable }}",
-        "    [--diplay display] [--mirror-of-display display]",
+        "    [--diplay display] [--mirror display]",
         "",
         "SUBCOMMANDS",
         "    help        Print this help information.",
         "    enable      Activate mirroring.",
-        "    disable     Deactivate mirroring.",
+        "    disable     Deactivate all mirroring.",
         "",
         "OPTIONS",
         "    --display display               Change mirroring settings for 'display'.",
-        "    --mirror-of-display display     Set the display to mirror 'display' (default: main display).",
+        "    --mirror display                Set the display to mirror 'display' (default: main display).",
         "",
     ])
 
@@ -1221,43 +1174,13 @@ def main():
         sys.exit(0)
 
     # todo: remove deprecated
-    # Check we have either all or none of the manual specifications.
     # try:
-    #     manual = [args.width, args.height]
-    #     if any(manual):
-    #         # if args.subcommand not in ['set', 'show']:
-    #         #     usage()
-    #         #     print("Error: Cannot supply manual specifications for subcommand '{}'.".format(subcommand))
-    #         #     sys.exit(1)
-    #         for element in manual:
-    #             if element is None:
-    #                 usage()
-    #                 print("Error: Must have either all or none of the manual specifications.")
-    #                 sys.exit(1)
+    #     hidpi = getHidpiValue(args.no_hidpi, args.only_hidpi)
     # except AttributeError:
-    #     # Evidently we're using a subparser without these attributes.
-    #     # Not an issue.
     #     pass
 
-    # Check if we have specified both not to use HiDPI and only to use HiDPI.
-    try:
-        hidpi = getHidpiValue(args.no_hidpi, args.only_hidpi)
-    except AttributeError:
-        # Probably using a subparser that doesn't check HiDPI settings.
-        # And that's okay.
-        pass
-
-    # todo: look into how this works (log)
-    # scriptname = os.path.basename(sys.argv[0])
-    # Actual logger:
-    # logger = loggers.FileLogger(name=scriptname, level=loggers.DEBUG)
-
-    # Debug logger:
-    # logger = loggers.StreamLogger(name=scriptname, level=loggers.DEBUG)
-
-    # loggers.debug("{0} started".format(scriptname))
-
     getIOKit()
+    hidpi = 1
 
     if args.subcommand == 'set':
         setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
@@ -1268,11 +1191,9 @@ def main():
     elif args.subcommand == 'underscan':
         underscanHandler(args.command, args.underscan, args.display)
     elif args.subcommand == 'mirroring':
-        mirroringHandler(args.command, args.display, args.mirror_of_display)
+        mirroringHandler(args.command, args.display, args.mirror)
     elif args.subcommand == 'rotate':
         rotateHandler(args.command, args.rotation, args.display)
-
-    # loggers.debug("{0} finished".format(scriptname))
 
 
 if __name__ == '__main__':
