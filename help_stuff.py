@@ -215,7 +215,7 @@ class DisplayMode(object):
             err = 'Invalid CGDisplayModeRef: {0!r}'.format(mode)
             raise DisplayError(err)
 
-        # save original mode for use when setting displays 
+        # save original currentMode for use when setting displays
         self.mode = mode
 
         # Effective Resolution
@@ -231,7 +231,7 @@ class DisplayMode(object):
         self.pixelResolution = pR
 
         # HiDPI is if pixelResolution is greater than effect resolution
-        self.HiDPI = True if pR > r else False
+        self.HiDPI = pR > r
         self.refreshRate = Quartz.CGDisplayModeGetRefreshRate(mode)
         self.usable = Quartz.CGDisplayModeIsUsableForDesktopGUI(mode)
         
@@ -370,9 +370,9 @@ def setDisplayMode(id, mode):
         raise DisplayError(e)
 
     # original CGDisplayModeRef from our DisplayMode
-    CGm = mode.mode
+    CGm = mode.currentMode
 
-    # populate CGDisplayConfigRef with settings from the mode we provided  
+    # populate CGDisplayConfigRef with settings from the currentMode we provided
     err = Quartz.CGConfigureDisplayWithDisplayMode(conf, id, CGm, None)
     if err:
         e = "CGConfigureDisplayWithDisplayMode failed: {0}".format(err)
@@ -387,12 +387,12 @@ def setDisplayMode(id, mode):
 
 
 # todo: remove deprecated?
-# def setDisplayMode2(id, mode):
+# def setDisplayMode2(id, currentMode):
 #     '''NOT VIABLE
 #     Only able to change the DisplayMode for the duration of the script
 #     '''
 #     opt = None
-#     m = mode.mode
+#     m = currentMode.currentMode
 #     err = Quartz.CGDisplaySetDisplayMode(id, m, opt)
 #     if err:
 #         e = "CGDisplaySetDisplayMode failed: {0}".format(err)

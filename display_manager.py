@@ -13,19 +13,221 @@ import CoreFoundation   # work with Objective-C data types
 import Quartz           # work with system graphics
 
 
-# todo: reorganize; move Sam's code in?
+# Configured for global usage; otherwise, must be re-instantiated each time
+iokit = None
+
+
+class Display(object):
+    """
+    Contains properties regarding display information for a given physical display, along with a few
+    useful helper functions.
+    """
+
+    # todo: start bringing in width/height stuff?
+    def __init__(self, displayID):
+        self.displayID = displayID
+
+    @property
+    def isMain(self):
+        """
+        :return: Boolean for whether this display is the main display
+        """
+        return Quartz.CGDisplayIsMain(self.displayID)
+
+    @property
+    def rotation(self):
+        """
+        :return: Rotation of this display, in degrees.
+        """
+        return int(Quartz.CGDisplayRotation(self.displayID))
+
+    @property
+    def brightness(self):
+        """
+        :return: Brightness of this display, from 0 to 1.
+        """
+        service = self.servicePort
+        (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0,
+                                                                          iokit["kDisplayBrightness"], None)
+        if error:
+            return None
+        else:
+            return brightness
+
+    @property
+    def currentMode(self):
+        """
+        :return: The current Quartz "DisplayMode" interface for this display.
+        """
+        return TempDisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
+
+    @property
+    def allModes(self):
+        """
+        :return: All possible Quartz "DisplayMode" interfaces for this display.
+        """
+        modes = []
+        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, None):
+            modes.append(TempDisplayMode(mode))
+        return modes
+
+    @property
+    def highestMode(self):
+        """
+        :return: The Quartz "DisplayMode" interface with the highest display resolution for this display.
+        """
+        highest = (None, 0)
+        for mode in self.allModes:
+            if mode.width * mode.height > highest[1]:
+                highest = (mode, mode.width * mode.height)
+        return highest[0]
+
+    @property
+    def servicePort(self):
+        """
+        :return: The integer representing this display's service port.
+        """
+        vendor = Quartz.CGDisplayVendorNumber(self.displayID)
+        model = Quartz.CGDisplayModelNumber(self.displayID)
+        serial = Quartz.CGDisplaySerialNumber(self.displayID)
+
+        matching = iokit["IOServiceMatching"]("IODisplayConnect")
+        error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
+
+        if error:
+            return 0
+
+        service = iokit["IOIteratorNext"](iterator)
+        matching_service = 0
+
+        def cfEquals(a, b):  # necessary because sometimes CoreFoundation returns Nones in the place of 0s
+            if a == b:
+                return True
+            elif a is None:
+                return b == 0
+            elif b is None:
+                return a == 0
+            else:
+                return False
+
+        # iterate through the iokit's listed services until desired service is found
+        while service != 0:
+            info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
+
+            vendorID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
+            productID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
+            serialNumber = CoreFoundation.CFDictionaryGetValue(info,
+                                                               CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
+
+            if cfEquals(vendorID, vendor) and cfEquals(productID, model) and cfEquals(serialNumber, serial):
+                matching_service = service
+                break
+
+            service = iokit["IOIteratorNext"](iterator)
+
+        return matching_service
+
+    def exactMode(self, width, height, depth=32, refresh=0):
+        """
+        :param width: Desired width
+        :param height: Desired height
+        :param depth: Desired pixel depth
+        :param refresh: Desired refresh rate
+        :return: The Quartz "DisplayMode" interface matching the description, if it exists; otherwise, None.
+        """
+        for mode in self.allModes:
+            if mode.width == width and mode.height == height and mode.depth == depth and mode.refresh == refresh:
+                return mode
+        return None
+
+    def closestMode(self, width, height, depth=32, refresh=0):
+        """
+        :param width: Desired width
+        :param height: Desired height
+        :param depth: Desired pixel depth
+        :param refresh: Desired refresh rate
+        :return: The closest Quartz "DisplayMode" interface possible for this display.
+        """
+        whd = None
+        wh = None
+
+        for mode in self.allModes:
+            widthMatch = mode.width == width
+            heightMatch = mode.height == height
+            depthMatch = mode.depth == depth
+            refreshMatch = mode.refresh == refresh
+
+            if widthMatch and heightMatch and depthMatch and refreshMatch:
+                return mode
+            elif widthMatch and heightMatch and depthMatch:
+                whd = mode
+            elif widthMatch and heightMatch:
+                wh = mode
+
+        if whd:
+            return whd
+        elif wh:
+            return wh
+        else:
+            return None
+
+    def setMode(self, mode):
+        """
+        :param mode: The Quartz "DisplayMode" interface to set this display to.
+        """
+        (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
+        if error:
+            print("Could not begin display configuration: error {}".format(error))
+            sys.exit(1)
+
+        error = Quartz.CGConfigureDisplayWithDisplayMode(configRef, self.displayID, mode.raw, None)
+        if error:
+            print("Failed to set display configuration: error {}".format(error))
+            error = Quartz.CGCancelDisplayConfiguration(configRef)
+            sys.exit(1)
+
+        Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
+
+    def setMirror(self, mirrorDisplay):
+        """
+        :param mirrorDisplay: The display to mirror. Input a NoneType to stop mirroring.
+        """
+        (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
+        if error:
+            print("Could not begin display configuration: error {}".format(error))
+            sys.exit(1)
+
+        if mirrorDisplay.displayID != self.displayID and mirrorDisplay.displayID is not None:
+            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
+        else:
+            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, Quartz.kCGNullDirectDisplay)
+
+
+# todo: rename
+class TempDisplayMode(object):
+    """
+    Represents a DisplayMode as implemented in Quartz.
+    """
+
+    def __init__(self, mode):
+        self.width = Quartz.CGDisplayModeGetWidth(mode)
+        self.height = Quartz.CGDisplayModeGetHeight(mode)
+        self.depth = getPixelDepth(Quartz.CGDisplayModeCopyPixelEncoding(mode))
+        self.refresh = Quartz.CGDisplayModeGetRefreshRate(mode)
+        self.hidpi = getHidpiScalar(mode)
+        self.raw = mode
+
+    def __str__(self):
+        return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}".format(**{
+            "width": self.width, "height": self.height, "depth": self.depth, "refresh": self.refresh
+        })
+
+
 class DisplayMode(object):
     """
-    This class describes a display mode, at least as I like to look at them.
-
-    It has width, height, bits per pixel (pixel encoding), and refresh rate.
-    It can also have the raw mode (if it's based on a real mode from the system)
-    and a HiDPI scalar value (if the mode represents a scaled mode).
-
-    This also calculates the total pixel count (width * height) and the display
-    ratio (width / height). These are used to help with matching of different
-    display modes with similar properties.
+    Represents a DisplayMode as implemented in Quartz.
     """
+
     def __init__(self, mode=None, width=None, height=None, bpp=None, refresh=None):
         if mode:
             self.width      = Quartz.CGDisplayModeGetWidth(mode)
@@ -71,148 +273,122 @@ class DisplayMode(object):
         return not self.__eq__(other)
 
 
-def CGDisplayGetIOServicePort(display):
-    """
-    :param display: The display whose port will be returned.
-    :return: The integer value of the matching service port (or 0 if none can
-        be found).
-    """
-    iokit = getIOKit()
-    vendor = Quartz.CGDisplayVendorNumber(display)
-    model  = Quartz.CGDisplayModelNumber(display)
-    serial = Quartz.CGDisplaySerialNumber(display)
-
-    matching = iokit["IOServiceMatching"]("IODisplayConnect")
-    error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
-
-    if error:
-        return 0
-
-    service = iokit["IOIteratorNext"](iterator)
-    matching_service = 0
-
-    def cfEquals(a, b):  # necessary because sometimes CoreFoundation returns Nones in the place of 0s
-        if a == b:
-            return True
-        elif a is None:
-            return b == 0
-        elif b is None:
-            return a == 0
-        else:
-            return False
-
-    # iterate through the iokit's listed services until desired service is found
-    while service != 0:
-        info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
-
-        vendorID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
-        productID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
-        serialNumber = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
-
-        if cfEquals(vendorID, vendor) and cfEquals(productID, model) and cfEquals(serialNumber, serial):
-            matching_service = service
-            break
-
-        service = iokit["IOIteratorNext"](iterator)
-
-    return matching_service
-
-
 def getIOKit():
     """
     This handles the importing of specific functions and variables from the
-    IOKit framework. IOKit is not natively bridged in PyObjC, and so the methods
+    IOKit framework. IOKit is not natively bridged in PyObjC, so the methods
     must be found and encoded manually to gain their functionality in Python.
 
-    After calling this function, the following IOKit functions are available:
-        IOServiceGetMatchingServices
-            Look up the registered IOService objects that match the given dict.
-        IODisplayCreateInfoDictionary
-            Returns a dictionary with information about display hardware.
-        IODisplayGetFloatParameter
-            Finds a float value for a given parameter.
-        IODisplaySetFloatParameter
-            Sets a float value for a given parameter.
-        IOServiceMatching
-            Returns a dictionary that specifies an IOService class match.
-        IOIteratorNext
-            Finds the next object in an iteration.
-
-    And the following variables are available:
-        kIODisplayNoProductName
-            Prevents IODisplayCreateInfoDictionary from including the
-            kIODisplayProductName property.
-        kIOMasterPortDefault
-            The setDefault mach port used to initiate communication with IOKit.
-        kIODisplayBrightnessKey
-            The key used to get brightness from IODisplayGetFloatParameter.
-        kDisplayVendorID
-        kDisplayProductID
-        kDisplaySerialNumber
-            These are keys used to access display information.
+    :return: A dictionary containing several IOKit functions and variables.
     """
+    global iokit
+    if not iokit:
+        # The dictionary which will contain all of the necessary functions and variables from IOKit
+        iokit = {}
 
-    # The dictionary which will contain all of the necessary functions and variables from IOKit
-    iokit = {}
+        # Retrieve the IOKit framework
+        iokitBundle = objc.initFrameworkWrapper(
+            "IOKit",
+            frameworkIdentifier="com.apple.iokit",
+            frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
+            globals=globals()
+            )
 
-    # Retrieve the IOKit framework
-    iokitBundle = objc.initFrameworkWrapper(
-        "IOKit",
-        frameworkIdentifier="com.apple.iokit",
-        frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
-        globals=globals()
-        )
+        # The IOKit functions to be retrieved
+        functions = [
+            ("IOServiceGetMatchingServices", b"iI@o^I"),
+            ("IODisplayCreateInfoDictionary", b"@II"),
+            ("IODisplayGetFloatParameter", b"iII@o^f"),
+            ("IODisplaySetFloatParameter", b"iII@f"),
+            ("IOServiceMatching", b"@or*", "", dict(
+                # This one is obnoxious. The "*" gets pythonified as a char, not a
+                # char*, so we have to make it interpret as a string.
+                arguments=
+                {
+                    0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
+                            c_array_delimited_by_null=True,
+                            type_modifier=objc._C_IN)
+                }
+            )),
+            ("IOServiceRequestProbe", b"iII"),
+            ("IOIteratorNext", b"II")
+        ]
 
-    # The IOKit functions to be retrieved
-    functions = [
-        ("IOServiceGetMatchingServices", b"iI@o^I"),
-        ("IODisplayCreateInfoDictionary", b"@II"),
-        ("IODisplayGetFloatParameter", b"iII@o^f"),
-        ("IODisplaySetFloatParameter", b"iII@f"),
-        ("IOServiceMatching", b"@or*", "", dict(
-            # This one is obnoxious. The "*" gets pythonified as a char, not a
-            # char*, so we have to make it interpret as a string.
-            arguments=
-            {
-                0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
-                        c_array_delimited_by_null=True,
-                        type_modifier=objc._C_IN)
-            }
-        )),
-        ("IOServiceRequestProbe", b"iII"),
-        ("IOIteratorNext", b"II")
-    ]
+        # The IOKit variables to be retrieved
+        variables = [
+            ("kIODisplayNoProductName", b"I"),
+            ("kIOMasterPortDefault", b"I"),
+            ("kIODisplayBrightnessKey", b"*"),
+            ("kDisplayVendorID", b"*"),
+            ("kDisplayProductID", b"*"),
+            ("kDisplaySerialNumber", b"*")
+        ]
 
-    # The IOKit variables to be retrieved
-    variables = [
-        ("kIODisplayNoProductName", b"I"),
-        ("kIOMasterPortDefault", b"I"),
-        ("kIODisplayBrightnessKey", b"*"),
-        ("kDisplayVendorID", b"*"),
-        ("kDisplayProductID", b"*"),
-        ("kDisplaySerialNumber", b"*")
-    ]
+        # Load functions from IOKit into the global namespace
+        objc.loadBundleFunctions(iokitBundle, iokit, functions)
+        objc.loadBundleVariables(iokitBundle, globals(), variables)  # bridge won't put straight into iokit, so globals()
+        # Move only the desired variables into iokit
+        for var in variables:
+            key = "{}".format(var[0])
+            if key in globals():
+                iokit[key] = globals()[key]
 
-    # Load functions from IOKit into the global namespace
-    objc.loadBundleFunctions(iokitBundle, iokit, functions)
-    objc.loadBundleVariables(iokitBundle, globals(), variables)  # bridge won't put straight into iokit, so globals()
-    # Move only the desired variables into iokit
-    for var in variables:
-        key = "{}".format(var[0])
-        if key in globals():
-            iokit[key] = globals()[key]
+        iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
+        iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
 
-    iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
-    iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
+        return iokit
 
-    return iokit
+
+# todo: remove deprecated
+# def CGDisplayGetIOServicePort(display):
+#     """
+#     :param display: The display whose port will be returned.
+#     :return: The integer value of the matching service port (or 0 if none can
+#         be found).
+#     """
+#     vendor = Quartz.CGDisplayVendorNumber(display)
+#     model  = Quartz.CGDisplayModelNumber(display)
+#     serial = Quartz.CGDisplaySerialNumber(display)
+#
+#     matching = iokit["IOServiceMatching"]("IODisplayConnect")
+#     error, iterator = iokit["IOServiceGetMatchingServices"](iokit["kIOMasterPortDefault"], matching, None)
+#
+#     if error:
+#         return 0
+#
+#     service = iokit["IOIteratorNext"](iterator)
+#     matching_service = 0
+#
+#     def cfEquals(a, b):  # necessary because sometimes CoreFoundation returns Nones in the place of 0s
+#         if a == b:
+#             return True
+#         elif a is None:
+#             return b == 0
+#         elif b is None:
+#             return a == 0
+#         else:
+#             return False
+#
+#     # iterate through the iokit's listed services until desired service is found
+#     while service != 0:
+#         info = iokit["IODisplayCreateInfoDictionary"](service, iokit["kIODisplayNoProductName"])
+#
+#         vendorID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayVendorID"]))
+#         productID = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplayProductID"]))
+#         serialNumber = CoreFoundation.CFDictionaryGetValue(info, CoreFoundation.CFSTR(iokit["kDisplaySerialNumber"]))
+#
+#         if cfEquals(vendorID, vendor) and cfEquals(productID, model) and cfEquals(serialNumber, serial):
+#             matching_service = service
+#             break
+#
+#         service = iokit["IOIteratorNext"](iterator)
+#
+#     return matching_service
 
 
 def getHidpiScalar(mode):
     """
-    Uses extra methods to find the HiDPI scalar for a display.
-
-    :param mode: The raw mode from the Quartz library for the display.
+    :param mode: The raw currentMode from the Quartz library for the display.
     :return: Either None if there is no scaling, or else the value of the
         scaling scalar.
     """
@@ -220,18 +396,17 @@ def getHidpiScalar(mode):
     raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
     res_width  = Quartz.CGDisplayModeGetWidth(mode)
     res_height = Quartz.CGDisplayModeGetHeight(mode)
+
     if raw_width == res_width and raw_height == res_height:
         return None
     else:
         if raw_width / res_width != raw_height / res_height:
-            raise RuntimeError("Vertical and horizontal dimensions aren't scaled properly... mode: {}".format(mode))
+            raise RuntimeError("Vertical and horizontal dimensions aren't scaled properly... currentMode: {}".format(mode))
         return raw_width / res_width
 
 
 def getHidpiValue(no_hidpi, only_hidpi):
     """
-    Returns a numeric value describing the HiDPI mode desired.
-
     :param no_hidpi: Whether to exclude HiDPI modes from the search.
     :param only_hidpi: Whether to only include HiDPI modes.
     :return: An integer describing the combination of these.
@@ -246,6 +421,7 @@ def getHidpiValue(no_hidpi, only_hidpi):
         raise ValueError("Error: Cannot require both no HiDPI and only HiDPI. Make up your mind.")
 
 
+# todo: move deprecated into new DisplayMode
 def getPixelDepth(encoding):
     """
     Takes a pixel encoding and returns an integer representing that encoding.
@@ -266,22 +442,10 @@ def getPixelDepth(encoding):
         raise RuntimeError("Unknown pixel encoding: {}".format(encoding))
 
 
-def getAllConfigs():
-    """
-    Gets a list of all displays and their associated current display modes.
-
-    :return: A list of tuples as:
-        (display identifier, [current DisplayMode for that display])
-    """
-    modes = []
-    for display in getAllDisplayIDs():
-        modes.append((display, getCurrentMode(display)))
-    return modes
-
-
+# todo: remove deprecated
 def getCurrentMode(display):
     """
-    Gets the current display mode for a given display.
+    Gets the current display currentMode for a given display.
 
     :param: The identifier of the desired display.
     :return: The current DisplayMode used by that display.
@@ -289,18 +453,19 @@ def getCurrentMode(display):
     return DisplayMode(mode=Quartz.CGDisplayCopyDisplayMode(display))
 
 
+# todo: remove deprecated
 def getClosestMode(modes, width, height, depth, refresh):
     """
     Given a set of values and a list of available modes, attempts to find the
-    closest matching supported mode in the list. "Closest matching" is
+    closest matching supported currentMode in the list. "Closest matching" is
     determined as follows:
 
-    1. Is the desired mode in the list exactly?
-    2. If not, is there a mode with the desired resolution and bit depth?
+    1. Is the desired currentMode in the list exactly?
+    2. If not, is there a currentMode with the desired resolution and bit depth?
       a. Find the closest matching refresh rate available.
-    3. If not, is there a mode with the desired resolution?
+    3. If not, is there a currentMode with the desired resolution?
       a. Find the closest matching bit depth available.
-    4. If not, is there a mode with the desired Width:Height ratio?
+    4. If not, is there a currentMode with the desired Width:Height ratio?
       a. Find the closest resolution available.
     5. If not...
       a. Find the closest aspect ratio.
@@ -505,6 +670,7 @@ def getClosestMode(modes, width, height, depth, refresh):
     return None
 
 
+# todo: remove deprecated
 def getAllModes(display, hidpi=1):
     """
     Given a display, this finds all of the available supported display modes.
@@ -512,7 +678,7 @@ def getAllModes(display, hidpi=1):
     depth, highest refresh rate modes are at the top.
 
     :param display: The identifier of the desired display.
-    :param hidpi: The HiDPI usage mode, specified by getHidpiValue().
+    :param hidpi: The HiDPI usage currentMode, specified by getHidpiValue().
     :return: A list of DisplayMode objects, sorted.
     """
     #TODO: The HiDPI call also gets extra things. Fix those.
@@ -549,15 +715,14 @@ def getAllModesAllDisplays(hidpi=1):
 
 
 def getMainDisplayID():
-    '''return display id of main display
-    '''
+    """
+    :return: DisplayID of the main display
+    """
     return Quartz.CGMainDisplayID()
 
 
 def getAllDisplayIDs():
     """
-    Gets a list of all current displays.
-
     :return: A tuple containing all currently-online displays.
         Each object in the tuple is a display identifier (as an integer).
     """
@@ -567,8 +732,18 @@ def getAllDisplayIDs():
     return online_displays
 
 
+def getAllDisplays():
+    """
+    :return: A list containing all currently-online displays.
+    """
+    displays = []
+    for displayID in getAllDisplayIDs():
+        displays.append(Display(displayID))
+    return displays
+
+
 ## Subcommand handlers
-def setHandler(command, width, height, depth=32, refresh=0, display=getMainDisplayID(), hidpi=1):
+def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=1):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -577,101 +752,47 @@ def setHandler(command, width, height, depth=32, refresh=0, display=getMainDispl
     :param height: Desired height.
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
-    :param display: Specific display to configure.
+    :param displayID: Specific display to configure.
     :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
-    main_display = getMainDisplayID()
     # Set defaults if they're not given (defaults in function definition overridden in certain cases)
     if depth is None:
         depth = 32
     if refresh is None:
         refresh = 0
-    if display is None:
-        display = getMainDisplayID()
+    if displayID is None:
+        displayID = getMainDisplayID()
     if hidpi is None:
         hidpi = 1
 
+    display = Display(displayID)
+
     if command == "closest":
-        # Find the closest matching configuration and apply it.
         for element in [width, height]:
-            # Make sure they supplied all of the necessary info.
             if element is None:
                 usage("set")
                 print("Must have both width and height for closest setting.")
-                sys.exit(2)
+                sys.exit(1)
 
-        all_modes = getAllModesAllDisplays(hidpi)
-        if display:
-            all_modes = [x for x in all_modes if x[0] == display]
-
-        if not all_modes:
-            print("No matching displays found.")
-            sys.exit(4)
-
-        # todo: decide whether to delete or not
-        # Print out what we ended up picking for "closest".
-        # print("Setting for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
-        #     width   = width,
-        #     height  = height,
-        #     ratio   = float(width) / float(height),
-        #     bpp     = depth,
-        #     refresh = refresh
-        #     ))
-
-        for pair in all_modes:
-            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
-            closest = getClosestMode(pair[1], width, height, depth, refresh)
-            if closest:
-                print("    {}".format(closest))
-                setDisplay(pair[0], closest)
-            else:
-                print("    (no close matches found)")
+        closest = display.closestMode(width, height, depth, refresh)
+        if closest:
+            display.setMode(closest)
+        else:
+            print("No close match was found.")
 
     elif command == "highest":
-        # Find the highest display mode and set it.
-        all_modes = getAllModesAllDisplays(hidpi)
-        if display:
-            all_modes = [x for x in all_modes if x[0] == display]
-
-        if not all_modes:
-            print("No matching displays found.")
-            sys.exit(4)
-
-        for pair in all_modes:
-            # This uses the first mode in the all_modes list, because it is
-            # guaranteed that the list is sorted.
-            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
-            print("    {}".format(pair[1][0]))
-            setDisplay(pair[0], pair[1][0])
+        display.setMode(display.highestMode)
 
     elif command == "exact":
-        # Set the exact mode or don't set it at all.
-        all_modes = getAllModesAllDisplays(hidpi)
-        # Create a fake exact mode to match against.
-        exact = DisplayMode(
-            width   = width,
-            height  = height,
-            bpp     = depth,
-            refresh = refresh
-            )
-        if display:
-            all_modes = [x for x in all_modes if x[0] == display]
-
-        if not all_modes:
-            print("No matching displays found.")
-            sys.exit(4)
-
-        for pair in all_modes:
-            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
-            closest = getClosestMode(pair[1], width, height, depth, refresh)
-            if closest and closest == exact:
-                print("    {}".format(closest))
-                setDisplay(pair[0], closest)
-            else:
-                print("    (no exact matches found)")
+        exact = display.exactMode(width, height, depth, refresh)
+        if exact:
+            display.setMode(exact)
+        else:
+            print("No exact match was found.")
+            sys.exit(1)
 
 
-def showHandler(command, width, height, depth=32, refresh=0, display=getMainDisplayID(), hidpi=1):
+def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=1):
     """
     Handles all the options for the "show" subcommand.
 
@@ -680,154 +801,106 @@ def showHandler(command, width, height, depth=32, refresh=0, display=getMainDisp
     :param height: Desired height.
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
-    :param display: Specific display to configure.
+    :param displayID: Specific display to configure.
     :param hidpi: Description of HiDPI settings from getHidpiValue().
     """
-    # Get the main display's identifier since it gets used a lot.
-    main_display = getMainDisplayID()
     # Set defaults if they're not given (function definition overridden in certain cases)
     if depth is None:
         depth = 32
     if refresh is None:
         refresh = 0
-    if display is None:
-        display = getMainDisplayID()
+    if displayID is None:
+        displayID = getMainDisplayID()
     if hidpi is None:
         hidpi = 1
-    # Iterate over the supported commands.
+
+    display = Display(displayID)
+
     if command == "all":
-        # Show all the modes.
-        all_modes = getAllModesAllDisplays(hidpi)
-        if not all_modes:
-            print("No matching displays found ({}).".format(display))
-            sys.exit(4)
-        for pair in all_modes:
-            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
-            for mode in pair[1]:
+        for display in getAllDisplays():
+            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+
+            for mode in display.allModes:
                 print("    {}".format(mode))
+
     elif command == "closest":
-        # Only show the closest mode to whatever was specified.
         for element in [width, height]:
             if element is None:
                 usage("show")
                 print("Must have both width and height for closest matching.")
-                sys.exit(2)
-        all_modes = getAllModesAllDisplays(hidpi)
-        # They only wanted to show one display's configuration.
-        if display:
-            all_modes = [x for x in all_modes if x[0] == display]
-        if not all_modes:
-            print("No matching displays found ({}).".format(display))
-            sys.exit(4)
-        print("Finding closest supported display configuration(s).")
-        # todo: delete? this one might actually be useful
-        # Inform what's going on.
-        # print("Searching for: {width}x{height} ({ratio:.2f}:1); {bpp} bpp; {refresh} Hz".format(
-        #     width   = width,
-        #     height  = height,
-        #     ratio   = float(width) / float(height),
-        #     bpp     = depth,
-        #     refresh = refresh
-        #     ))
-        for pair in all_modes:
-            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
-            closest = getClosestMode(pair[1], width, height, depth, refresh)
-            if closest:
-                print("    {}".format(closest))
-            else:
-                print("    (no close matches found)")
+                sys.exit(1)
+
+        closest = display.closestMode(width, height, depth, refresh)
+        if closest:
+            print(closest)
+        else:
+            print("No close match was found.")
+
     elif command == "highest":
-        # Show the highest supported display configuration.
-        all_modes = getAllModesAllDisplays(hidpi)
-        if display:
-            all_modes = [x for x in all_modes if x[0] == display]
-        if not all_modes:
-            print("No matching displays found ({}).".format(display))
-            sys.exit(4)
-        for pair in all_modes:
-            print("Display: {}{}".format(pair[0], " (Main Display)" if pair[0] == main_display else ""))
-            print("    {}".format(pair[1][0]))
-    elif command == "exact":
-        # Show the current display configuration.
-        current_modes = getAllConfigs()
-        if display:
-            current_modes = [x for x in current_modes if x[0] == display]
-        if not current_modes:
-            print("No matching displays found ({}).".format(display))
-            sys.exit(4)
-        for pair in current_modes:
-            print("Display: {}".format(pair[0]))
-            print("    {}".format(pair[1]))
+        print(display.highestMode)
+
+    elif command == "current":
+        for display in getAllDisplays():
+            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+            print("    {}".format(display.currentMode))
+
     elif command == "displays":
-        # Print a list of online displays.
-        for display in getAllDisplayIDs():
-            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+        for display in getAllDisplays():
+            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
 
-def brightnessHandler(command, brightness=1, display=getMainDisplayID()):
+def brightnessHandler(command, brightness=1, displayID=getMainDisplayID()):
     """
     Handles all the options for the "brightness" subcommand.
 
     :param command: The command passed in.
     :param brightness: The level of brightness to change to.
-    :param display: Specific display to configure.
+    :param displayID: Specific display to configure.
     """
-    main_display = getMainDisplayID()
-    # Set default if it's not given (function definition overridden in certain cases)
-    if display is None:
-        display = getMainDisplayID()
-    iokit = getIOKit()
+    # Set defaults if they're not given (function definition overridden in certain cases)
+    if displayID is None:
+        displayID = getMainDisplayID()
+
+    display = Display(displayID)
 
     if command == "show":
-        displays = getAllDisplayIDs()
-        for display in displays:
-            service = CGDisplayGetIOServicePort(display)
-            (error, display_brightness) = iokit["IODisplayGetFloatParameter"](service, 0,
-                                                                              iokit["kDisplayBrightness"], None)
-            if error:
-                print("Failed to get brightness of display {}; error {}".format(display, error))
-                continue
-            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
-            print("    {:.2f}%".format(display_brightness * 100))
+        for display in getAllDisplays():
+            if display.brightness:
+                print("Display: {}{}".format(displayID, " (Main Display)" if display.isMain else ""))
+                print("    {:.2f}%".format(display.brightness * 100))
+            else:
+                print("Failed to get brightness of display {}".format(display.displayID))
 
     elif command == "set":
-        # Set the brightness setting.
-        service = CGDisplayGetIOServicePort(display)
+        service = display.servicePort
         error = iokit["IODisplaySetFloatParameter"](service, 0, iokit["kDisplayBrightness"], brightness)
         if error:
-            print("Failed to set brightness of display {}; error {}".format(display, error))
+            print("Failed to set brightness of display {}; error {}".format(display.displayID, error))
             # External display brightness probably can't be managed this way
             print("External displays may not be compatible with Display Manager. \n"
                   "If this is an external display, try setting manually on device hardware.")
 
 
-def rotateHandler(command, angle=0, display=getMainDisplayID()):
+def rotateHandler(command, angle=0, displayID=getMainDisplayID()):
     """
     Handles all the options for the "rotation" subcommand.
 
     :param command: The command passed in.
     :param angle: The display to configure rotation on.
-    :param display: The display to configure rotation on.
+    :param displayID: The display to configure rotation on.
     """
+    # Set defaults if they're not given (function definition overridden in certain cases)
+    if displayID is None:
+        displayID = getMainDisplayID()
+
+    display = Display(displayID)
+
     if command == "show":
-        # Show main display rotation
-        mainDisplay = getMainDisplayID()
-        angle = Quartz.CGDisplayRotation(mainDisplay)
-        print("Display: {0} (Main Display)".format(str(mainDisplay)))
-        print("    Rotation: {0} degrees".format(str(int(angle))))
-        # Show other display rotations, if any
-        for externalDisplay in getAllDisplayIDs():
-            if externalDisplay != display:
-                angle = Quartz.CGDisplayRotation(externalDisplay)
-                print("Display: {0}".format(str(externalDisplay)))
-                print("    Rotation: {0} degrees".format(str(int(angle))))
+        for display in getAllDisplays():
+            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+            print("    Rotation: {0} degrees".format(str(int(display.rotation))))
 
     elif command == "set":
-        # Default to main display (sometimes calling rotate passes a None and ignores the default value)
-        if display is None:
-            display = getMainDisplayID()
-        iokit = getIOKit()
-
         # Get rotation "options", per user input
         angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
         rotateCode = 1024
@@ -836,120 +909,63 @@ def rotateHandler(command, angle=0, display=getMainDisplayID()):
             sys.exit(1)
         # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
         options = rotateCode | (angleCodes[angle % 360] << 16)
-        service = Quartz.CGDisplayIOServicePort(display)  # gets the right port to send the rotate command to
 
         # Actually rotate the screen
-        iokit["IOServiceRequestProbe"](service, options)
+        iokit["IOServiceRequestProbe"](display.servicePort, options)
 
 
-def underscanHandler(command, underscan=1, display=getMainDisplayID()):
+def underscanHandler(command, underscan=1, displayID=getMainDisplayID()):
     """
     Handles all the options for the "underscan" subcommand.
 
     :param command: The command passed in.
     :param underscan: The value to set on the underscan slider.
-    :param display: Specific display to configure.
+    :param displayID: Specific display to configure.
     """
-    iokit = getIOKit()
-    main_display = getMainDisplayID()
     # Set defaults if they're not given (function definition overridden in certain cases)
-    if display is None:
-        display = getMainDisplayID()
-    if not display:
-        displays = getAllDisplayIDs()
-    else:
-        displays = [display]
+    if displayID is None:
+        displayID = getMainDisplayID()
+
+    display = Display(displayID)
 
     if command == "show":
-        for display in displays:
-            service = CGDisplayGetIOServicePort(display)
-            (error, display_underscan) = iokit["IODisplayGetFloatParameter"](service, 0,
+        for display in getAllDisplays():
+            (error, display_underscan) = iokit["IODisplayGetFloatParameter"](display.servicePort, 0,
                                                                              iokit["kDisplayUnderscan"], None)
             if error:
-                print("Failed to get underscan value of display {}; error {}".format(display, error))
+                print("Failed to get underscan value of display {}; error {}".format(display.displayID, error))
                 continue
-            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
+            print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
             print("    {:.2f}%".format(display_underscan * 100))
 
     elif command == "set":
-        for display in displays:
-            service = CGDisplayGetIOServicePort(display)
-            error = iokit["IODisplaySetFloatParameter"](service, 0, iokit["kDisplayUnderscan"], underscan)
-            if error:
-                print("Failed to set underscan of display {}; error {}".format(display, error))
-                continue
-            print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
-            print("    {:.2f}%".format(underscan * 100))
+        error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
+        if error:
+            print("Failed to set underscan of display {}; error {}".format(display.displayID, error))
+        print("Display: {}{}".format(displayID, " (Main Display)" if display.isMain else ""))
+        print("    {:.2f}%".format(underscan * 100))
 
 
-def mirroringHandler(command, display, display_to_mirror=getMainDisplayID()):
+def mirroringHandler(command, displayID, mirrorDisplayID=getMainDisplayID()):
     """
     Handles all the options for the "mirroring" subcommand.
 
     :param command: The command passed in.
-    :param display: The display to configure mirroring on.
-    :param display_to_mirror: The display to become a mirror of.
+    :param displayID: The display to configure mirroring on.
+    :param mirrorDisplayID: The display to become a mirror of.
     """
-    main_display = getMainDisplayID()
-    if not display:
-        displays = getAllDisplayIDs()
-    else:
-        displays = [display]
-    # Get the current modes for each display.
-    modes = []
-    for display in displays:
-        modes.append((display, getCurrentMode(display)))
-    # If we're disabling, then set the mirror target to the null display.
+    # Set defaults if they're not given (function definition overridden in certain cases)
+    if mirrorDisplayID is None:
+        mirrorDisplayID = getMainDisplayID()
+
+    mirrorDisplay = Display(mirrorDisplayID)
+    display = Display(displayID)
+
     if command == "enable":
-        enable_mirroring = True
-        print("Enabling mirroring with target display: {}{}".format(
-            display_to_mirror, " (Main Display)" if display_to_mirror == main_display else ""))
+        display.setMirror(mirrorDisplay)
+
     if command == "disable":
-        display_to_mirror = Quartz.kCGNullDirectDisplay
-        enable_mirroring = False
-    # Effect the changes!
-    for display, mode in modes:
-        print("Display: {}{}".format(display, " (Main Display)" if display == main_display else ""))
-        setDisplay(display, mode, enable_mirroring, display_to_mirror)
-
-
-## Actually set display (resolution and mirroring)
-def setDisplay(display, mode, mirroring=False, mirror_display=getMainDisplayID()):
-    """
-    Sets a display to a given configuration.
-
-    :param display: The identifier of the desired display.
-    :param mode: The DisplayMode to set the display to.
-    :param mirroring: Whether to activate mirroring.
-    :param mirror_display: The identifier of the display to mirror.
-    """
-    # Begin the configuration.
-    (error, config_ref) = Quartz.CGBeginDisplayConfiguration(None)
-    # Check there were no errors.
-    if error:
-        print("Could not begin display configuration: error {}".format(error))
-        sys.exit(8)
-    # Enact the desired configuration.
-    error = Quartz.CGConfigureDisplayWithDisplayMode(config_ref, display, mode.raw_mode, None)
-    # Were there errors?
-    if error:
-        print("Failed to set display configuration: error {}".format(error))
-        # Yeah, there were errors. Let's cancel the configuration.
-        error = Quartz.CGCancelDisplayConfiguration(config_ref)
-        if error:
-            # Apparently this can fail too? Huh.
-            print("Failed to cancel display configuraiton setting: error {}".format(error))
-        sys.exit(9)
-    # Did we want mirroring enabled?
-    if mirroring:
-        # Yes, so let's turn it on! We mirror the specified display.
-        if display != mirror_display:
-            Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, mirror_display)
-    else:
-        # I guess not. Don't mirror anything!
-        Quartz.CGConfigureDisplayMirrorOfDisplay(config_ref, display, Quartz.kCGNullDirectDisplay)
-    # Finish the configuration.
-    Quartz.CGCompleteDisplayConfiguration(config_ref, Quartz.kCGConfigurePermanently)
+        display.setMirror(None)
 
 
 ## main() and its helper functions
@@ -1000,7 +1016,7 @@ def parse():
     parser_show = subparsers.add_parser('show', add_help=False)
     parser_show.add_argument(
         'command',
-        choices=['help', 'all', 'closest', 'highest', 'exact', 'displays'],
+        choices=['help', 'all', 'closest', 'highest', 'current', 'displays'],
         nargs='?',
         default='all'
     )
@@ -1090,7 +1106,7 @@ def usage(command=None):
     ])
 
     information['show'] = '\n'.join([
-        "usage: display_manager.py show {{ help | all | closest | highest | exact }}",
+        "usage: display_manager.py show {{ help | all | closest | highest | current }}",
         "    [-w width] [-h height] [-d depth] [-r refresh]",
         "    [--display display] [--nohidpi]",
         "",
@@ -1100,7 +1116,7 @@ def usage(command=None):
         "    closest     Show the closest matching supported resolution to the specified",
         "                values.",
         "    highest     Show the highest supported resolution.",
-        "    exact       Show the current display configuration.",
+        "    current       Show the current display configuration.",
         "    displays    Just list the current displays and their IDs.",
         "",
         "OPTIONS",
@@ -1240,6 +1256,8 @@ def main():
     # logger = loggers.StreamLogger(name=scriptname, level=loggers.DEBUG)
 
     # loggers.debug("{0} started".format(scriptname))
+
+    getIOKit()
 
     if args.subcommand == 'set':
         setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)

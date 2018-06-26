@@ -5,9 +5,9 @@ setup(
     name='Display Manager',
     version=display_manager.attributes['version'],
     url='https://github.com/univ-of-utah-marriott-library-apple/display_manager',
-    author='Pierce Darragh, Marriott Library IT Services',
+    author='Adam Davies, Marriott Library IT Services',
     author_email='mlib-its-mac-github@lists.utah.edu',
-    description=('A handy command-line utility to manipulate your Mac\'s display settings.'),
+    description=('A command-line utility to manipulate your Mac\'s display settings.'),
     license='MIT',
     scripts=['display_manager.py'],
     classifiers=[
