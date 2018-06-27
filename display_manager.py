@@ -46,8 +46,7 @@ class Display(object):
         :return: Brightness of this display, from 0 to 1.
         """
         service = self.servicePort
-        (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0,
-                                                                          iokit["kDisplayBrightness"], None)
+        (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0, iokit["kDisplayBrightness"], None)
         if error:
             return None
         else:
@@ -249,6 +248,7 @@ def getIOKit():
             ("kIODisplayNoProductName", b"I"),
             ("kIOMasterPortDefault", b"I"),
             ("kIODisplayBrightnessKey", b"*"),
+            ("kIODisplayOverscanKey", b"*"),
             ("kDisplayVendorID", b"*"),
             ("kDisplayProductID", b"*"),
             ("kDisplaySerialNumber", b"*")
@@ -256,7 +256,8 @@ def getIOKit():
 
         # Load functions from IOKit into the global namespace
         objc.loadBundleFunctions(iokitBundle, iokit, functions)
-        objc.loadBundleVariables(iokitBundle, globals(), variables)  # bridge won't put straight into iokit, so globals()
+        # Bridge won't put straight into iokit, so globals()
+        objc.loadBundleVariables(iokitBundle, globals(), variables)
         # Move only the desired variables into iokit
         for var in variables:
             key = "{}".format(var[0])
@@ -264,9 +265,6 @@ def getIOKit():
                 iokit[key] = globals()[key]
 
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
-        iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
-
-        return iokit
 
 
 def getHidpiValue(no_hidpi, only_hidpi):
@@ -500,13 +498,13 @@ def underscanHandler(command, underscan=1, displayID=getMainDisplayID()):
 
     if command == "show":
         for display in getAllDisplays():
-            (error, display_underscan) = iokit["IODisplayGetFloatParameter"](display.servicePort, 0,
-                                                                             iokit["kDisplayUnderscan"], None)
+            (error, underscan) = iokit["IODisplayGetFloatParameter"](
+                display.servicePort, 0, iokit["kDisplayUnderscan"], None)
             if error:
                 print("Failed to get underscan value of display {}; error {}".format(display.displayID, error))
                 continue
             print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
-            print("    {:.2f}%".format(display_underscan * 100))
+            print("    {:.2f}%".format(underscan * 100))
 
     elif command == "set":
         error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
