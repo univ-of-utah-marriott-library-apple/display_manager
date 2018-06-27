@@ -50,7 +50,7 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 * Greater compatibility
    * Python is not a compiled language, so any potential architecture changes in the future won't affect it
 * Better readability
-   * For those not well-versed in C-style languages, Python can be easier to read through and modify
+   * For those not well-versed in C-style languages, Python can be easier to read through (and modify, if necessary)
 * More features
    * We support all the features of SetDisplay
    * Plans for additional features (AirPlay configuration, HDMI underscan settings, etc.)
@@ -95,6 +95,15 @@ The `set` command is used to change the current configuration on a display or ac
 $ display_manager.py set highest
 ```
 
+* Set the display to an exact specification:
+```
+$ display_manager.py set -w 1024 -h 768 -d 32 -r 70
+```
+or
+```
+$ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
+```
+
 * Set the display to the closest value to what you want:
 ```
 $ display_manager.py set closest -w 1024 -h 768 -d 32 -r 70
@@ -133,8 +142,7 @@ Use the `show` command to learn more about the supported display configurations 
 * Show the highest supported configuration:
 ```
 $ display_manager.py show highest
-Display: 478176570 (Main Display)
-    1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
+resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
 ```
 
 * Show all connected displays and their identifiers:
@@ -159,18 +167,13 @@ The `mirroring` command is used to configure display mirroring.
 | Option                        | Purpose                                               |
 |-------------------------------|-------------------------------------------------------|
 | `--display display`           | Change mirroring settings *for* display `display`.    |
-| `--mirror-of-display display` | Set the display to become a mirror of `display`.      |
+| `--mirror display`            | Set the display to become a mirror of `display`.      |
 
 #### Examples
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ display_manager.py mirroring enable --display 478176723 --mirror-of-display 478176570
-```
-
-* Set all connected displays that aren't the main display to mirror the main display:
-```
-$ display_manager.py mirroring enable
+$ display_manager.py mirroring enable --display 478176723 --mirror 478176570
 ```
 
 * Stop mirroring:
