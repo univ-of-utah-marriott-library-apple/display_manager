@@ -10,7 +10,7 @@ A command-line utility which can modify your Mac's display settings.
 * [Install](#install) - instructions for installing Display Manager
 * [Uninstall](#uninstall) - removal of Display Manager
 * [Purpose](#purpose) - why does this script exist?
-* [Usage](#usage)
+* [Usage](#help)
    * [Set](#set) - set the configuration
    * [Show](#show) - look at available configurations
    * [Mirroring](#mirroring) - configure mirroring
@@ -65,7 +65,7 @@ $ display_manager.py { help | set | show | mirroring | brightness | rotate }
 
 The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
 
-The other commands each have their own usage instructions, which are detailed below.
+The other commands each have their own help instructions, which are detailed below.
 
 ### Set
 
@@ -73,7 +73,7 @@ The `set` command is used to change the current configuration on a display or ac
 
 | Subcommand | Purpose                                                                                      |
 |------------|----------------------------------------------------------------------------------------------|
-| `help`     | Prints the usage instructions.                                                               |
+| `help`     | Prints the help instructions.                                                               |
 | `closest`  | Set the display to the supported configuration that is closest to the user-supplied values.  |
 | `highest`  | Set the display to the highest supported configuration settings.                             |
 | `exact`    | Set the display to the specified values **if** they form a supported configuration.          |
@@ -120,7 +120,7 @@ Use the `show` command to learn more about the supported display configurations 
 
 | Subcommand    | Purpose                                                                                   |
 |---------------|-------------------------------------------------------------------------------------------|
-| `help`        | Prints the usage instructions.                                                            |
+| `help`        | Prints the help instructions.                                                            |
 | `all`         | Shows all available supported display configuration.                                      |
 | `closest`     | Shows the closest supported configuration to the given values.                            |
 | `highest`     | Shows the highest available supported display configuration.                              |
@@ -160,7 +160,7 @@ The `mirroring` command is used to configure display mirroring.
 
 | Subcommand | Purpose                                                                  |
 |------------|--------------------------------------------------------------------------|
-| `help`     | Prints the usage instructions.                                           |
+| `help`     | Prints the help instructions.                                           |
 | `enable`   | Activate mirroring.                                                      |
 | `disable`  | Deactivate mirroring.                                                    |
 
@@ -187,7 +187,7 @@ You can set the brightness on your display with the `brightness` command (assumi
 
 | Subcommand    | Purpose                                               |
 |---------------|-------------------------------------------------------|
-| `help`        | Prints the usage instructions.                        |
+| `help`        | Prints the help instructions.                        |
 | `show`        | Show the current brightness setting(s).               |
 
 | Option                | Purpose                                       |
@@ -217,7 +217,7 @@ You can view and change your display's orientation with the `rotate` command.
 
 | Subcommand    | Purpose                                               |
 |---------------|-------------------------------------------------------|
-| `help`        | Prints the usage instructions.                        |
+| `help`        | Prints the help instructions.                        |
 | `show`        | Show the current rotation setting(s).                 |
 | `set [value]` | Set display orientation to [value] \(in degrees\).    |
 

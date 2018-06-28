@@ -6,14 +6,13 @@
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness
 
 
-import argparse         # read in command-line execution
-import objc             # access Objective-C functions and variables
-import sys              # exit script with the right codes
-import CoreFoundation   # work with Objective-C data types
-import Quartz           # work with system graphics
+import argparse  # read in command-line execution
+import objc  # access Objective-C functions and variables
+import sys  # exit script with the right codes
+import CoreFoundation  # work with Objective-C data types
+import Quartz  # work with system graphics
 
-
-# Configured for global usage; otherwise, must be re-instantiated each time
+# Configured for global help; otherwise, must be re-instantiated each time
 iokit = None
 
 
@@ -117,6 +116,7 @@ class Display(object):
             depthMatch = mode.depth == depth
             refreshMatch = mode.refresh == refresh
 
+            # todo: look into more cases (i.e. right ratio, wrong width & height
             if widthMatch and heightMatch and depthMatch and refreshMatch:
                 return mode
             elif widthMatch and heightMatch and depthMatch:
@@ -183,25 +183,20 @@ class DisplayMode(object):
                 "--------RRRRRRRRGGGGGGGGBBBBBBBB": 32, "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB": 30}
         self.depth = temp[Quartz.CGDisplayModeCopyPixelEncoding(mode)]
 
-        # Hidpi scalar
-        raw_width = Quartz.CGDisplayModeGetPixelWidth(mode)
-        raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
-        res_width = Quartz.CGDisplayModeGetWidth(mode)
-        res_height = Quartz.CGDisplayModeGetHeight(mode)
-        if raw_width == res_width and raw_height == res_height:
-            self.hidpi = None
-        else:
-            if raw_width / res_width == raw_height / res_height:
-                self.hidpi = raw_width / raw_height
-            else:
-                self.hidpi = None
+        # HiDPI scalar
+        # todo: rename "raw" once I learn whether it's the HiDPI res, or the non-HiDPI, comments included.
+        rawWidth = Quartz.CGDisplayModeGetPixelWidth(mode)
+        rawHeight = Quartz.CGDisplayModeGetPixelHeight(mode)
+        self.hidpi = (rawWidth != self.width and rawHeight != self.height)  # if they're the same, mode is not HiDPI
 
     def __str__(self):
-        return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}".format(**{
-            "width": self.width, "height": self.height, "depth": self.depth, "refresh": self.refresh
+        return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
+            "width": self.width, "height": self.height, "depth": self.depth,
+            "refresh": self.refresh, "hidpi": self.hidpi
         })
 
 
+## Helper functions
 def getIOKit():
     """
     This handles the importing of specific functions and variables from the
@@ -221,7 +216,7 @@ def getIOKit():
             frameworkIdentifier="com.apple.iokit",
             frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
             globals=globals()
-            )
+        )
 
         # The IOKit functions to be retrieved
         functions = [
@@ -267,22 +262,6 @@ def getIOKit():
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
 
 
-def getHidpiValue(no_hidpi, only_hidpi):
-    """
-    :param no_hidpi: Whether to exclude HiDPI modes from the search.
-    :param only_hidpi: Whether to only include HiDPI modes.
-    :return: An integer describing the combination of these.
-    """
-    if no_hidpi and not only_hidpi:
-        return 0
-    elif not no_hidpi and not only_hidpi:
-        return 1
-    elif not no_hidpi and only_hidpi:
-        return 2
-    else:
-        raise ValueError("Error: Cannot require both no HiDPI and only HiDPI. Make up your mind.")
-
-
 def getAllDisplays():
     """
     :return: A list containing all currently-online displays.
@@ -312,7 +291,7 @@ def getAllDisplayIDs():
 
 
 ## Subcommand handlers
-def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=1):
+def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=0):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -331,15 +310,13 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
         refresh = 0
     if displayID is None:
         displayID = getMainDisplayID()
-    if hidpi is None:
-        hidpi = 1
 
     display = Display(displayID)
 
     if command == "closest":
         for element in [width, height]:
             if element is None:
-                usage("set")
+                showHelp("set")
                 print("Must have both width and height for closest setting.")
                 sys.exit(1)
 
@@ -361,7 +338,7 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
             sys.exit(1)
 
 
-def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=1):
+def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=0):
     """
     Handles all the options for the "show" subcommand.
 
@@ -380,38 +357,66 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
         refresh = 0
     if displayID is None:
         displayID = getMainDisplayID()
-    if hidpi is None:
-        hidpi = 1
 
     display = Display(displayID)
+
+    def printHidpi(mode):
+        """
+        Prints only the modes that the user requested.
+        :param mode: The mode to be evaluated (and potentially printed).
+        :return: Whether the mode was printed.
+        """
+        if hidpi == 0:  # display HiDPI and non-HiDPI (default)
+            print("    {}".format(mode))
+            return True
+        elif hidpi == 1 and not mode.hidpi:  # display only non-HiDPI
+            print("    {}".format(mode))
+            return True
+        elif hidpi == 2 and mode.hidpi:  # display only HiDPI
+            print("    {}".format(mode))
+            return True
+        return False
 
     if command == "all":
         for display in getAllDisplays():
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
+            foundMatching = False  # whether we ended up printing a matching mode or not
             for mode in display.allModes:
-                print("    {}".format(mode))
+                if printHidpi(mode):
+                    foundMatching = True
+
+            if not foundMatching:
+                print("    No matching display mode was found. {}".format(
+                    "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
 
     elif command == "closest":
         for element in [width, height]:
             if element is None:
-                usage("show")
+                showHelp("show")
                 print("Must have both width and height for closest matching.")
                 sys.exit(1)
 
         closest = display.closestMode(width, height, depth, refresh)
         if closest:
-            print(closest)
+            if not printHidpi(closest):
+                print("    No matching display mode was found. {}".format(
+                    "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
         else:
-            print("No close match was found.")
+            print("No matching display mode was found.")
 
     elif command == "highest":
-        print(display.highestMode)
+        printHidpi(display.highestMode)
 
     elif command == "current":
         for display in getAllDisplays():
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-            print("    {}".format(display.currentMode))
+
+            if printHidpi(display.currentMode):
+                print("    {}".format(display.currentMode))
+            else:
+                print("    No matching display mode was found. {}".format(
+                    "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
 
     elif command == "displays":
         for display in getAllDisplays():
@@ -544,12 +549,12 @@ def earlyExit():
     """
     # If they don't include enough arguments, show help and exit with error
     if len(sys.argv) < 2:
-        usage()
+        showHelp()
         sys.exit(1)
 
     # Still show help, but do not exit with error
     elif len(sys.argv) == 2 and sys.argv[1] == '--help':
-        usage()
+        showHelp()
         sys.exit(0)
 
 
@@ -578,7 +583,7 @@ def parse():
         'command',
         choices=['help', 'closest', 'highest', 'exact'],
         nargs='?',
-        default='closest'
+        default='exact'
     )
 
     # Subparser for 'show'
@@ -639,9 +644,9 @@ def parse():
     return parser.parse_args(args[1])
 
 
-def usage(command=None):
+def showHelp(command=None):
     """
-    Prints out the usage information.
+    Prints out the help information.
 
     :param command: The subcommand to print information for.
     """
@@ -685,7 +690,7 @@ def usage(command=None):
         "    closest     Show the closest matching supported resolution to the specified",
         "                values.",
         "    highest     Show the highest supported resolution.",
-        "    current       Show the current display configuration.",
+        "    current     Show the current display configuration.",
         "    displays    Just list the current displays and their IDs.",
         "",
         "OPTIONS",
@@ -781,20 +786,33 @@ def main():
 
     # If they used the 'help' subcommand, display that subcommand's help information
     if args.subcommand == 'help':
-        usage(command=args.command)
+        showHelp(command=args.command)
         sys.exit(0)
 
     # Check if they wanted help with the subcommand.
     if args.command == 'help' or args.help:
-        usage(command=args.subcommand)
+        showHelp(command=args.subcommand)
         sys.exit(0)
 
     getIOKit()
-    hidpi = 1
 
     if args.subcommand == 'set':
+        # Either they didn't specify, or they gave contrary instructions. In either case, just show everything.
+        if args.only_hidpi == args.no_hidpi:
+            hidpi = 0
+        elif args.no_hidpi:
+            hidpi = 1
+        elif args.only_hidpi:
+            hidpi = 2
         setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'show':
+        # Either they didn't specify, or they gave contrary instructions. In either case, just show everything.
+        if args.only_hidpi == args.no_hidpi:
+            hidpi = 0  # default: show all
+        elif args.no_hidpi:
+            hidpi = 1  # do not show HiDPI resolutions
+        elif args.only_hidpi:
+            hidpi = 2  # show only HiDPI resolutions
         showHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
     elif args.subcommand == 'brightness':
         brightnessHandler(args.command, args.brightness, args.display)
