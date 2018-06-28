@@ -96,15 +96,16 @@ $ display_manager.py set highest
 ```
 
 * Set the main display to an exact specification:
-```
-$ display_manager.py set -w 1024 -h 768 -d 32 -r 70
-```
-or
+
 ```
 $ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
 ```
 
 * Set the main display to the closest value to what you want:
+```
+$ display_manager.py set -w 1024 -h 768 -d 32 -r 70
+```
+or
 ```
 $ display_manager.py set closest -w 1024 -h 768 -d 32 -r 70
 ```
