@@ -317,6 +317,23 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
 
     display = Display(displayID)
 
+    def isRightHidpi(mode):
+        """
+        :param mode: The mode to be evaluated (and potentially set).
+        :return: Whether the mode fits the HiDPI description specified by the user.
+        """
+        if hidpi == 0:  # fits HiDPI or non-HiDPI (default)
+            return True
+        elif hidpi == 1 and not mode.hidpi:  # fits only non-HiDPI
+            return True
+        elif hidpi == 2 and mode.hidpi:  # fits only HiDPI
+            return True
+        return False
+
+    def printNotFound():
+        print("    No matching display mode was found. {}".format(
+            "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
+
     if command == "closest":
         if width is None or height is None:
             showHelp("set")
@@ -325,19 +342,29 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
 
         closest = display.closestMode(width, height, depth, refresh)
         if closest:
-            display.setMode(closest)
+            if isRightHidpi(closest):
+                display.setMode(closest)
+            else:
+                printNotFound()
         else:
-            print("No close match was found.")
+            print("No close display mode was found.")
 
     elif command == "highest":
-        display.setMode(display.highestMode)
+        if isRightHidpi(display.highestMode):
+            display.setMode(display.highestMode)
+        else:
+            printNotFound()
+            sys.exit(1)
 
     elif command == "exact":
         exact = display.exactMode(width, height, depth, refresh)
         if exact:
-            display.setMode(exact)
+            if isRightHidpi(exact):
+                display.setMode(exact)
+            else:
+                printNotFound()
         else:
-            print("No exact match was found.")
+            print("No matching display mode was found.")
             sys.exit(1)
 
 
@@ -407,7 +434,7 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
             if not printHidpi(closest):
                 printNotFound()
         else:
-            print("No matching display mode was found.")
+            print("No close display mode was found.")
 
     elif command == "highest":
         if not printHidpi(display.highestMode):
@@ -587,7 +614,7 @@ def parse():
         'command',
         choices=['help', 'closest', 'highest', 'exact'],
         nargs='?',
-        default='exact'
+        default='closest'
     )
 
     # Subparser for 'show'
