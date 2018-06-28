@@ -16,8 +16,8 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="613" column="24" selection-start-line="613" selection-start-column="24" selection-end-line="613" selection-end-column="24" />
+            <state relative-caret-position="2258">
+              <caret line="333" column="23" lean-forward="true" selection-start-line="333" selection-start-column="23" selection-end-line="333" selection-end-column="23" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#509#525#1" />
@@ -31,17 +31,12 @@
                 <element signature="e#1150#1216#1" />
                 <element signature="e#1405#1685#0" />
                 <element signature="e#1405#1508#1" />
-                <element signature="e#1728#2046#0" />
-                <element signature="e#1728#1770#2" />
-                <element signature="e#1920#1990#0" />
                 <element signature="e#2558#4540#0" />
                 <element signature="e#2645#2687#1" />
                 <element signature="e#2130#2329#0" />
                 <element signature="e#2130#2267#1" />
                 <element signature="e#2169#2298#0" />
-                <element signature="e#1753#2693#0" />
                 <element signature="e#1410#1547#2" />
-                <element signature="e#2110#2560#0" />
                 <element signature="e#6039#7791#0" />
                 <element signature="e#6025#6101#1" />
                 <element signature="e#6531#6625#0" />
@@ -218,7 +213,6 @@
       <find>ioservice</find>
       <find>getHidpiValue(</find>
       <find>[a-zA-Z]_[a-zA-Z]* =</find>
-      <find>todo</find>
       <find>def</find>
       <find>def</find>
       <find>#.*hidpi</find>
@@ -231,6 +225,7 @@
       <find>_.*=</find>
       <find>exit\(1</find>
       <find>for .* in \[</find>
+      <find>todo</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -369,17 +364,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
@@ -561,17 +551,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
@@ -753,17 +738,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
@@ -945,17 +925,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
@@ -1123,17 +1098,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
@@ -1232,17 +1202,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
@@ -1453,6 +1418,9 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/copypasta.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -1463,13 +1431,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="613" column="24" selection-start-line="613" selection-start-column="24" selection-end-line="613" selection-end-column="24" />
+        <state relative-caret-position="2258">
+          <caret line="333" column="23" lean-forward="true" selection-start-line="333" selection-start-column="23" selection-end-line="333" selection-end-column="23" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#509#525#1" />
@@ -1483,17 +1448,12 @@
             <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
-            <element signature="e#1728#2046#0" />
-            <element signature="e#1728#1770#2" />
-            <element signature="e#1920#1990#0" />
             <element signature="e#2558#4540#0" />
             <element signature="e#2645#2687#1" />
             <element signature="e#2130#2329#0" />
             <element signature="e#2130#2267#1" />
             <element signature="e#2169#2298#0" />
-            <element signature="e#1753#2693#0" />
             <element signature="e#1410#1547#2" />
-            <element signature="e#2110#2560#0" />
             <element signature="e#6039#7791#0" />
             <element signature="e#6025#6101#1" />
             <element signature="e#6531#6625#0" />
