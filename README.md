@@ -90,12 +90,12 @@ The `set` command is used to change the current configuration on a display or ac
 
 #### Examples
 
-* Set the display to its highest supported configuration:
+* Set the main display to its highest supported configuration:
 ```
 $ display_manager.py set highest
 ```
 
-* Set the display to an exact specification:
+* Set the main display to an exact specification:
 ```
 $ display_manager.py set -w 1024 -h 768 -d 32 -r 70
 ```
@@ -104,7 +104,7 @@ or
 $ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
 ```
 
-* Set the display to the closest value to what you want:
+* Set the main display to the closest value to what you want:
 ```
 $ display_manager.py set closest -w 1024 -h 768 -d 32 -r 70
 ```
@@ -133,13 +133,13 @@ Use the `show` command to learn more about the supported display configurations 
 | `-h height`, `--height height`    | Resolution height.                                                    |
 | `-d depth`, `--depth depth`       | Color depth.                                                          |
 | `-r refresh`, `--refresh refresh` | Refresh rate (in Hz).                                                 |
-| `--display display`               | Only change settings for the display with identifier `display`.       |
+| `--display display`               | Only show display modes for the display with identifier `display`.    |
 | `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
 | `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
 
 #### Examples
 
-* Show the highest supported configuration:
+* Show the main display's highest supported configuration:
 ```
 $ display_manager.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
