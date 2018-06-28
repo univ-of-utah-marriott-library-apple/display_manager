@@ -116,7 +116,7 @@ class Display(object):
         """
         return Quartz.CGDisplayIOServicePort(self.displayID)
 
-    def exactMode(self, width, height, depth=32, refresh=0):
+    def exactMode(self, width, height, depth=32, refresh=0, hidpi=0):
         """
         :param width: Desired width
         :param height: Desired height
@@ -125,7 +125,10 @@ class Display(object):
         :return: The Quartz "DisplayMode" interface matching the description, if it exists; otherwise, None.
         """
         for mode in self.allModes:
-            if mode.width == width and mode.height == height and mode.depth == depth and mode.refresh == refresh:
+            if (
+                    mode.width == width and mode.height == height and mode.depth == depth and
+                    mode.refresh == refresh and self.rightHidpi(mode, hidpi)
+            ):
                 return mode
         return None
 
@@ -387,7 +390,7 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
             sys.exit(1)
 
     elif command == "exact":
-        exact = display.exactMode(width, height, depth, refresh)
+        exact = display.exactMode(width, height, depth, refresh, hidpi)
         if exact:
             display.setMode(exact)
         else:

@@ -16,8 +16,8 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="50">
-              <caret line="417" column="32" selection-start-line="417" selection-start-column="32" selection-end-line="417" selection-end-column="32" />
+            <state relative-caret-position="363">
+              <caret line="128" column="93" selection-start-line="128" selection-start-column="93" selection-end-line="128" selection-end-column="93" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#6442#8051#0" />
@@ -1356,8 +1356,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="50">
-          <caret line="417" column="32" selection-start-line="417" selection-start-column="32" selection-end-line="417" selection-end-column="32" />
+        <state relative-caret-position="363">
+          <caret line="128" column="93" selection-start-line="128" selection-start-column="93" selection-end-line="128" selection-end-column="93" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#6442#8051#0" />
