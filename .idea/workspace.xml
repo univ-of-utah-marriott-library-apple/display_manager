@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/copypasta.py" beforeDir="false" afterPath="$PROJECT_DIR$/copypasta.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,8 +16,8 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2258">
-              <caret line="333" column="23" lean-forward="true" selection-start-line="333" selection-start-column="23" selection-end-line="333" selection-end-column="23" />
+            <state relative-caret-position="5985">
+              <caret line="681" column="9" selection-start-line="681" selection-start-column="9" selection-end-line="681" selection-end-column="9" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#509#525#1" />
@@ -27,8 +27,6 @@
                 <element signature="e#949#991#1" />
                 <element signature="e#1276#1682#0" />
                 <element signature="e#1189#1231#1" />
-                <element signature="e#1143#1238#0" />
-                <element signature="e#1150#1216#1" />
                 <element signature="e#1405#1685#0" />
                 <element signature="e#1405#1508#1" />
                 <element signature="e#2558#4540#0" />
@@ -85,17 +83,6 @@
                 <element signature="e#40450#40547#1" />
                 <element signature="e#40658#40685#0" />
                 <element signature="e#40802#40829#0" />
-                <element signature="e#43007#48896#0" />
-                <element signature="e#23225#23335#1" />
-                <element signature="e#44475#45648#0" />
-                <element signature="e#45719#46901#0" />
-                <element signature="e#46978#47470#0" />
-                <element signature="e#47543#48015#0" />
-                <element signature="e#47553#47633#0" />
-                <element signature="e#48091#48708#0" />
-                <element signature="e#48784#49347#0" />
-                <element signature="e#48176#48896#0" />
-                <element signature="e#49483#50153#0" />
               </folding>
             </state>
           </provider>
@@ -104,8 +91,8 @@
       <file leaf-file-name="copypasta.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/copypasta.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+            <state relative-caret-position="195">
+              <caret line="13" column="1" lean-forward="true" selection-start-line="13" selection-start-column="1" selection-end-line="13" selection-end-column="1" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -196,7 +183,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>getAllDisplayIDs</find>
       <find>getAllModes(</find>
       <find>hidpi</find>
       <find>getHidpiScalar</find>
@@ -226,6 +212,7 @@
       <find>exit\(1</find>
       <find>for .* in \[</find>
       <find>todo</find>
+      <find>highestMode</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -246,8 +233,8 @@
         <option value="$PROJECT_DIR$/temp.py" />
         <option value="$PROJECT_DIR$/help_stuff.py" />
         <option value="$PROJECT_DIR$/setup.py" />
-        <option value="$PROJECT_DIR$/copypasta.py" />
         <option value="$PROJECT_DIR$/display_manager.py" />
+        <option value="$PROJECT_DIR$/copypasta.py" />
       </list>
     </option>
   </component>
@@ -360,8 +347,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -418,17 +403,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>
@@ -547,8 +521,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -605,17 +577,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>
@@ -734,8 +695,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -792,17 +751,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>
@@ -921,8 +869,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -979,17 +925,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>
@@ -1094,8 +1029,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -1152,17 +1085,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>
@@ -1198,8 +1120,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -1256,17 +1176,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>
@@ -1423,8 +1332,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/copypasta.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+        <state relative-caret-position="195">
+          <caret line="13" column="1" lean-forward="true" selection-start-line="13" selection-start-column="1" selection-end-line="13" selection-end-column="1" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -1433,8 +1342,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2258">
-          <caret line="333" column="23" lean-forward="true" selection-start-line="333" selection-start-column="23" selection-end-line="333" selection-end-column="23" />
+        <state relative-caret-position="5985">
+          <caret line="681" column="9" selection-start-line="681" selection-start-column="9" selection-end-line="681" selection-end-column="9" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#509#525#1" />
@@ -1444,8 +1353,6 @@
             <element signature="e#949#991#1" />
             <element signature="e#1276#1682#0" />
             <element signature="e#1189#1231#1" />
-            <element signature="e#1143#1238#0" />
-            <element signature="e#1150#1216#1" />
             <element signature="e#1405#1685#0" />
             <element signature="e#1405#1508#1" />
             <element signature="e#2558#4540#0" />
@@ -1502,17 +1409,6 @@
             <element signature="e#40450#40547#1" />
             <element signature="e#40658#40685#0" />
             <element signature="e#40802#40829#0" />
-            <element signature="e#43007#48896#0" />
-            <element signature="e#23225#23335#1" />
-            <element signature="e#44475#45648#0" />
-            <element signature="e#45719#46901#0" />
-            <element signature="e#46978#47470#0" />
-            <element signature="e#47543#48015#0" />
-            <element signature="e#47553#47633#0" />
-            <element signature="e#48091#48708#0" />
-            <element signature="e#48784#49347#0" />
-            <element signature="e#48176#48896#0" />
-            <element signature="e#49483#50153#0" />
           </folding>
         </state>
       </provider>

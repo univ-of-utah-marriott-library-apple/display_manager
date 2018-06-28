@@ -14,9 +14,13 @@ iokit.IOServiceOpen(Quartz.CGDisplayIOServicePort(Quartz.CGMainDisplayID()),
 #
 #
 
-mode = Quartz.CGDisplayCopyDisplayMode(Quartz.CGMainDisplayID())
+import Quartz
 
-raw_width = Quartz.CGDisplayModeGetPixelWidth(mode)
-raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
-res_width = Quartz.CGDisplayModeGetWidth(mode)
-res_height = Quartz.CGDisplayModeGetHeight(mode)
+modes = Quartz.CGDisplayCopyAllDisplayModes(Quartz.CGMainDisplayID(), None)
+
+for mode in modes:
+    raw_width = Quartz.CGDisplayModeGetPixelWidth(mode)
+    raw_height = Quartz.CGDisplayModeGetPixelHeight(mode)
+    res_width = Quartz.CGDisplayModeGetWidth(mode)
+    res_height = Quartz.CGDisplayModeGetHeight(mode)
+    print(raw_width, raw_height, res_width, res_height)
