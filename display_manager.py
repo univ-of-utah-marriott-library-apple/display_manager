@@ -16,11 +16,12 @@ import Quartz  # work with system graphics
 iokit = None
 
 
-# todo: implement Sam's "Resolution" for use in here and DisplayMode
 class Display(object):
     """
+    Virtual representation of a physical display.
+
     Contains properties regarding display information for a given physical display, along with a few
-    useful helper functions.
+    useful helper functions to configure the display.
     """
 
     def __init__(self, displayID):
@@ -56,6 +57,24 @@ class Display(object):
         else:
             return brightness
 
+    @staticmethod
+    def rightHidpi(mode, hidpi):
+        """
+        Evaluates whether the mode fits the user's HiDPI specification.
+
+        :param mode: The mode to be evaluated.
+        :param hidpi: The desired HiDPI description.
+        :return: Whether the mode fits the HiDPI description specified by the user.
+        """
+        if (
+                (hidpi == 0)  # fits HiDPI or non-HiDPI (default)
+                or (hidpi == 1 and not mode.hidpi)  # fits only non-HiDPI
+                or (hidpi == 2 and mode.hidpi)  # fits only HiDPI
+        ):
+            return True
+        else:
+            return False
+
     @property
     def currentMode(self):
         """
@@ -64,31 +83,31 @@ class Display(object):
         return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
 
     @property
-    def allModes(self):
+    def allModes(self, hidpi=0):
         """
         :return: All possible Quartz "DisplayMode" interfaces for this display.
         """
         modes = []
-        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: Quartz.kCFBooleanTrue}
+        # options forces Quartz to show HiDPI modes
+        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
         for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            modes.append(DisplayMode(mode))
+            if self.rightHidpi(mode, hidpi):
+                modes.append(DisplayMode(mode))
         return modes
 
     def highestMode(self, hidpi=0):
         """
         :return: The Quartz "DisplayMode" interface with the highest display resolution for this display.
         """
-        highest = (None, 0)
+        highest = None
         for mode in self.allModes:
-            if mode.width * mode.height > highest[1]:
-                if (
-                        (hidpi == 0)  # fits HiDPI or non-HiDPI (default)
-                        or (hidpi == 1 and not mode.hidpi)  # fits only non-HiDPI
-                        or (hidpi == 2 and mode.hidpi)  # fits only HiDPI
-                ):
-                    highest = (mode, mode.width * mode.height)
+            if highest:
+                if mode > highest and self.rightHidpi(mode, hidpi):
+                    highest = mode
+            else:
+                highest = mode
 
-        return highest[0]
+        return highest
 
     @property
     def servicePort(self):
@@ -110,7 +129,7 @@ class Display(object):
                 return mode
         return None
 
-    def closestMode(self, width, height, depth=32, refresh=0):
+    def closestMode(self, width, height, depth=32, refresh=0, hidpi=0):
         """
         :param width: Desired width
         :param height: Desired height
@@ -118,6 +137,7 @@ class Display(object):
         :param refresh: Desired refresh rate
         :return: The closest Quartz "DisplayMode" interface possible for this display.
         """
+        whdr = None
         whd = None
         wh = None
 
@@ -126,21 +146,31 @@ class Display(object):
             heightMatch = mode.height == height
             depthMatch = mode.depth == depth
             refreshMatch = mode.refresh == refresh
+            hidpiMatch = self.rightHidpi(mode, hidpi)
 
             # todo: look into more cases (e.g. right ratio, wrong width & height)
-            if widthMatch and heightMatch and depthMatch and refreshMatch:
+            if widthMatch and heightMatch and depthMatch and refreshMatch and hidpiMatch:
                 return mode
+            elif widthMatch and heightMatch and depthMatch and refreshMatch:
+                whdr = mode
             elif widthMatch and heightMatch and depthMatch:
                 whd = mode
             elif widthMatch and heightMatch:
                 wh = mode
 
-        if whd:
-            return whd
-        elif wh:
-            return wh
-        else:
-            return None
+        for match in [whdr, whd, wh]:
+            if match:
+                return match
+
+        # todo: remove deprecated
+        # if whdr:
+        #     return whdr
+        # elif whd:
+        #     return whd
+        # elif wh:
+        #     return wh
+        # else:
+        #     return None
 
     def setMode(self, mode):
         """
@@ -194,17 +224,25 @@ class DisplayMode(object):
                 "--------RRRRRRRRGGGGGGGGBBBBBBBB": 32, "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB": 30}
         self.depth = temp[Quartz.CGDisplayModeCopyPixelEncoding(mode)]
 
-        # HiDPI scalar
-        # todo: rename "raw" once I learn whether it's the HiDPI res, or the non-HiDPI, comments included.
-        rawWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # higher than self.width
-        rawHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # higher than self.height
-        self.hidpi = (rawWidth != self.width and rawHeight != self.height)  # if they're the same, mode is not HiDPI
+        # HiDPI status
+        maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
+        maxHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # the maximum display width for this display
+        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
 
     def __str__(self):
         return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
             "width": self.width, "height": self.height, "depth": self.depth,
             "refresh": self.refresh, "hidpi": self.hidpi
         })
+
+    def __lt__(self, otherDM):
+        return self.width * self.height < otherDM.width * otherDM.height
+
+    def __gt__(self, otherDM):
+        return self.width * self.height > otherDM.width * otherDM.height
+
+    def __eq__(self, otherDM):
+        return self.width * self.height == otherDM.width * otherDM.height
 
 
 ## Helper functions
@@ -324,19 +362,6 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
 
     display = Display(displayID)
 
-    def isRightHidpi(mode):
-        """
-        :param mode: The mode to be evaluated (and potentially set).
-        :return: Whether the mode fits the HiDPI description specified by the user.
-        """
-        if (
-                (hidpi == 0)  # fits HiDPI or non-HiDPI (default)
-                or (hidpi == 1 and not mode.hidpi)  # fits only non-HiDPI
-                or (hidpi == 2 and mode.hidpi)  # fits only HiDPI
-        ):
-            return True
-        return False
-
     def printNotFound():
         print("    No matching display mode was found. {}".format(
             "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
@@ -349,15 +374,13 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
 
         closest = display.closestMode(width, height, depth, refresh)
         if closest:
-            if isRightHidpi(closest):
-                display.setMode(closest)
-            else:
-                printNotFound()
+            display.setMode(closest)
         else:
-            print("No close display mode was found.")
+            printNotFound()
+            sys.exit(1)
 
     elif command == "highest":
-        if isRightHidpi(display.highestMode(hidpi)):
+        if display.highestMode(hidpi):
             display.setMode(display.highestMode(hidpi))
         else:
             printNotFound()
@@ -366,12 +389,9 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
     elif command == "exact":
         exact = display.exactMode(width, height, depth, refresh)
         if exact:
-            if isRightHidpi(exact):
-                display.setMode(exact)
-            else:
-                printNotFound()
+            display.setMode(exact)
         else:
-            print("No matching display mode was found.")
+            printNotFound()
             sys.exit(1)
 
 
@@ -397,21 +417,6 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
 
     display = Display(displayID)
 
-    def printHidpi(mode):
-        """
-        Prints only the modes that the user requested.
-        :param mode: The mode to be evaluated (and potentially printed).
-        :return: Whether the mode was printed.
-        """
-        if (
-                (hidpi == 0)  # fits HiDPI or non-HiDPI (default)
-                or (hidpi == 1 and not mode.hidpi)  # fits only non-HiDPI
-                or (hidpi == 2 and mode.hidpi)  # fits only HiDPI
-        ):
-            print("    {}".format(mode))
-            return True
-        return False
-
     def printNotFound():
         print("    No matching display mode was found. {}".format(
             "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
@@ -421,9 +426,9 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
             foundMatching = False  # whether we ended up printing a matching mode or not
-            for mode in display.allModes:
-                if printHidpi(mode):
-                    foundMatching = True
+            for mode in sorted(display.allModes, reverse=True):
+                print("    {}".format(mode))
+                foundMatching = True
 
             if not foundMatching:
                 printNotFound()
@@ -436,20 +441,22 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
 
         closest = display.closestMode(width, height, depth, refresh)
         if closest:
-            if not printHidpi(closest):
-                printNotFound()
+            print("    {}".format(closest))
         else:
-            print("No close display mode was found.")
+            printNotFound()
 
     elif command == "highest":
-        if not printHidpi(display.highestMode(hidpi)):
+        highest = display.highestMode(hidpi)
+        if highest:
+            print("    {}".format(highest))
+        else:
             printNotFound()
 
     elif command == "current":
         for display in getAllDisplays():
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
-            if printHidpi(display.currentMode):
+            if display.currentMode:
                 print("    {}".format(display.currentMode))
             else:
                 printNotFound()
