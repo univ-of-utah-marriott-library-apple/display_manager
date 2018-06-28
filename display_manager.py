@@ -23,7 +23,11 @@ class Display(object):
     """
 
     def __init__(self, displayID):
-        self.displayID = displayID
+        if displayID in getAllDisplayIDs():
+            self.displayID = displayID
+        else:
+            print("Display {} not found.".format(displayID))
+            sys.exit(1)
 
     @property
     def isMain(self):
@@ -284,10 +288,10 @@ def getAllDisplayIDs():
     :return: A tuple containing all currently-online displays.
         Each object in the tuple is a display identifier (as an integer).
     """
-    (error, online_displays, displays_count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
+    (error, displays, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
     if error:
         raise RuntimeError("Unable to get displays list.")
-    return online_displays
+    return displays
 
 
 ## Subcommand handlers
@@ -301,7 +305,7 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
     :param displayID: Specific display to configure.
-    :param hidpi: Description of HiDPI settings from getHidpiValue().
+    :param hidpi: HiDPI settings.
     """
     # Set defaults if they're not given (defaults in function definition overridden in certain cases)
     if depth is None:
@@ -314,11 +318,10 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
     display = Display(displayID)
 
     if command == "closest":
-        for element in [width, height]:
-            if element is None:
-                showHelp("set")
-                print("Must have both width and height for closest setting.")
-                sys.exit(1)
+        if width is None or height is None:
+            showHelp("set")
+            print("Must have both width and height for closest setting.")
+            sys.exit(1)
 
         closest = display.closestMode(width, height, depth, refresh)
         if closest:
@@ -348,7 +351,7 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
     :param depth: Desired pixel depth.
     :param refresh: Desired refresh rate.
     :param displayID: Specific display to configure.
-    :param hidpi: Description of HiDPI settings from getHidpiValue().
+    :param hidpi: HiDPI settings.
     """
     # Set defaults if they're not given (function definition overridden in certain cases)
     if depth is None:
@@ -377,6 +380,10 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
             return True
         return False
 
+    def printNotFound():
+        print("    No matching display mode was found. {}".format(
+            "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
+
     if command == "all":
         for display in getAllDisplays():
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
@@ -387,26 +394,24 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
                     foundMatching = True
 
             if not foundMatching:
-                print("    No matching display mode was found. {}".format(
-                    "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
+                printNotFound()
 
     elif command == "closest":
-        for element in [width, height]:
-            if element is None:
-                showHelp("show")
-                print("Must have both width and height for closest matching.")
-                sys.exit(1)
+        if width is None or height is None:
+            showHelp("show")
+            print("Must have both width and height for closest matching.")
+            sys.exit(1)
 
         closest = display.closestMode(width, height, depth, refresh)
         if closest:
             if not printHidpi(closest):
-                print("    No matching display mode was found. {}".format(
-                    "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
+                printNotFound()
         else:
             print("No matching display mode was found.")
 
     elif command == "highest":
-        printHidpi(display.highestMode)
+        if not printHidpi(display.highestMode):
+            printNotFound()
 
     elif command == "current":
         for display in getAllDisplays():
@@ -415,8 +420,7 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
             if printHidpi(display.currentMode):
                 print("    {}".format(display.currentMode))
             else:
-                print("    No matching display mode was found. {}".format(
-                    "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
+                printNotFound()
 
     elif command == "displays":
         for display in getAllDisplays():
