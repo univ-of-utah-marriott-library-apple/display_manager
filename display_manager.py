@@ -69,7 +69,8 @@ class Display(object):
         :return: All possible Quartz "DisplayMode" interfaces for this display.
         """
         modes = []
-        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, None):
+        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: Quartz.kCFBooleanTrue}
+        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
             modes.append(DisplayMode(mode))
         return modes
 
