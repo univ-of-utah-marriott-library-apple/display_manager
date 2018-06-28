@@ -124,7 +124,7 @@ Use the `show` command to learn more about the supported display configurations 
 | `all`         | Shows all available supported display configuration.                                      |
 | `closest`     | Shows the closest supported configuration to the given values.                            |
 | `highest`     | Shows the highest available supported display configuration.                              |
-| `exact`       | Shows the current display configuration.                                                  |
+| `current`     | Shows the current display configuration.                                                  |
 | `displays`    | Shows a list of all attached, configurable displays.                                      |
 
 | Option                            | Purpose                                                               |
