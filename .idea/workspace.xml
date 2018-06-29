@@ -2,19 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/main/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/parseWrapper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scriptReader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MANIFEST.in" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/copypasta.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fb-rotate/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fb-rotate/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fb-rotate/fb-rotate.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/help_stuff.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/Display Manager [0.10.0].dmg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev/help_stuff.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev/help_stuff.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/DisplayManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/DisplayManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parseWrapper.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -25,26 +18,17 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="parseWrapper.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/parseWrapper.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="102" column="23" selection-start-line="102" selection-start-column="23" selection-end-line="102" selection-end-column="23" />
-              <folding>
-                <element signature="e#160#170#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main/DisplayManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="525">
-              <caret line="85" column="23" lean-forward="true" selection-start-line="85" selection-start-column="23" selection-end-line="85" selection-end-column="23" />
+            <state relative-caret-position="285">
+              <caret line="335" lean-forward="true" selection-start-line="335" selection-end-line="335" />
               <folding>
                 <element signature="n#!!doc" />
+                <element signature="e#614#7324#0" />
                 <element signature="e#614#831#1" />
+                <element signature="e#876#1049#0" />
+                <element signature="e#977#1049#0" />
                 <element signature="e#1095#1234#0" />
                 <element signature="e#1095#1180#1" />
                 <element signature="e#1282#1413#0" />
@@ -88,6 +72,20 @@
                 <element signature="e#8613#8677#0" />
                 <element signature="e#8718#8782#0" />
                 <element signature="e#8823#8888#0" />
+                <element signature="e#8918#9539#0" />
+                <element signature="e#8918#8989#1" />
+                <element signature="e#9207#9551#0" />
+                <element signature="e#9619#11787#0" />
+                <element signature="e#9570#9624#1" />
+                <element signature="e#9722#9775#0" />
+                <element signature="e#9900#10214#0" />
+                <element signature="e#9923#10023#1" />
+                <element signature="e#10135#10207#0" />
+                <element signature="e#10127#11686#0" />
+                <element signature="e#10127#10179#1" />
+                <element signature="e#10358#10900#0" />
+                <element signature="e#10961#11108#0" />
+                <element signature="e#11163#11311#0" />
                 <element signature="e#11709#14266#0" />
                 <element signature="e#11709#12028#1" />
                 <element signature="e#12072#14266#0" />
@@ -113,7 +111,11 @@
                 <element signature="e#16170#16209#0" />
                 <element signature="e#16248#16430#0" />
                 <element signature="e#16391#16430#0" />
+                <element signature="e#16514#18652#0" />
                 <element signature="e#16514#16860#1" />
+                <element signature="e#16928#17065#0" />
+                <element signature="e#17100#17549#0" />
+                <element signature="e#17145#17549#0" />
                 <element signature="e#17417#17482#0" />
                 <element signature="e#17590#17929#0" />
                 <element signature="e#17638#17753#0" />
@@ -155,7 +157,33 @@
                 <element signature="e#27402#27970#0" />
                 <element signature="e#28058#28758#0" />
                 <element signature="e#28074#28756#0" />
+                <element signature="e#28785#28984#0" />
                 <element signature="e#28785#28884#1" />
+                <element signature="e#28935#28993#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="runDM.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/runDM.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="17" lean-forward="true" selection-end-column="17" />
+              <folding>
+                <element signature="e#160#170#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="scriptReader.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scriptReader.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="13" column="25" lean-forward="true" selection-start-line="13" selection-start-column="25" selection-end-line="13" selection-end-column="25" />
+              <folding>
+                <element signature="e#102#112#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -201,6 +229,7 @@
       <find>allModes</find>
       <find>showhelp</find>
       <find>not found</find>
+      <find>hidpi</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -228,6 +257,7 @@
         <option value="$PROJECT_DIR$/main/__init__.py" />
         <option value="$PROJECT_DIR$/parseWrapper.py" />
         <option value="$PROJECT_DIR$/main/DisplayManager.py" />
+        <option value="$PROJECT_DIR$/scriptReader.py" />
       </list>
     </option>
   </component>
@@ -307,6 +337,7 @@
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1587057" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32884097" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32815966" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
@@ -320,7 +351,6 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32815966" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -328,7 +358,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="25" />
+      <option name="time" value="26" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -337,7 +367,29 @@
         <state relative-caret-position="1305">
           <caret line="87" column="41" lean-forward="true" selection-start-line="87" selection-start-column="41" selection-end-line="87" selection-end-column="41" />
           <folding>
+            <element signature="n#!!doc" />
             <element signature="e#160#170#0" expanded="true" />
+            <element signature="e#243#620#0" />
+            <element signature="e#243#341#1" />
+            <element signature="e#452#485#0" />
+            <element signature="e#587#620#0" />
+            <element signature="e#640#3053#0" />
+            <element signature="e#640#690#1" />
+            <element signature="e#2399#2537#0" />
+            <element signature="e#2631#3014#0" />
+            <element signature="e#3072#5040#0" />
+            <element signature="e#3072#3161#1" />
+            <element signature="e#3359#3412#0" />
+            <element signature="e#3494#3550#0" />
+            <element signature="e#3577#3975#0" />
+            <element signature="e#3643#3909#0" />
+            <element signature="e#3754#3909#0" />
+            <element signature="e#3952#4155#0" />
+            <element signature="e#4200#4403#0" />
+            <element signature="e#4454#4565#0" />
+            <element signature="e#4615#4724#0" />
+            <element signature="e#4774#4889#0" />
+            <element signature="e#4936#5040#0" />
           </folding>
         </state>
       </provider>
@@ -394,13 +446,48 @@
     <entry file="file://$PROJECT_DIR$/main/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/main/DisplayManager.py">
+    <entry file="file://$PROJECT_DIR$/parseWrapper.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="85" column="23" lean-forward="true" selection-start-line="85" selection-start-column="23" selection-end-line="85" selection-end-column="23" />
+        <state relative-caret-position="75">
+          <caret line="8" column="32" lean-forward="true" selection-start-line="8" selection-start-column="32" selection-end-line="8" selection-end-column="32" />
           <folding>
             <element signature="n#!!doc" />
+            <element signature="e#160#170#0" expanded="true" />
+            <element signature="e#243#620#0" />
+            <element signature="e#243#341#1" />
+            <element signature="e#452#485#0" />
+            <element signature="e#587#620#0" />
+            <element signature="e#640#3053#0" />
+            <element signature="e#640#690#1" />
+            <element signature="e#2399#2537#0" />
+            <element signature="e#2631#3014#0" />
+            <element signature="e#3072#5040#0" />
+            <element signature="e#3072#3161#1" />
+            <element signature="e#3359#3412#0" />
+            <element signature="e#3494#3550#0" />
+            <element signature="e#3577#3975#0" />
+            <element signature="e#3643#3909#0" />
+            <element signature="e#3754#3909#0" />
+            <element signature="e#3952#4155#0" />
+            <element signature="e#4200#4403#0" />
+            <element signature="e#4454#4565#0" />
+            <element signature="e#4615#4724#0" />
+            <element signature="e#4774#4889#0" />
+            <element signature="e#4936#5040#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main/DisplayManager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="335" lean-forward="true" selection-start-line="335" selection-end-line="335" />
+          <folding>
+            <element signature="n#!!doc" />
+            <element signature="e#614#7324#0" />
             <element signature="e#614#831#1" />
+            <element signature="e#876#1049#0" />
+            <element signature="e#977#1049#0" />
             <element signature="e#1095#1234#0" />
             <element signature="e#1095#1180#1" />
             <element signature="e#1282#1413#0" />
@@ -444,6 +531,20 @@
             <element signature="e#8613#8677#0" />
             <element signature="e#8718#8782#0" />
             <element signature="e#8823#8888#0" />
+            <element signature="e#8918#9539#0" />
+            <element signature="e#8918#8989#1" />
+            <element signature="e#9207#9551#0" />
+            <element signature="e#9619#11787#0" />
+            <element signature="e#9570#9624#1" />
+            <element signature="e#9722#9775#0" />
+            <element signature="e#9900#10214#0" />
+            <element signature="e#9923#10023#1" />
+            <element signature="e#10135#10207#0" />
+            <element signature="e#10127#11686#0" />
+            <element signature="e#10127#10179#1" />
+            <element signature="e#10358#10900#0" />
+            <element signature="e#10961#11108#0" />
+            <element signature="e#11163#11311#0" />
             <element signature="e#11709#14266#0" />
             <element signature="e#11709#12028#1" />
             <element signature="e#12072#14266#0" />
@@ -469,7 +570,11 @@
             <element signature="e#16170#16209#0" />
             <element signature="e#16248#16430#0" />
             <element signature="e#16391#16430#0" />
+            <element signature="e#16514#18652#0" />
             <element signature="e#16514#16860#1" />
+            <element signature="e#16928#17065#0" />
+            <element signature="e#17100#17549#0" />
+            <element signature="e#17145#17549#0" />
             <element signature="e#17417#17482#0" />
             <element signature="e#17590#17929#0" />
             <element signature="e#17638#17753#0" />
@@ -511,17 +616,29 @@
             <element signature="e#27402#27970#0" />
             <element signature="e#28058#28758#0" />
             <element signature="e#28074#28756#0" />
+            <element signature="e#28785#28984#0" />
             <element signature="e#28785#28884#1" />
+            <element signature="e#28935#28993#0" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/parseWrapper.py">
+    <entry file="file://$PROJECT_DIR$/runDM.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="102" column="23" selection-start-line="102" selection-start-column="23" selection-end-line="102" selection-end-column="23" />
+        <state>
+          <caret column="17" lean-forward="true" selection-end-column="17" />
           <folding>
             <element signature="e#160#170#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scriptReader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="25" lean-forward="true" selection-start-line="13" selection-start-column="25" selection-end-line="13" selection-end-column="25" />
+          <folding>
+            <element signature="e#102#112#0" expanded="true" />
           </folding>
         </state>
       </provider>

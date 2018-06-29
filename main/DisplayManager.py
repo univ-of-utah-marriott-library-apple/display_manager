@@ -34,7 +34,7 @@ class Display(object):
     @property
     def isMain(self):
         """
-        :return: Boolean for whether this display is the main display
+        :return: Boolean for whether this display is the run display
         """
         return Quartz.CGDisplayIsMain(self.displayID)
 
@@ -315,24 +315,24 @@ class Commands(object):
                 mirroring.append(command)
 
         for command in set:
-            setHandler(command.command, command.width, command.height, command.depth, command.refresh,
-                       command.displayID, command.hidpi)
+            handleSet(command.command, command.width, command.height, command.depth, command.refresh,
+                      command.displayID, command.hidpi)
 
         for command in show:
-            showHandler(command.command, command.width, command.height, command.depth, command.refresh,
+            handleShow(command.command, command.width, command.height, command.depth, command.refresh,
                        command.displayID, command.hidpi)
 
         for command in brightness:
-            brightnessHandler(command.command, command.brightness, command.displayID)
+            handleBrightness(command.command, command.brightness, command.displayID)
 
         for command in rotate:
-            rotateHandler(command.command, command.angle, command.displayID)
+            handleRotate(command.command, command.angle, command.displayID)
 
         for command in underscan:
-            underscanHandler(command.command, command.underscan, command.displayID)
+            handleUnderscan(command.command, command.underscan, command.displayID)
 
         for command in mirroring:
-            brightnessHandler(command.command, command.displayID, command.mirrorDisplayID)
+            handleBrightness(command.command, command.displayID, command.mirrorDisplayID)
 
 
 def getIOKit():
@@ -412,7 +412,7 @@ def getAllDisplays():
 
 def getMainDisplayID():
     """
-    :return: DisplayID of the main display
+    :return: DisplayID of the run display
     """
     return Quartz.CGMainDisplayID()
 
@@ -428,7 +428,7 @@ def getAllDisplayIDs():
     return displays
 
 
-def setHandler(command, width, height, depth, refresh, displayID, hidpi=0):
+def handleSet(command, width, height, depth, refresh, displayID, hidpi=0):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -476,7 +476,7 @@ def setHandler(command, width, height, depth, refresh, displayID, hidpi=0):
             sys.exit(1)
 
 
-def showHandler(command, width, height, depth, refresh, displayID, hidpi=0):
+def handleShow(command, width, height, depth, refresh, displayID, hidpi=0):
     """
     Handles all the options for the "show" subcommand.
 
@@ -540,7 +540,7 @@ def showHandler(command, width, height, depth, refresh, displayID, hidpi=0):
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
 
-def brightnessHandler(command, brightness, displayID):
+def handleBrightness(command, brightness, displayID):
     """
     Handles all the options for the "brightness" subcommand.
 
@@ -567,7 +567,7 @@ def brightnessHandler(command, brightness, displayID):
                   "If this is an external display, try setting manually on device hardware.")
 
 
-def rotateHandler(command, angle, displayID):
+def handleRotate(command, angle, displayID):
     """
     Handles all the options for the "rotation" subcommand.
 
@@ -596,7 +596,7 @@ def rotateHandler(command, angle, displayID):
         iokit["IOServiceRequestProbe"](display.servicePort, options)
 
 
-def underscanHandler(command, underscan, displayID):
+def handleUnderscan(command, underscan, displayID):
     """
     Handles all the options for the "underscan" subcommand.
 
@@ -624,7 +624,7 @@ def underscanHandler(command, underscan, displayID):
         print("    {:.2f}%".format(underscan * 100))
 
 
-def mirroringHandler(command, displayID, mirrorDisplayID):
+def handleMirroring(command, displayID, mirrorDisplayID):
     """
     Handles all the options for the "mirroring" subcommand.
 
@@ -672,7 +672,7 @@ def showHelp(command=None):
         "    -h height           Resolution height.",
         "    -d depth            Pixel color depth (default: 32).",
         "    -r refresh          Refresh rate (default: 0).",
-        "    --display display   Specify a particular display (default: main display).",
+        "    --display display   Specify a particular display (default: run display).",
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
@@ -697,7 +697,7 @@ def showHelp(command=None):
         "    -h height           Resolution height.",
         "    -d depth            Pixel color depth (default: 32).",
         "    -r refresh          Refresh rate (default: 32).",
-        "    --display display   Specify a particular display (default: main display).",
+        "    --display display   Specify a particular display (default: run display).",
         "    --no-hidpi          Don't show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
@@ -713,7 +713,7 @@ def showHelp(command=None):
         "    set [value] Sets the brightness to the given value. Must be between 0 and 1.",
         "",
         "OPTIONS",
-        "    --display display   Specify a particular display (default: main display).",
+        "    --display display   Specify a particular display (default: run display).",
         "",
     ])
 
@@ -726,7 +726,7 @@ def showHelp(command=None):
         "    set [value] Set the rotation to the given value (in degrees). Must be a multiple of 90.",
         "",
         "OPTIONS",
-        "    --display display   Specify a particular display (default: main display).",
+        "    --display display   Specify a particular display (default: run display).",
         ""
     ])
 
@@ -757,7 +757,7 @@ def showHelp(command=None):
         "",
         "OPTIONS",
         "    --display display               Change mirroring settings for 'display'.",
-        "    --mirror display                Set the display to mirror 'display' (default: main display).",
+        "    --mirror display                Set the display to mirror 'display' (default: run display).",
         "",
     ])
 
@@ -779,7 +779,7 @@ def showHelp(command=None):
         ]))
 
 
-def main(commands):
+def run(commands):
     """
     Called to execute commands.
     :param commands: What commands have been requested?

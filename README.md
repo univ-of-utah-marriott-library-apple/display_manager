@@ -90,18 +90,18 @@ The `set` command is used to change the current configuration on a display or ac
 
 #### Examples
 
-* Set the main display to its highest supported configuration:
+* Set the run display to its highest supported configuration:
 ```
 $ display_manager.py set highest
 ```
 
-* Set the main display to an exact specification:
+* Set the run display to an exact specification:
 
 ```
 $ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
 ```
 
-* Set the main display to the closest value to what you want:
+* Set the run display to the closest value to what you want:
 ```
 $ display_manager.py set -w 1024 -h 768 -d 32 -r 70
 ```
@@ -140,7 +140,7 @@ Use the `show` command to learn more about the supported display configurations 
 
 #### Examples
 
-* Show the main display's highest supported configuration:
+* Show the run display's highest supported configuration:
 ```
 $ display_manager.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
@@ -202,7 +202,7 @@ You can set the brightness on your display with the `brightness` command (assumi
 $ display_manager.py brightness show
 ```
 
-* Set the brightness of the main display to its maximum brightness:
+* Set the brightness of the run display to its maximum brightness:
 ```
 $ display_manager.py brightness set .4
 ```
@@ -233,7 +233,7 @@ You can view and change your display's orientation with the `rotate` command.
 $ display_manager.py rotate show
 ```
 
-* Rotate the main display by 90 degrees (counter-clockwise):
+* Rotate the run display by 90 degrees (counter-clockwise):
 ```
 $ display_manager.py rotate set 90
 ```

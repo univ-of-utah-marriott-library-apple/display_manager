@@ -1,4 +1,4 @@
-#!/usr/bin/python
+q
 
 # This script allows users to access the DisplayManager program through the command line.
 # Passes command parameters into DisplayManager.
@@ -84,7 +84,7 @@ def main():
     earlyExit()  # exits if the user didn't give enough information, or just wanted help
     args = parse()  # returns parsed args
 
-    if args.subcommand == 'help':  # main help (default)
+    if args.subcommand == 'help':  # run help (default)
         dm.showHelp(command=args.command)
         sys.exit(0)
 
@@ -105,23 +105,23 @@ def main():
     if args.subcommand == 'set':
         command = dm.Command(args.command, args.subcommand, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
-        dm.main(command)
+        dm.run(command)
     elif args.subcommand == 'show':
         command = dm.Command(args.command, args.subcommand, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
-        dm.main(command)
+        dm.run(command)
     elif args.subcommand == 'brightness':
         command = dm.Command(args.command, args.subcommand, brightness=args.brightness, displayID=args.display)
-        dm.main(command)
+        dm.run(command)
     elif args.subcommand == 'underscan':
         command = dm.Command(args.command, args.subcommand, underscan=args.underscan, displayID=args.display)
-        dm.main(command)
+        dm.run(command)
     elif args.subcommand == 'mirroring':
         command = dm.Command(args.command, args.subcommand, displayID=args.brightness, mirrorDisplayID=args.mirror)
-        dm.main(command)
+        dm.run(command)
     elif args.subcommand == 'rotate':
         command = dm.Command(args.command, args.subcommand, angle=args.rotation, displayID=args.display)
-        dm.main(command)
+        dm.run(command)
 
 
 if __name__ == '__main__':

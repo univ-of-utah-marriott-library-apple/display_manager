@@ -123,7 +123,7 @@ class Display(object):
     def isMain(self):
         '''x.isMain() <==> Quartz.CGDisplayIsMain(x.id)
 
-        Returns Boolean value indicating whether display is the main 
+        Returns Boolean value indicating whether display is the run
         display.
         '''
         return Quartz.CGDisplayIsMain(self.id)
@@ -326,7 +326,7 @@ def getAllDisplays(id, dupLowRes=True, returnUnusable=True):
 
 
 def getMainDisplayID():
-    '''return display id of main display
+    '''return display id of run display
     '''
     return Quartz.CGMainDisplayID()
 
