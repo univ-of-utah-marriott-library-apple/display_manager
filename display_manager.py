@@ -383,8 +383,9 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
             sys.exit(1)
 
     elif command == "highest":
-        if display.highestMode(hidpi):
-            display.setMode(display.highestMode(hidpi))
+        highest = display.highestMode(hidpi)
+        if highest:
+            display.setMode(highest)
         else:
             printNotFound()
             sys.exit(1)
@@ -459,8 +460,9 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
         for display in getAllDisplays():
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
-            if display.currentMode:
-                print("    {}".format(display.currentMode))
+            current = display.currentMode
+            if current:
+                print("    {}".format(current))
             else:
                 printNotFound()
 
