@@ -2,17 +2,17 @@
 
 # Display Manager, version 1.0.0
 
-# Programmatically manages Mac displays
-# Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness
+# Programmatically manages Mac displays.
+# Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness.
 
 
-import argparse  # read in command-line execution
-import objc  # access Objective-C functions and variables
-import sys  # exit script with the right codes
-import CoreFoundation  # work with Objective-C data types
-import Quartz  # work with system graphics
+import argparse         # read in command-line execution
+import objc             # access Objective-C functions and variables
+import sys              # exit script with the right codes
+import CoreFoundation   # work with Objective-C data types
+import Quartz           # work with system graphics
 
-# Configured for global help; otherwise, must be re-instantiated each time
+# Configured for global usage; otherwise, must be re-instantiated each time it is called
 iokit = None
 
 
@@ -248,7 +248,93 @@ class DisplayMode(object):
         return self.width * self.height == otherDM.width * otherDM.height
 
 
-## Helper functions
+class Command(object):
+    """
+    Represents a user-requested command to Display Manager.
+    """
+
+    def __init__(self, command, subcommand, width=None, height=None, depth=None, refresh=None, displayID=None,
+                 hidpi=None, brightness=None, angle=None, underscan=None, mirrorDisplayID=None):
+        self.command = command
+        self.subcommand = subcommand
+        self.width = width
+        self.height = height
+        self.depth = depth
+        self.refresh = refresh
+        self.displayID = displayID
+        self.hidpi = hidpi
+        self.brightness = brightness
+        self.angle = angle
+        self.underscan = underscan
+        self.mirrorDisplayID = mirrorDisplayID
+
+
+class Commands(object):
+    """
+    Holds one or more "Command" instances.
+    """
+
+    def __init__(self, commands=None):
+        self.commands = []
+        self.addCommands(commands)
+
+    def addCommands(self, commands):
+        """
+        Adds Command(s) to the list.
+        :param commands: The Command(s) to add.
+        """
+        if type(commands) == Command:
+            self.commands.append(commands)
+        elif type(commands) == Commands:
+            for command in commands.commands:
+                self.commands.append(command)
+
+    def run(self):
+        """
+        Run all the Commands stored.
+        """
+        set = []
+        show = []
+        brightness = []
+        rotate = []
+        underscan = []
+        mirroring = []
+
+        for command in self.commands:
+            if command.subcommand == "set":
+                set.append(command)
+            elif command.subcommand == "show":
+                show.append(command)
+            elif command.subcommand == "brightness":
+                brightness.append(command)
+            elif command.subcommand == "rotate":
+                rotate.append(command)
+            elif command.subcommand == "underscan":
+                underscan.append(underscan)
+            elif command.subcommand == "mirroring":
+                mirroring.append(command)
+
+        for command in set:
+            setHandler(command.command, command.width, command.height, command.depth, command.refresh,
+                       command.displayID, command.hidpi)
+
+        for command in show:
+            showHandler(command.command, command.width, command.height, command.depth, command.refresh,
+                       command.displayID, command.hidpi)
+
+        for command in brightness:
+            brightnessHandler(command.command, command.brightness, command.displayID)
+
+        for command in rotate:
+            rotateHandler(command.command, command.angle, command.displayID)
+
+        for command in underscan:
+            underscanHandler(command.command, command.underscan, command.displayID)
+
+        for command in mirroring:
+            brightnessHandler(command.command, command.displayID, command.mirrorDisplayID)
+
+
 def getIOKit():
     """
     This handles the importing of specific functions and variables from the
@@ -342,8 +428,7 @@ def getAllDisplayIDs():
     return displays
 
 
-## Subcommand handlers
-def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=0):
+def setHandler(command, width, height, depth, refresh, displayID, hidpi=0):
     """
     Handles all of the options for the "set" subcommand.
 
@@ -355,14 +440,6 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
     :param displayID: Specific display to configure.
     :param hidpi: HiDPI settings.
     """
-    # Set defaults if they're not given (defaults in function definition overridden in certain cases)
-    if depth is None:
-        depth = 32
-    if refresh is None:
-        refresh = 0
-    if displayID is None:
-        displayID = getMainDisplayID()
-
     display = Display(displayID)
 
     def printNotFound():
@@ -399,7 +476,7 @@ def setHandler(command, width, height, depth=32, refresh=0, displayID=getMainDis
             sys.exit(1)
 
 
-def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDisplayID(), hidpi=0):
+def showHandler(command, width, height, depth, refresh, displayID, hidpi=0):
     """
     Handles all the options for the "show" subcommand.
 
@@ -411,14 +488,6 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
     :param displayID: Specific display to configure.
     :param hidpi: HiDPI settings.
     """
-    # Set defaults if they're not given (function definition overridden in certain cases)
-    if depth is None:
-        depth = 32
-    if refresh is None:
-        refresh = 0
-    if displayID is None:
-        displayID = getMainDisplayID()
-
     display = Display(displayID)
 
     def printNotFound():
@@ -471,7 +540,7 @@ def showHandler(command, width, height, depth=32, refresh=0, displayID=getMainDi
             print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
 
-def brightnessHandler(command, brightness=1, displayID=getMainDisplayID()):
+def brightnessHandler(command, brightness, displayID):
     """
     Handles all the options for the "brightness" subcommand.
 
@@ -479,10 +548,6 @@ def brightnessHandler(command, brightness=1, displayID=getMainDisplayID()):
     :param brightness: The level of brightness to change to.
     :param displayID: Specific display to configure.
     """
-    # Set defaults if they're not given (function definition overridden in certain cases)
-    if displayID is None:
-        displayID = getMainDisplayID()
-
     display = Display(displayID)
 
     if command == "show":
@@ -502,7 +567,7 @@ def brightnessHandler(command, brightness=1, displayID=getMainDisplayID()):
                   "If this is an external display, try setting manually on device hardware.")
 
 
-def rotateHandler(command, angle=0, displayID=getMainDisplayID()):
+def rotateHandler(command, angle, displayID):
     """
     Handles all the options for the "rotation" subcommand.
 
@@ -510,10 +575,6 @@ def rotateHandler(command, angle=0, displayID=getMainDisplayID()):
     :param angle: The display to configure rotation on.
     :param displayID: The display to configure rotation on.
     """
-    # Set defaults if they're not given (function definition overridden in certain cases)
-    if displayID is None:
-        displayID = getMainDisplayID()
-
     display = Display(displayID)
 
     if command == "show":
@@ -535,7 +596,7 @@ def rotateHandler(command, angle=0, displayID=getMainDisplayID()):
         iokit["IOServiceRequestProbe"](display.servicePort, options)
 
 
-def underscanHandler(command, underscan=1, displayID=getMainDisplayID()):
+def underscanHandler(command, underscan, displayID):
     """
     Handles all the options for the "underscan" subcommand.
 
@@ -543,10 +604,6 @@ def underscanHandler(command, underscan=1, displayID=getMainDisplayID()):
     :param underscan: The value to set on the underscan slider.
     :param displayID: Specific display to configure.
     """
-    # Set defaults if they're not given (function definition overridden in certain cases)
-    if displayID is None:
-        displayID = getMainDisplayID()
-
     display = Display(displayID)
 
     if command == "show":
@@ -567,7 +624,7 @@ def underscanHandler(command, underscan=1, displayID=getMainDisplayID()):
         print("    {:.2f}%".format(underscan * 100))
 
 
-def mirroringHandler(command, displayID, mirrorDisplayID=getMainDisplayID()):
+def mirroringHandler(command, displayID, mirrorDisplayID):
     """
     Handles all the options for the "mirroring" subcommand.
 
@@ -575,10 +632,6 @@ def mirroringHandler(command, displayID, mirrorDisplayID=getMainDisplayID()):
     :param displayID: The display to configure mirroring on.
     :param mirrorDisplayID: The display to become a mirror of.
     """
-    # Set defaults if they're not given (function definition overridden in certain cases)
-    if mirrorDisplayID is None:
-        mirrorDisplayID = getMainDisplayID()
-
     mirrorDisplay = Display(mirrorDisplayID)
     display = Display(displayID)
 
@@ -588,108 +641,6 @@ def mirroringHandler(command, displayID, mirrorDisplayID=getMainDisplayID()):
     if command == "disable":
         for display in getAllDisplays():
             display.setMirror(None)
-
-
-## main() and its helper functions
-def earlyExit():
-    """
-    Exits early in specific cases; exit return value sensitive to specific conditions
-    """
-    # If they don't include enough arguments, show help and exit with error
-    if len(sys.argv) < 2:
-        showHelp()
-        sys.exit(1)
-
-    # Still show help, but do not exit with error
-    elif len(sys.argv) == 2 and sys.argv[1] == '--help':
-        showHelp()
-        sys.exit(0)
-
-
-def parse():
-    # Do actual argument parsing
-    parser = argparse.ArgumentParser(add_help=False)
-
-    # Isolate parser args
-    args = parser.parse_known_args()
-
-    # Add the subparsers.
-    subparsers = parser.add_subparsers(dest='subcommand')
-
-    # Subparser for 'help'
-    parser_help = subparsers.add_parser('help', add_help=False)
-    parser_help.add_argument(
-        'command',
-        choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
-        nargs='?',
-        default=None
-    )
-
-    # Subparser for 'set'
-    parser_set = subparsers.add_parser('set', add_help=False)
-    parser_set.add_argument(
-        'command',
-        choices=['help', 'closest', 'highest', 'exact'],
-        nargs='?',
-        default='closest'
-    )
-
-    # Subparser for 'show'
-    parser_show = subparsers.add_parser('show', add_help=False)
-    parser_show.add_argument(
-        'command',
-        choices=['help', 'all', 'closest', 'highest', 'current', 'displays'],
-        nargs='?',
-        default='all'
-    )
-
-    # Subparser for 'brightness'
-    parser_brightness = subparsers.add_parser('brightness', add_help=False)
-    parser_brightness.add_argument('command', choices=['help', 'show', 'set'])
-    parser_brightness.add_argument('brightness', type=float, nargs='?')
-
-    # Subparser for 'rotate'
-    parser_rotate = subparsers.add_parser('rotate', add_help=False)
-    parser_rotate.add_argument(
-        'command',
-        choices=['help', 'set', 'show'],
-        nargs='?',
-        default='show'
-    )
-    parser_rotate.add_argument(
-        'rotation',
-        type=int,
-        default=0,
-        nargs='?'
-    )
-
-    # Subparser for 'underscan'
-    parser_underscan = subparsers.add_parser('underscan', add_help=False)
-    parser_underscan.add_argument('command', choices=['help', 'show', 'set'])
-    parser_underscan.add_argument('underscan', type=float, nargs='?')
-
-    # Subparser for 'mirroring'
-    parser_mirroring = subparsers.add_parser('mirroring', add_help=False)
-    parser_mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
-    parser_mirroring.add_argument('--mirror', type=int, default=getMainDisplayID())
-
-    # All of the subcommands have some similar arguments
-    for subparser in [parser_set, parser_show, parser_brightness, parser_underscan, parser_mirroring, parser_rotate]:
-        subparser.add_argument('--help', action='store_true')
-        subparser.add_argument('--display', type=int)
-
-    # These two subparsers have similar arguments
-    for subparser in [parser_set, parser_show]:
-        subparser.add_argument('-w', '--width', type=int)
-        subparser.add_argument('-h', '--height', type=int)
-        subparser.add_argument('-d', '--depth', type=int)
-        subparser.add_argument('-r', '--refresh', type=int)
-        subparser.add_argument('--no-hidpi', action='store_true')
-        subparser.add_argument('--only-hidpi', action='store_true')
-
-    # Parse the arguments
-    # Note that we have to use the leftover arguments from the parser.parse_known_args() call up above
-    return parser.parse_args(args[1])
 
 
 def showHelp(command=None):
@@ -828,49 +779,13 @@ def showHelp(command=None):
         ]))
 
 
-def main():
-    earlyExit()  # exits if the user didn't give enough information, or just wanted help
-    args = parse()  # returns parsed args
-
-    # If they used the 'help' subcommand, display that subcommand's help information
-    if args.subcommand == 'help':
-        showHelp(command=args.command)
-        sys.exit(0)
-
-    # Check if they wanted help with the subcommand.
-    if args.command == 'help' or args.help:
-        showHelp(command=args.subcommand)
-        sys.exit(0)
-
+def main(commands):
+    """
+    Called to execute commands.
+    :param commands: What commands have been requested?
+    """
     getIOKit()
 
-    if args.subcommand == 'set':
-        # Either they didn't specify, or they gave contrary instructions. In either case, just show everything.
-        if args.only_hidpi == args.no_hidpi:
-            hidpi = 0
-        elif args.no_hidpi:
-            hidpi = 1
-        elif args.only_hidpi:
-            hidpi = 2
-        setHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
-    elif args.subcommand == 'show':
-        # Either they didn't specify, or they gave contrary instructions. In either case, just show everything.
-        if args.only_hidpi == args.no_hidpi:
-            hidpi = 0  # default: show all
-        elif args.no_hidpi:
-            hidpi = 1  # do not show HiDPI resolutions
-        elif args.only_hidpi:
-            hidpi = 2  # show only HiDPI resolutions
-        showHandler(args.command, args.width, args.height, args.depth, args.refresh, args.display, hidpi)
-    elif args.subcommand == 'brightness':
-        brightnessHandler(args.command, args.brightness, args.display)
-    elif args.subcommand == 'underscan':
-        underscanHandler(args.command, args.underscan, args.display)
-    elif args.subcommand == 'mirroring':
-        mirroringHandler(args.command, args.display, args.mirror)
-    elif args.subcommand == 'rotate':
-        rotateHandler(args.command, args.rotation, args.display)
-
-
-if __name__ == '__main__':
-    main()
+    if commands:
+        runCommands = Commands(commands)
+        runCommands.run()
