@@ -1,4 +1,4 @@
-q
+#!/usr/bin/python
 
 # This script allows users to access the DisplayManager program through the command line.
 # Passes command parameters into DisplayManager.
