@@ -103,24 +103,24 @@ def main():
         return hidpi
 
     if args.subcommand == 'set':
-        command = dm.Command(args.command, args.subcommand, width=args.width, height=args.height, depth=args.depth,
+        command = dm.Command(args.subcommand, args.command, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
         dm.run(command)
     elif args.subcommand == 'show':
-        command = dm.Command(args.command, args.subcommand, width=args.width, height=args.height, depth=args.depth,
+        command = dm.Command(args.subcommand, args.command, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
         dm.run(command)
     elif args.subcommand == 'brightness':
-        command = dm.Command(args.command, args.subcommand, brightness=args.brightness, displayID=args.display)
+        command = dm.Command(args.subcommand, args.command, brightness=args.brightness, displayID=args.display)
         dm.run(command)
     elif args.subcommand == 'underscan':
-        command = dm.Command(args.command, args.subcommand, underscan=args.underscan, displayID=args.display)
+        command = dm.Command(args.subcommand, args.command, underscan=args.underscan, displayID=args.display)
         dm.run(command)
     elif args.subcommand == 'mirroring':
-        command = dm.Command(args.command, args.subcommand, displayID=args.brightness, mirrorDisplayID=args.mirror)
+        command = dm.Command(args.subcommand, args.command, displayID=args.brightness, mirrorDisplayID=args.mirror)
         dm.run(command)
     elif args.subcommand == 'rotate':
-        command = dm.Command(args.command, args.subcommand, angle=args.rotation, displayID=args.display)
+        command = dm.Command(args.subcommand, args.command, angle=args.rotation, displayID=args.display)
         dm.run(command)
 
 

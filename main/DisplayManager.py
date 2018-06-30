@@ -253,30 +253,72 @@ class Command(object):
     Represents a user-requested command to Display Manager.
     """
 
-    def __init__(self, command, subcommand, width=None, height=None, depth=None, refresh=None, displayID=None,
-                 hidpi=None, brightness=None, angle=None, underscan=None, mirrorDisplayID=None):
-        self.command = command
-        self.subcommand = subcommand
-        self.width = width
-        self.height = height
-        self.depth = depth
-        self.refresh = refresh
-        self.displayID = displayID
-        self.hidpi = hidpi
-        self.brightness = brightness
-        self.angle = angle
-        self.underscan = underscan
-        self.mirrorDisplayID = mirrorDisplayID
+    def __init__(self, primary, secondary, width=None, height=None, depth=32, refresh=0,
+                 displayID=None, hidpi=0, brightness=1, angle=0, underscan=1,
+                 mirrorDisplayID=None):
+        # Required for all types of commands
+        if primary in ["set", "show", "brightness", "rotate", "underscan", "mirroring"]:
+            self.primary = primary
+        else:
+            print("Unrecognized command {}".format(primary))
+            sys.exit(1)
+        self.secondary = secondary
+
+        # Command-specific data
+        if width:
+            self.width = int(width)
+        else:
+            self.width = None
+        if height:
+            self.height = int(height)
+        else:
+            self.height = None
+        self.depth = int(depth)
+        self.refresh = int(refresh)
+        self.hidpi = int(hidpi)
+        self.brightness = int(brightness)
+        self.angle = int(angle)
+        self.underscan = int(underscan)
+        if mirrorDisplayID:
+            self.mirrorDisplayID = int(mirrorDisplayID)
+        else:
+            self.mirrorDisplayID = None
+
+        # Need this conditional block because Python doesn't recognize getMainDisplay() in __init__ declaration
+        if displayID:
+            self.displayID = int(displayID)
+        else:
+            self.displayID = getMainDisplayID()
+
+    def run(self):
+        """
+        Runs whichever command this Command has stored.
+        """
+        if self.primary == "set":
+            handleSet(self.secondary, self.width, self.height, self.depth, self.refresh,
+                      self.displayID, self.hidpi)
+        elif self.primary == "show":
+            handleShow(self.secondary, self.width, self.height, self.depth, self.refresh,
+                       self.displayID, self.hidpi)
+        elif self.primary == "brightness":
+            handleBrightness(self.secondary, self.brightness, self.displayID)
+        elif self.primary == "rotate":
+            handleRotate(self.secondary, self.angle, self.displayID)
+        elif self.primary == "underscan":
+            handleUnderscan(self.secondary, self.underscan, self.displayID)
+        elif self.primary == "mirroring":
+            handleBrightness(self.secondary, self.displayID, self.mirrorDisplayID)
 
 
-class Commands(object):
+class CommandList(object):
     """
     Holds one or more "Command" instances.
     """
 
     def __init__(self, commands=None):
-        self.commands = []
-        self.addCommands(commands)
+        self.commandDict = {"set": [], "show": [], "brightness": [], "rotate": [], "underscan": [], "mirroring": []}
+        if commands:
+            self.addCommands(commands)
 
     def addCommands(self, commands):
         """
@@ -284,55 +326,27 @@ class Commands(object):
         :param commands: The Command(s) to add.
         """
         if type(commands) == Command:
-            self.commands.append(commands)
-        elif type(commands) == Commands:
-            for command in commands.commands:
-                self.commands.append(command)
+            self.commandDict[commands.primary].append(commands)
+        elif type(commands) == CommandList:
+            for commandKey in commands.commandDict:
+                self.commandDict[commandKey] = commands.commandDict[commandKey]
 
     def run(self):
         """
-        Run all the Commands stored.
+        Run all the Commands stored. Grouped by type for safety and efficiency.
         """
-        set = []
-        show = []
-        brightness = []
-        rotate = []
-        underscan = []
-        mirroring = []
-
-        for command in self.commands:
-            if command.subcommand == "set":
-                set.append(command)
-            elif command.subcommand == "show":
-                show.append(command)
-            elif command.subcommand == "brightness":
-                brightness.append(command)
-            elif command.subcommand == "rotate":
-                rotate.append(command)
-            elif command.subcommand == "underscan":
-                underscan.append(underscan)
-            elif command.subcommand == "mirroring":
-                mirroring.append(command)
-
-        for command in set:
-            handleSet(command.command, command.width, command.height, command.depth, command.refresh,
-                      command.displayID, command.hidpi)
-
-        for command in show:
-            handleShow(command.command, command.width, command.height, command.depth, command.refresh,
-                       command.displayID, command.hidpi)
-
-        for command in brightness:
-            handleBrightness(command.command, command.brightness, command.displayID)
-
-        for command in rotate:
-            handleRotate(command.command, command.angle, command.displayID)
-
-        for command in underscan:
-            handleUnderscan(command.command, command.underscan, command.displayID)
-
-        for command in mirroring:
-            handleBrightness(command.command, command.displayID, command.mirrorDisplayID)
+        for command in self.commandDict["set"]:
+            command.run()
+        for command in self.commandDict["show"]:
+            command.run()
+        for command in self.commandDict["brightness"]:
+            command.run()
+        for command in self.commandDict["rotate"]:
+            command.run()
+        for command in self.commandDict["underscan"]:
+            command.run()
+        for command in self.commandDict["mirroring"]:
+            command.run()
 
 
 def getIOKit():
@@ -344,7 +358,7 @@ def getIOKit():
     :return: A dictionary containing several IOKit functions and variables.
     """
     global iokit
-    if not iokit:
+    if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
         # The dictionary which will contain all of the necessary functions and variables from IOKit
         iokit = {}
 
@@ -787,5 +801,5 @@ def run(commands):
     getIOKit()
 
     if commands:
-        runCommands = Commands(commands)
+        runCommands = CommandList(commands)
         runCommands.run()
