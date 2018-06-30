@@ -1,20 +1,25 @@
 #!/usr/bin/python
 
-# Writes a config file per given Display Manager commands.
+# Writes to a config file per given Display Manager commands.
 
 
 import pickle
 import sys
-import main.DisplayManager as dm
+sys.path.append("..")  # to allow import from current directory
+import DisplayManager as dm
+import commandLine as cl
 
 
 def main():
-    commands = [
-        dm.Command("rotate", "set", angle="90"),
-        dm.Command("rotate", "set"),
-        dm.Command("set", "closest", width=800, height=600),
-        dm.Command("set", "highest")
-    ]
+    print("Write each command out on its own line. After final command, hit return on empty line.")
+
+    commands = []
+    while True:
+        line = raw_input()
+        if line:
+            commands.append(cl.getCommand(line))
+        else:
+            break
 
     commandList = dm.CommandList()
     for command in commands:

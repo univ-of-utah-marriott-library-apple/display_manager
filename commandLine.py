@@ -6,7 +6,8 @@
 
 import sys
 import argparse
-import main.DisplayManager as dm
+sys.path.append("..")  # to allow import from current directory
+import DisplayManager as dm
 
 
 def earlyExit():
@@ -24,65 +25,69 @@ def earlyExit():
         sys.exit(0)
 
 
-def parse():
+def parse(parseList):
     """
     Parse the user command-line input.
+    :return: A parser that has parsed all command-line arguments passed in.
     """
     parser = argparse.ArgumentParser(add_help=False)
-    args = parser.parse_known_args()
-    subparsers = parser.add_subparsers(dest='subcommand')
+    secondaries = parser.add_subparsers(dest='subcommand')
 
-    help = subparsers.add_parser('help', add_help=False)
+    help = secondaries.add_parser('help', add_help=False)
     help.add_argument('command', choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
                       nargs='?', default=None)
 
-    set = subparsers.add_parser('set', add_help=False)
+    set = secondaries.add_parser('set', add_help=False)
     set.add_argument('command', choices=['help', 'closest', 'highest', 'exact'], nargs='?', default='closest')
 
-    show = subparsers.add_parser('show', add_help=False)
+    show = secondaries.add_parser('show', add_help=False)
     show.add_argument('command', choices=['help', 'all', 'closest', 'highest', 'current', 'displays'],
                       nargs='?', default='all')
 
-    brightness = subparsers.add_parser('brightness', add_help=False)
+    brightness = secondaries.add_parser('brightness', add_help=False)
     brightness.add_argument('command', choices=['help', 'show', 'set'])
     brightness.add_argument('brightness', type=float, nargs='?', default=1)
 
-    rotate = subparsers.add_parser('rotate', add_help=False)
+    rotate = secondaries.add_parser('rotate', add_help=False)
     rotate.add_argument('command', choices=['help', 'set', 'show'], nargs='?', default='show')
     rotate.add_argument('rotation', type=int, nargs='?', default=0)
 
-    underscan = subparsers.add_parser('underscan', add_help=False)
+    underscan = secondaries.add_parser('underscan', add_help=False)
     underscan.add_argument('command', choices=['help', 'show', 'set'])
     underscan.add_argument('underscan', type=float, nargs='?')
 
-    mirroring = subparsers.add_parser('mirroring', add_help=False)
+    mirroring = secondaries.add_parser('mirroring', add_help=False)
     mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
     mirroring.add_argument('--mirror', type=int)
 
-    # All of the subcommands have some similar arguments
-    for subparser in [set, show, brightness, underscan, mirroring, rotate]:
-        subparser.add_argument('--help', action='store_true')
-        subparser.add_argument('--display', type=int, default=dm.getMainDisplayID())
+    # All of the secondaries have some similar arguments
+    for secondary in [set, show, brightness, underscan, mirroring, rotate]:
+        secondary.add_argument('--help', action='store_true')
+        secondary.add_argument('--display', type=int, default=dm.getMainDisplayID())
 
-    # These two subparsers have similar arguments
-    for subparser in [set, show]:
-        subparser.add_argument('-w', '--width', type=int)
-        subparser.add_argument('-h', '--height', type=int)
-        subparser.add_argument('-d', '--depth', type=int, default=32)
-        subparser.add_argument('-r', '--refresh', type=int, default=0)
-        subparser.add_argument('--no-hidpi', action='store_true')
-        subparser.add_argument('--only-hidpi', action='store_true')
+    # These two secondaries have similar arguments
+    for secondary in [set, show]:
+        secondary.add_argument('-w', '--width', type=int)
+        secondary.add_argument('-h', '--height', type=int)
+        secondary.add_argument('-d', '--depth', type=int, default=32)
+        secondary.add_argument('-r', '--refresh', type=int, default=0)
+        secondary.add_argument('--no-hidpi', action='store_true')
+        secondary.add_argument('--only-hidpi', action='store_true')
 
-    return parser.parse_args(args[1])
+    return parser.parse_args(parseList)
 
 
-def main():
+def getCommand(commandString):
     """
-    Called on execution. Parses input and calls Display Manager.
-    :return:
+    Transforms input string into a Command.
+    :returns: The resulting Command.
     """
     earlyExit()  # exits if the user didn't give enough information, or just wanted help
-    args = parse()  # returns parsed args
+
+    parseList = []
+    for element in commandString.split():
+        parseList.append(element)
+    args = parse(parseList)
 
     if args.subcommand == 'help':  # run help (default)
         dm.showHelp(command=args.command)
@@ -102,26 +107,32 @@ def main():
                     hidpi = 2  # show only HiDPI modes
         return hidpi
 
+    command = None
     if args.subcommand == 'set':
         command = dm.Command(args.subcommand, args.command, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
-        dm.run(command)
     elif args.subcommand == 'show':
         command = dm.Command(args.subcommand, args.command, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
-        dm.run(command)
     elif args.subcommand == 'brightness':
         command = dm.Command(args.subcommand, args.command, brightness=args.brightness, displayID=args.display)
-        dm.run(command)
     elif args.subcommand == 'underscan':
         command = dm.Command(args.subcommand, args.command, underscan=args.underscan, displayID=args.display)
-        dm.run(command)
     elif args.subcommand == 'mirroring':
         command = dm.Command(args.subcommand, args.command, displayID=args.brightness, mirrorDisplayID=args.mirror)
-        dm.run(command)
     elif args.subcommand == 'rotate':
         command = dm.Command(args.subcommand, args.command, angle=args.rotation, displayID=args.display)
-        dm.run(command)
+
+    return command
+
+
+def main():
+    """
+    Called on execution. Parses input and calls Display Manager.
+    :return:
+    """
+    command = getCommand(' '.join(sys.argv[1:]))
+    dm.run(command)
 
 
 if __name__ == '__main__':

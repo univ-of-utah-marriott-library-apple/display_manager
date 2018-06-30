@@ -5,6 +5,7 @@
       <option name="ignoredErrors">
         <list>
           <option value="E128" />
+          <option value="E402" />
         </list>
       </option>
     </inspection_tool>
@@ -14,6 +15,7 @@
           <option value="N802" />
           <option value="N806" />
           <option value="N803" />
+          <option value="N813" />
         </list>
       </option>
     </inspection_tool>
@@ -21,6 +23,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="main.DisplayManager.getMainDisplayID" />
+          <option value="configWriter.raw_input" />
         </list>
       </option>
     </inspection_tool>
