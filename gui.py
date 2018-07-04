@@ -126,21 +126,6 @@ class App(object):
         self.modeDropdown.current(0)
         self.modeDropdown.bind("<<ComboboxSelected>>", lambda event: self.__handleModeSelection())
 
-    # todo: find something for this to do, or delete it
-    def __handleModeSelection(self):
-        """
-        Handles self.modeDropdown's "ComboboxSelected" callback.
-        """
-        pass
-
-    @property
-    def mode(self):
-        """
-        :return: The currently selected DisplayMode.
-        """
-        modeString = self.modeDropdown.get()
-        return self.modeDict[modeString]
-
     def __brightnessSelectionInit(self):
         """
         Set self.brightnessSlider's value to that of the currently selected display
@@ -155,6 +140,21 @@ class App(object):
     # todo: find something for this to do, or delete it
     def __handleBrightnessSelection(self):
         pass
+
+    # todo: find something for this to do, or delete it
+    def __handleModeSelection(self):
+        """
+        Handles self.modeDropdown's "ComboboxSelected" callback.
+        """
+        pass
+
+    @property
+    def mode(self):
+        """
+        :return: The currently selected DisplayMode.
+        """
+        modeString = self.modeDropdown.get()
+        return self.modeDict[modeString]
 
     @property
     def brightness(self):
