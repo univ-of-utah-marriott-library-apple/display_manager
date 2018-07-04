@@ -96,22 +96,6 @@ class App(object):
         self.displayDropdown.current(0)
         self.displayDropdown.bind("<<ComboboxSelected>>", lambda event: self.__handleDisplaySelection())
 
-    def __handleDisplaySelection(self):
-        """
-        Handles self.displayDropdown's "ComboboxSelected" callback.
-        """
-        # Switch all data-containing elements to give options for the current display.
-        self.__modeSelectionInit()
-        self.__brightnessSelectionInit()
-
-    @property
-    def display(self):
-        """
-        :return: The currently selected Display.
-        """
-        displayID = re.search(r"^[0-9]*", self.displayDropdown.get()).group()
-        return self.displayDict[displayID]
-
     def __modeSelectionInit(self):
         """
         Add all the DisplayModes of the currently selected display to self.modeDropdown.
@@ -137,9 +121,13 @@ class App(object):
             # todo: find a way to deactivate this slider altogether when the display's brightness can't be read/set
             pass
 
-    # todo: find something for this to do, or delete it
-    def __handleBrightnessSelection(self):
-        pass
+    def __handleDisplaySelection(self):
+        """
+        Handles self.displayDropdown's "ComboboxSelected" callback.
+        """
+        # Switch all data-containing elements to give options for the current display.
+        self.__modeSelectionInit()
+        self.__brightnessSelectionInit()
 
     # todo: find something for this to do, or delete it
     def __handleModeSelection(self):
@@ -147,6 +135,18 @@ class App(object):
         Handles self.modeDropdown's "ComboboxSelected" callback.
         """
         pass
+
+    # todo: find something for this to do, or delete it
+    def __handleBrightnessSelection(self):
+        pass
+
+    @property
+    def display(self):
+        """
+        :return: The currently selected Display.
+        """
+        displayID = re.search(r"^[0-9]*", self.displayDropdown.get()).group()
+        return self.displayDict[displayID]
 
     @property
     def mode(self):
@@ -194,7 +194,7 @@ class App(object):
         """
         return "config"
 
-    def generateCommandList(self):
+    def __generateCommandList(self):
         """
         :return: All currently selected commands, in the form of a DisplayManager.CommandList.
         """
@@ -245,14 +245,14 @@ class App(object):
         """
         Set the Display to the currently selected settings.
         """
-        commandList = self.generateCommandList()
+        commandList = self.__generateCommandList()
         dm.run(commandList)
 
     def buildConfig(self):
         """
         Build a config file with the currently selected settings.
         """
-        commandList = self.generateCommandList()
+        commandList = self.__generateCommandList()
         cg.buildConfig(commandList, self.config)
 
     def start(self):

@@ -181,8 +181,8 @@
       <file leaf-file-name="gui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="15" column="7" lean-forward="true" selection-start-line="15" selection-start-column="7" selection-end-line="15" selection-end-column="7" />
+            <state relative-caret-position="713">
+              <caret line="243" column="14" selection-start-line="243" selection-start-column="14" selection-end-line="243" selection-end-column="14" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#1058#1112#1" />
@@ -191,13 +191,9 @@
                 <element signature="e#1023#1031#0" />
                 <element signature="e#1887#1946#0" />
                 <element signature="e#2275#2353#0" />
-                <element signature="e#3795#4446#0" />
-                <element signature="e#2485#2721#1" />
-                <element signature="e#4109#4238#0" />
-                <element signature="e#2793#3039#0" />
-                <element signature="e#4559#4601#2" />
-                <element signature="e#4454#4639#0" />
-                <element signature="e#4684#4726#1" />
+                <element signature="e#4266#4810#0" />
+                <element signature="e#4266#4341#1" />
+                <element signature="e#4426#4608#0" />
                 <element signature="e#4520#4995#0" />
                 <element signature="e#4785#5025#1" />
                 <element signature="e#4785#4864#0" />
@@ -205,9 +201,13 @@
                 <element signature="e#5629#5728#1" />
                 <element signature="e#5789#5881#0" />
                 <element signature="e#5908#6028#0" />
+                <element signature="e#5594#5840#0" />
+                <element signature="e#5594#5677#1" />
+                <element signature="e#5943#6036#0" />
+                <element signature="e#5943#6023#1" />
                 <element signature="e#5937#5941#0" />
-                <element signature="e#6056#6161#0" />
-                <element signature="e#6056#6144#1" />
+                <element signature="e#5972#6173#0" />
+                <element signature="e#5972#6044#1" />
                 <element signature="e#5193#5331#0" />
                 <element signature="e#5403#5445#2" />
                 <element signature="e#6023#6198#0" />
@@ -692,8 +692,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="15" column="7" lean-forward="true" selection-start-line="15" selection-start-column="7" selection-end-line="15" selection-end-column="7" />
+        <state relative-caret-position="713">
+          <caret line="243" column="14" selection-start-line="243" selection-start-column="14" selection-end-line="243" selection-end-column="14" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#1058#1112#1" />
@@ -702,13 +702,9 @@
             <element signature="e#1023#1031#0" />
             <element signature="e#1887#1946#0" />
             <element signature="e#2275#2353#0" />
-            <element signature="e#3795#4446#0" />
-            <element signature="e#2485#2721#1" />
-            <element signature="e#4109#4238#0" />
-            <element signature="e#2793#3039#0" />
-            <element signature="e#4559#4601#2" />
-            <element signature="e#4454#4639#0" />
-            <element signature="e#4684#4726#1" />
+            <element signature="e#4266#4810#0" />
+            <element signature="e#4266#4341#1" />
+            <element signature="e#4426#4608#0" />
             <element signature="e#4520#4995#0" />
             <element signature="e#4785#5025#1" />
             <element signature="e#4785#4864#0" />
@@ -716,9 +712,13 @@
             <element signature="e#5629#5728#1" />
             <element signature="e#5789#5881#0" />
             <element signature="e#5908#6028#0" />
+            <element signature="e#5594#5840#0" />
+            <element signature="e#5594#5677#1" />
+            <element signature="e#5943#6036#0" />
+            <element signature="e#5943#6023#1" />
             <element signature="e#5937#5941#0" />
-            <element signature="e#6056#6161#0" />
-            <element signature="e#6056#6144#1" />
+            <element signature="e#5972#6173#0" />
+            <element signature="e#5972#6044#1" />
             <element signature="e#5193#5331#0" />
             <element signature="e#5403#5445#2" />
             <element signature="e#6023#6198#0" />
