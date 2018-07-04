@@ -10,6 +10,16 @@ import DisplayManager as dm
 import commandLine as cl
 
 
+def buildConfig(commandList, filename):
+    """
+    Build the configuration file.
+    :param commandList: The DisplayManager.CommandList to write to the file.
+    :param filename: The name of the file to write to.
+    """
+    with open(filename, "w") as file:
+        pickle.dump(commandList, file)
+
+
 def main():
     print("Write each command out on its own line. After final command, hit return on empty line.")
 
@@ -24,11 +34,8 @@ def main():
     commandList = dm.CommandList()
     for command in commands:
         commandList.addCommands(command)
-        commandList.addCommands(command)
-        commandList.addCommands(command)
 
-    with open(sys.argv[1], "w") as file:
-        pickle.dump(commandList, file)
+    buildConfig(commandList, sys.argv[1])
 
 
 if __name__ == "__main__":

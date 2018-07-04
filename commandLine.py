@@ -31,48 +31,46 @@ def parse(parseList):
     :return: A parser that has parsed all command-line arguments passed in.
     """
     parser = argparse.ArgumentParser(add_help=False)
-    secondaries = parser.add_subparsers(dest='subcommand')
+    primary = parser.add_subparsers(dest='primary')
 
-    help = secondaries.add_parser('help', add_help=False)
-    help.add_argument('command', choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
+    help = primary.add_parser('help', add_help=False)
+    help.add_argument('secondary', choices=['set', 'show', 'brightness', 'underscan', 'mirroring'],
                       nargs='?', default=None)
 
-    set = secondaries.add_parser('set', add_help=False)
-    set.add_argument('command', choices=['help', 'closest', 'highest', 'exact'], nargs='?', default='closest')
+    set = primary.add_parser('set', add_help=False)
+    set.add_argument('secondary', choices=['help', 'closest', 'highest', 'exact'], nargs='?', default='closest')
 
-    show = secondaries.add_parser('show', add_help=False)
-    show.add_argument('command', choices=['help', 'all', 'closest', 'highest', 'current', 'displays'],
+    show = primary.add_parser('show', add_help=False)
+    show.add_argument("secondary", choices=['help', 'all', 'closest', 'highest', 'current', 'displays'],
                       nargs='?', default='all')
 
-    brightness = secondaries.add_parser('brightness', add_help=False)
-    brightness.add_argument('command', choices=['help', 'show', 'set'])
+    brightness = primary.add_parser('brightness', add_help=False)
+    brightness.add_argument("secondary", choices=['help', 'show', 'set'])
     brightness.add_argument('brightness', type=float, nargs='?', default=1)
 
-    rotate = secondaries.add_parser('rotate', add_help=False)
-    rotate.add_argument('command', choices=['help', 'set', 'show'], nargs='?', default='show')
+    rotate = primary.add_parser('rotate', add_help=False)
+    rotate.add_argument("secondary", choices=['help', 'set', 'show'], nargs='?', default='show')
     rotate.add_argument('rotation', type=int, nargs='?', default=0)
 
-    underscan = secondaries.add_parser('underscan', add_help=False)
-    underscan.add_argument('command', choices=['help', 'show', 'set'])
+    underscan = primary.add_parser('underscan', add_help=False)
+    underscan.add_argument("secondary", choices=['help', 'show', 'set'])
     underscan.add_argument('underscan', type=float, nargs='?')
 
-    mirroring = secondaries.add_parser('mirroring', add_help=False)
-    mirroring.add_argument('command', choices=['help', 'enable', 'disable'])
+    mirroring = primary.add_parser('mirroring', add_help=False)
+    mirroring.add_argument("secondary", choices=['help', 'enable', 'disable'])
     mirroring.add_argument('--mirror', type=int)
 
-    # All of the secondaries have some similar arguments
-    for secondary in [set, show, brightness, underscan, mirroring, rotate]:
-        secondary.add_argument('--help', action='store_true')
-        secondary.add_argument('--display', type=int, default=dm.getMainDisplayID())
+    for primary in [set, show, brightness, underscan, mirroring, rotate]:
+        primary.add_argument('--help', action='store_true')
+        primary.add_argument('--display', type=int, default=dm.getMainDisplayID())
 
-    # These two secondaries have similar arguments
-    for secondary in [set, show]:
-        secondary.add_argument('-w', '--width', type=int)
-        secondary.add_argument('-h', '--height', type=int)
-        secondary.add_argument('-d', '--depth', type=int, default=32)
-        secondary.add_argument('-r', '--refresh', type=int, default=0)
-        secondary.add_argument('--no-hidpi', action='store_true')
-        secondary.add_argument('--only-hidpi', action='store_true')
+    for primary in [set, show]:
+        primary.add_argument('-w', '--width', type=int)
+        primary.add_argument('-h', '--height', type=int)
+        primary.add_argument('-d', '--depth', type=int, default=32)
+        primary.add_argument('-r', '--refresh', type=int, default=0)
+        primary.add_argument('--no-hidpi', action='store_true')
+        primary.add_argument('--only-hidpi', action='store_true')
 
     return parser.parse_args(parseList)
 
@@ -89,12 +87,12 @@ def getCommand(commandString):
         parseList.append(element)
     args = parse(parseList)
 
-    if args.subcommand == 'help':  # run help (default)
-        dm.showHelp(command=args.command)
+    if args.primary == 'help':  # run help (default)
+        dm.showHelp(command=args.secondary)
         sys.exit(0)
 
-    if args.command == 'help' or args.help:  # subcommand-specific help
-        dm.showHelp(command=args.subcommand)
+    if args.secondary == 'help' or args.help:  # secondary-specific help
+        dm.showHelp(command=args.primary)
         sys.exit(0)
 
     def hidpi():
@@ -108,20 +106,20 @@ def getCommand(commandString):
         return hidpi
 
     command = None
-    if args.subcommand == 'set':
-        command = dm.Command(args.subcommand, args.command, width=args.width, height=args.height, depth=args.depth,
+    if args.primary == 'set':
+        command = dm.Command(args.primary, args.secondary, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
-    elif args.subcommand == 'show':
-        command = dm.Command(args.subcommand, args.command, width=args.width, height=args.height, depth=args.depth,
+    elif args.primary == 'show':
+        command = dm.Command(args.primary, args.secondary, width=args.width, height=args.height, depth=args.depth,
                              refresh=args.refresh, displayID=args.display, hidpi=hidpi())
-    elif args.subcommand == 'brightness':
-        command = dm.Command(args.subcommand, args.command, brightness=args.brightness, displayID=args.display)
-    elif args.subcommand == 'underscan':
-        command = dm.Command(args.subcommand, args.command, underscan=args.underscan, displayID=args.display)
-    elif args.subcommand == 'mirroring':
-        command = dm.Command(args.subcommand, args.command, displayID=args.brightness, mirrorDisplayID=args.mirror)
-    elif args.subcommand == 'rotate':
-        command = dm.Command(args.subcommand, args.command, angle=args.rotation, displayID=args.display)
+    elif args.primary == 'brightness':
+        command = dm.Command(args.primary, args.secondary, brightness=args.brightness, displayID=args.display)
+    elif args.primary == 'rotate':
+        command = dm.Command(args.primary, args.secondary, angle=args.rotation, displayID=args.display)
+    elif args.primary == 'mirroring':
+        command = dm.Command(args.primary, args.secondary, mirrorDisplayID=args.mirror, displayID=args.display)
+    elif args.primary == 'underscan':
+        command = dm.Command(args.primary, args.secondary, underscan=args.underscan, displayID=args.display)
 
     return command
 

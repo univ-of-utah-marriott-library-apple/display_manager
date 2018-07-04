@@ -1,0 +1,1 @@
+# jamf policy -event dmConfigTrig
