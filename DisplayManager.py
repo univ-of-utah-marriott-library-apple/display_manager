@@ -6,7 +6,6 @@
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness.
 
 
-import argparse         # read in command-line execution
 import objc             # access Objective-C functions and variables
 import sys              # exit script with the right codes
 import CoreFoundation   # work with Objective-C data types
@@ -60,7 +59,7 @@ class Display(object):
     @staticmethod
     def rightHidpi(mode, hidpi):
         """
-        Evaluates whether the mode fits the user's HiDPI specification.
+        Evaluates whether the mode fits the user"s HiDPI specification.
 
         :param mode: The mode to be evaluated.
         :param hidpi: The desired HiDPI description.
@@ -112,7 +111,7 @@ class Display(object):
     @property
     def servicePort(self):
         """
-        :return: The integer representing this display's service port.
+        :return: The integer representing this display"s service port.
         """
         return Quartz.CGDisplayIOServicePort(self.displayID)
 
@@ -192,10 +191,11 @@ class Display(object):
             print("Could not begin display configuration: error {}".format(error))
             sys.exit(1)
 
-        if mirrorDisplay is not None and mirrorDisplay.displayID != self.displayID:
-            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
-        else:
+        # Will be passed a None mirrorDisplay to disable mirroring. Cannot mirror self.
+        if mirrorDisplay is None or mirrorDisplay.displayID == self.displayID:
             Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, Quartz.kCGNullDirectDisplay)
+        else:
+            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
@@ -220,7 +220,7 @@ class DisplayMode(object):
         # HiDPI status
         maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
         maxHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # the maximum display width for this display
-        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
+        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they"re the same, mode is not HiDPI
 
     def __str__(self):
         return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
@@ -247,7 +247,7 @@ class Command(object):
                  displayID=None, hidpi=0, brightness=1, angle=0, underscan=1,
                  mirrorDisplayID=None):
         # Required for all types of commands
-        if primary in ["set", "show", "brightness", "rotate", "underscan", "mirroring"]:
+        if primary in ["set", "show", "brightness", "rotate", "underscan", "mirror"]:
             self.primary = primary
         else:
             print("Unrecognized command {}".format(primary))
@@ -296,8 +296,8 @@ class Command(object):
             handleRotate(self.secondary, self.angle, self.displayID)
         elif self.primary == "underscan":
             handleUnderscan(self.secondary, self.underscan, self.displayID)
-        elif self.primary == "mirroring":
-            handleBrightness(self.secondary, self.displayID, self.mirrorDisplayID)
+        elif self.primary == "mirror":
+            handleMirror(self.secondary, self.displayID, self.mirrorDisplayID)
 
 
 class CommandList(object):
@@ -306,7 +306,7 @@ class CommandList(object):
     """
 
     def __init__(self, commands=None):
-        self.commandDict = {"set": [], "show": [], "brightness": [], "rotate": [], "underscan": [], "mirroring": []}
+        self.commandDict = {"set": [], "show": [], "brightness": [], "rotate": [], "underscan": [], "mirror": []}
         if commands:
             self.addCommands(commands)
 
@@ -333,7 +333,7 @@ class CommandList(object):
             command.run()
         for command in self.commandDict["rotate"]:
             command.run()
-        for command in self.commandDict["mirroring"]:
+        for command in self.commandDict["mirror"]:
             command.run()
         for command in self.commandDict["underscan"]:
             command.run()
@@ -393,7 +393,7 @@ def getIOKit():
 
         # Load functions from IOKit into the global namespace
         objc.loadBundleFunctions(iokitBundle, iokit, functions)
-        # Bridge won't put straight into iokit, so globals()
+        # Bridge won"t put straight into iokit, so globals()
         objc.loadBundleVariables(iokitBundle, globals(), variables)
         # Move only the desired variables into iokit
         for var in variables:
@@ -566,7 +566,7 @@ def handleBrightness(command, brightness, displayID):
         error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayBrightness"], brightness)
         if error:
             print("Failed to set brightness of display {}; error {}".format(display.displayID, error))
-            # External display brightness probably can't be managed this way
+            # External display brightness probably can"t be managed this way
             print("External displays may not be compatible with Display Manager. \n"
                   "If this is an external display, try setting manually on device hardware.")
 
@@ -600,18 +600,18 @@ def handleRotate(command, angle, displayID):
         iokit["IOServiceRequestProbe"](display.servicePort, options)
 
 
-def handleMirroring(command, displayID, mirrorDisplayID):
+def handleMirror(command, displayID, mirrorDisplayID):
     """
-    Handles all the options for the "mirroring" command.
+    Handles all the options for the "mirror" command.
 
     :param command: The command passed in.
     :param displayID: The display to configure mirroring on.
     :param mirrorDisplayID: The display to become a mirror of.
     """
-    mirrorDisplay = Display(mirrorDisplayID)
-    display = Display(displayID)
-
     if command == "enable":
+        mirrorDisplay = Display(mirrorDisplayID)
+        display = Display(displayID)
+
         mirrorDisplay.setMirror(display)
 
     if command == "disable":
@@ -658,7 +658,7 @@ def showHelp(command=None):
 
     information = {}
 
-    information['set'] = '\n'.join([
+    information["set"] = "\n".join([
         "usage: display_manager.py set {{ help | closest | highest | exact }}",
         "    [-w width] [-h height] [-d depth] [-r refresh]",
         "    [--display display] [--nohidpi]",
@@ -669,7 +669,7 @@ def showHelp(command=None):
         "                closest to the specified values.",
         "    highest     Set the display settings to the highest supported resolution.",
         "    exact       Set the display settings to the specified values if they are",
-        "                supported. If they are not, don't change the display.",
+        "                supported. If they are not, don\'t change the display.",
         "",
         "OPTIONS",
         "    -w width            Resolution width.",
@@ -677,12 +677,12 @@ def showHelp(command=None):
         "    -d depth            Pixel color depth (default: 32).",
         "    -r refresh          Refresh rate (default: 0).",
         "    --display display   Specify a particular display (default: main display).",
-        "    --no-hidpi          Don't show HiDPI settings.",
+        "    --no-hidpi          Don\'t show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
     ])
 
-    information['show'] = '\n'.join([
+    information["show"] = "\n".join([
         "usage: display_manager.py show {{ help | all | closest | highest | current }}",
         "    [-w width] [-h height] [-d depth] [-r refresh]",
         "    [--display display] [--nohidpi]",
@@ -702,12 +702,12 @@ def showHelp(command=None):
         "    -d depth            Pixel color depth (default: 32).",
         "    -r refresh          Refresh rate (default: 32).",
         "    --display display   Specify a particular display (default: main display).",
-        "    --no-hidpi          Don't show HiDPI settings.",
+        "    --no-hidpi          Don\'t show HiDPI settings.",
         "    --only-hidpi        Only show HiDPI settings.",
         "",
     ])
 
-    information['brightness'] = '\n'.join([
+    information["brightness"] = "\n".join([
         "usage: display_manager.py brightness {{ help | show | set [value] }}",
         "    [--display display]",
         "",
@@ -721,7 +721,7 @@ def showHelp(command=None):
         "",
     ])
 
-    information['rotate'] = '\n'.join([
+    information["rotate"] = "\n".join([
         "usage: display_manager.py rotate {{ help | show | set [value] }}"
         "    [--display display]",
         "commandS",
@@ -734,7 +734,7 @@ def showHelp(command=None):
         ""
     ])
 
-    information['mirroring'] = '\n'.join([
+    information["mirror"] = "\n".join([
         "usage: display_manager.py brightness {{ help | enable | disable }}",
         "    [--diplay display] [--mirror display]",
         "",
@@ -744,12 +744,12 @@ def showHelp(command=None):
         "    disable     Deactivate all mirroring.",
         "",
         "OPTIONS",
-        "    --display display               Change mirroring settings for 'display' (default: main display).",
-        "    --mirror display                Set the display to mirror 'display'.",
+        "    --display display               Change mirroring settings for \"display\" (default: main display).",
+        "    --mirror display                Set the display to mirror \"display\".",
         "",
     ])
 
-    information['underscan'] = '\n'.join([
+    information["underscan"] = "\n".join([
         "usage: display_manager.py underscan {{ help | show | set [value] }}",
         "    [--display display]",
         "",
@@ -768,17 +768,17 @@ def showHelp(command=None):
     if command in information:
         print(information[command])
     else:
-        print('\n'.join([
-            "usage: display_manager.py {{ help | set | show | brightness | rotate | mirroring | underscan }}",
+        print("\n".join([
+            "usage: display_manager.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
             "",
-            "Use any of the commands with 'help' to get more information:",
+            "Use any of the commands with \"help\" to get more information:",
             "    help        Show this help information.",
             "    set         Set the display configuration.",
             "    show        Show available display configurations.",
             "    brightness  Show or set the current display brightness.",
             "    rotate      Show or set display rotation.",
             "    underscan   Show or set the current display underscan.",
-            "    mirroring   Set mirroring configuration.",
+            "    mirror      Set mirroring configuration.",
             "",
         ]))
 

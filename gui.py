@@ -68,8 +68,14 @@ class App(object):
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=8, columnspan=8, sticky=tk.EW)
 
         # Mirroring menu
-        ttk.Label(self.mainFrame, text="Mirroring:").grid(column=0, row=9, sticky=tk.E)
-        # todo: some kind of mirroring input
+        ttk.Label(self.mainFrame, text="Mirror Display:").grid(column=0, row=9, sticky=tk.E)
+        self.mirrorEnabled = False
+        self.mirrorDropdown = ttk.Combobox(self.mainFrame, width=32, state="readonly")
+        self.mirrorDropdown.grid(column=1, row=9, sticky=tk.EW)
+        enable = ttk.Button(self.mainFrame, text="Enable", command=lambda: self.__toggleMirroring(True))
+        enable.grid(column=2, row=9, sticky=tk.E)
+        disable = ttk.Button(self.mainFrame, text="Disable", command=lambda: self.__toggleMirroring(False))
+        disable.grid(column=3, row=9, sticky=tk.E)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=10, columnspan=8, sticky=tk.EW)
 
         # Underscan menu
@@ -94,7 +100,7 @@ class App(object):
 
         self.displayDropdown["values"] = displayStrings
         self.displayDropdown.current(0)
-        self.displayDropdown.bind("<<ComboboxSelected>>", lambda event: self.__handleDisplaySelection())
+        self.displayDropdown.bind("<<ComboboxSelected>>", lambda event: self.__reloadDisplay())
 
     def __modeSelectionInit(self):
         """
@@ -108,11 +114,10 @@ class App(object):
 
         self.modeDropdown["values"] = sortedModeStrings
         self.modeDropdown.current(0)
-        self.modeDropdown.bind("<<ComboboxSelected>>", lambda event: self.__handleModeSelection())
 
     def __brightnessSelectionInit(self):
         """
-        Set self.brightnessSlider's value to that of the currently selected display
+        Set self.brightnessSlider's value to that of the currently selected display.
         """
         if self.display.brightness is not None:
             brightness = self.display.brightness * 100
@@ -121,24 +126,25 @@ class App(object):
             # todo: find a way to deactivate this slider altogether when the display's brightness can't be read/set
             pass
 
-    def __handleDisplaySelection(self):
+    def __mirrorSelectionInit(self):
         """
-        Handles self.displayDropdown's "ComboboxSelected" callback.
+        Show the other available displays to mirror.
         """
-        # Switch all data-containing elements to give options for the current display.
-        self.__modeSelectionInit()
-        self.__brightnessSelectionInit()
+        otherDisplayIDs = []
+        for display in self.displayDict.values():
+            displayID = str(display.displayID)
+            if displayID != str(self.display.displayID):
+                otherDisplayIDs.append(displayID + " (Main Display)" if display.isMain else displayID)
 
-    # todo: find something for this to do, or delete it
-    def __handleModeSelection(self):
-        """
-        Handles self.modeDropdown's "ComboboxSelected" callback.
-        """
-        pass
+        self.mirrorDropdown["values"] = otherDisplayIDs
+        self.mirrorDropdown.current(0)
 
-    # todo: find something for this to do, or delete it
-    def __handleBrightnessSelection(self):
-        pass
+    def __toggleMirroring(self, boolean):
+        """
+        Toggles whether mirroring is enabled.
+        :param boolean: True if enabled, False if disabled.
+        """
+        self.mirrorEnabled = boolean
 
     @property
     def display(self):
@@ -170,13 +176,13 @@ class App(object):
         """
         return int(self.rotateSlider.get() * 90)  # in multiples of 90 degrees
 
-    # todo: this
     @property
     def mirror(self):
         """
         :return: The currently selected display to mirror.
         """
-        return None
+        mirrorID = re.search(r"^[0-9]*", self.mirrorDropdown.get()).group()
+        return self.displayDict[mirrorID]
 
     # todo: this
     @property
@@ -220,13 +226,13 @@ class App(object):
                 angle=self.rotation,
                 displayID=self.display.displayID
             ),
-            # todo: uncomment, and set enable/disable mirroring correctly
-            # dm.Command(
-            #     "mirroring",
-            #     "enable",
-            #     mirrorDisplayID=self.mirror,
-            #     displayID=self.display.displayID
-            # ),
+            dm.Command(
+                "mirror",
+                "enable" if self.mirrorEnabled else "disable",
+                mirrorDisplayID=self.mirror.displayID,
+                displayID=self.display.displayID
+            ),
+            # todo: underscan
             # dm.Command(
             #     "underscan",
             #     "set",
@@ -255,6 +261,16 @@ class App(object):
         commandList = self.__generateCommandList()
         cg.buildConfig(commandList, self.config)
 
+    def __reloadDisplay(self):
+        """
+        Reloads data-containing elements.
+        """
+        self.__modeSelectionInit()
+        self.__brightnessSelectionInit()
+        self.__mirrorSelectionInit()
+
+        self.mirrorEnabled = False  # resets every time the display is switched
+
     def start(self):
         """
         Open the GUI.
@@ -262,10 +278,8 @@ class App(object):
         # Make sure Display Manager has IOKit ready for future requests
         dm.getIOKit()
 
-        # Initialize all the data-containing elements
         self.__displaySelectionInit()
-        self.__modeSelectionInit()
-        self.__brightnessSelectionInit()
+        self.__reloadDisplay()
 
         self.root.mainloop()
 
