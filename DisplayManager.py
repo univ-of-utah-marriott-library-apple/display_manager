@@ -165,16 +165,6 @@ class Display(object):
             if match:
                 return match
 
-        # todo: remove deprecated
-        # if whdr:
-        #     return whdr
-        # elif whd:
-        #     return whd
-        # elif wh:
-        #     return wh
-        # else:
-        #     return None
-
     def setMode(self, mode):
         """
         :param mode: The Quartz "DisplayMode" interface to set this display to.
@@ -276,7 +266,7 @@ class Command(object):
         self.depth = int(depth)
         self.refresh = int(refresh)
         self.hidpi = int(hidpi)
-        self.brightness = int(brightness)
+        self.brightness = float(brightness)
         self.angle = int(angle)
         self.underscan = int(underscan)
         if mirrorDisplayID:
@@ -343,9 +333,9 @@ class CommandList(object):
             command.run()
         for command in self.commandDict["rotate"]:
             command.run()
-        for command in self.commandDict["underscan"]:
-            command.run()
         for command in self.commandDict["mirroring"]:
+            command.run()
+        for command in self.commandDict["underscan"]:
             command.run()
 
 
