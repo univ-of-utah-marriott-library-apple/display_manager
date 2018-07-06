@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="" />
+    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/u1036693.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/u1036693.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commandLine.py" beforeDir="false" afterPath="$PROJECT_DIR$/commandLine.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,8 +17,8 @@
       <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DisplayManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-124">
-              <caret line="455" column="51" selection-start-line="455" selection-start-column="51" selection-end-line="455" selection-end-column="51" />
+            <state relative-caret-position="395">
+              <caret line="443" column="41" lean-forward="true" selection-start-line="443" selection-start-column="41" selection-end-line="443" selection-end-column="41" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#557#7140#0" />
@@ -95,11 +98,14 @@
                 <element signature="e#15293#15347#1" />
                 <element signature="e#15414#15751#0" />
                 <element signature="e#15414#15562#1" />
+                <element signature="e#17280#19415#0" />
                 <element signature="e#17280#17623#1" />
                 <element signature="e#17691#17828#0" />
                 <element signature="e#17863#18312#0" />
                 <element signature="e#17908#18312#0" />
                 <element signature="e#18180#18245#0" />
+                <element signature="e#18353#18692#0" />
+                <element signature="e#18473#18559#0" />
                 <element signature="e#18733#18875#0" />
                 <element signature="e#18916#19227#0" />
                 <element signature="e#18961#19227#0" />
@@ -136,20 +142,20 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="commandLine.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="commandLine.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/commandLine.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="515">
-              <caret line="86" column="27" selection-start-line="86" selection-start-column="27" selection-end-line="86" selection-end-column="27" />
+            <state relative-caret-position="687">
+              <caret line="93" column="63" selection-start-line="93" selection-start-column="63" selection-end-line="93" selection-end-column="63" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
+      <file leaf-file-name="copypasta.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dev/copypasta.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="1" column="5" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="5" />
+            <state relative-caret-position="30">
+              <caret line="2" selection-start-line="2" selection-end-line="2" />
             </state>
           </provider>
         </entry>
@@ -169,7 +175,7 @@
       <file leaf-file-name="gui.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="972">
+            <state relative-caret-position="1919">
               <caret line="162" column="40" selection-start-line="162" selection-start-column="40" selection-end-line="162" selection-end-column="40" />
               <folding>
                 <element signature="n#!!doc" />
@@ -182,8 +188,8 @@
       <file leaf-file-name="configWriter.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/configWriter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="15" column="76" selection-start-line="15" selection-start-column="76" selection-end-line="15" selection-end-column="76" />
+            <state relative-caret-position="90">
+              <caret line="6" column="10" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="10" />
               <folding>
                 <element signature="e#83#96#0" expanded="true" />
               </folding>
@@ -202,13 +208,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>self.view</find>
-      <find>selectedDis</find>
-      <find>if display.is</find>
-      <find>'command'</find>
-      <find>args.subcommand</find>
-      <find>args.command</find>
-      <find>subcommand</find>
       <find>todo</find>
       <find>k</find>
       <find>'</find>
@@ -232,6 +231,13 @@
       <find>!</find>
       <find>.idea</find>
       <find>pyc</find>
+      <find>command</find>
+      <find>[a-z]'[a-z]</find>
+      <find>don't</find>
+      <find>print</find>
+      <find>print(</find>
+      <find>argumentparser</find>
+      <find>, &quot;primary&quot;</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -274,14 +280,15 @@
         <option value="$PROJECT_DIR$/config/configWriter.py" />
         <option value="$PROJECT_DIR$/runDM.py" />
         <option value="$PROJECT_DIR$/configReader.py" />
-        <option value="$PROJECT_DIR$/dev/copypasta.py" />
         <option value="$PROJECT_DIR$/view.py" />
         <option value="$PROJECT_DIR$/configWriter.py" />
         <option value="$PROJECT_DIR$/dev/setup.py" />
         <option value="$PROJECT_DIR$/gui.py" />
         <option value="$PROJECT_DIR$/DisplayManager.py" />
-        <option value="$PROJECT_DIR$/commandLine.py" />
         <option value="$PROJECT_DIR$/dev/test.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/dev/copypasta.py" />
+        <option value="$PROJECT_DIR$/commandLine.py" />
       </list>
     </option>
   </component>
@@ -303,6 +310,11 @@
             <path>
               <item name="Display Manager" type="b2602c69:ProjectViewProjectNode" />
               <item name="Display Manager" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Display Manager" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Display Manager" type="462c0819:PsiDirectoryNode" />
+              <item name="dev" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -423,13 +435,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/parseWrapper.py" />
     <entry file="file://$PROJECT_DIR$/config/__init__.py" />
-    <entry file="file://$PROJECT_DIR$/dev/copypasta.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" lean-forward="true" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dev/help_stuff.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -437,16 +442,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="6" column="38" lean-forward="true" selection-start-line="6" selection-start-column="38" selection-end-line="6" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/configWriter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="15" column="76" selection-start-line="15" selection-start-column="76" selection-end-line="15" selection-end-column="76" />
-          <folding>
-            <element signature="e#83#96#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -460,9 +455,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/dev/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/configWriter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="10" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="10" />
+          <folding>
+            <element signature="e#83#96#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="972">
+        <state relative-caret-position="1919">
           <caret line="162" column="40" selection-start-line="162" selection-start-column="40" selection-end-line="162" selection-end-column="40" />
           <folding>
             <element signature="n#!!doc" />
@@ -473,8 +492,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DisplayManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-124">
-          <caret line="455" column="51" selection-start-line="455" selection-start-column="51" selection-end-line="455" selection-end-column="51" />
+        <state relative-caret-position="395">
+          <caret line="443" column="41" lean-forward="true" selection-start-line="443" selection-start-column="41" selection-end-line="443" selection-end-column="41" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#557#7140#0" />
@@ -554,11 +573,14 @@
             <element signature="e#15293#15347#1" />
             <element signature="e#15414#15751#0" />
             <element signature="e#15414#15562#1" />
+            <element signature="e#17280#19415#0" />
             <element signature="e#17280#17623#1" />
             <element signature="e#17691#17828#0" />
             <element signature="e#17863#18312#0" />
             <element signature="e#17908#18312#0" />
             <element signature="e#18180#18245#0" />
+            <element signature="e#18353#18692#0" />
+            <element signature="e#18473#18559#0" />
             <element signature="e#18733#18875#0" />
             <element signature="e#18916#19227#0" />
             <element signature="e#18961#19227#0" />
@@ -594,24 +616,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dev/test.py">
+    <entry file="file://$PROJECT_DIR$/dev/copypasta.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/commandLine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="515">
-          <caret line="86" column="27" selection-start-line="86" selection-start-column="27" selection-end-line="86" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="5" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="5" />
+        <state relative-caret-position="687">
+          <caret line="93" column="63" selection-start-line="93" selection-start-column="63" selection-end-line="93" selection-end-column="63" />
         </state>
       </provider>
     </entry>
