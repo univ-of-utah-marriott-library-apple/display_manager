@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/dev/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev/test.py" afterDir="false" />
-    </list>
+    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -149,7 +147,11 @@
       </file>
       <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="5" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="5" />
+            </state>
+          </provider>
         </entry>
       </file>
       <file leaf-file-name="configReader.py" pinned="false" current-in-tab="false">
@@ -200,8 +202,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>mai</find>
-      <find>run display</find>
       <find>self.view</find>
       <find>selectedDis</find>
       <find>if display.is</find>
@@ -230,6 +230,8 @@
       <find>rotate</find>
       <find>&quot;set&quot;, &quot;show&quot;</find>
       <find>!</find>
+      <find>.idea</find>
+      <find>pyc</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -301,11 +303,6 @@
             <path>
               <item name="Display Manager" type="b2602c69:ProjectViewProjectNode" />
               <item name="Display Manager" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Display Manager" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Display Manager" type="462c0819:PsiDirectoryNode" />
-              <item name="dev" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -612,7 +609,11 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="5" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="5" />
+        </state>
+      </provider>
     </entry>
   </component>
 </project>
