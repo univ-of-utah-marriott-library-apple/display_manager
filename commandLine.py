@@ -10,24 +10,25 @@ sys.path.append("..")  # to allow import from current directory
 import DisplayManager as dm
 
 
-class CustomParser(argparse.ArgumentParser):
-    """
-    A modified version of ArgumentParser that handles errors differently.
-    """
-
-    def error(self, message):
-        """
-        When the parser encounters a user error, it comes here.
-        """
-        print(message)
-        showHelp()
-        sys.exit(1)
-
-    # def add_parser(self, destination, commandName):
-    #     parent = argparse.ArgumentParser(add_help=False, conflict_handler="resolve")
-    #     child = parent.add_subparsers(dest=destination)
-    #     grandchild = CustomParser(child.add_parser(commandName, add_help=False), conflict_handler="resolve")
-    #     return grandchild
+# todo: fix or remove
+# class CustomParser(argparse.ArgumentParser):
+#     """
+#     A modified version of ArgumentParser that handles errors differently.
+#     """
+#
+#     def error(self, message):
+#         """
+#         When the parser encounters a user error, it comes here.
+#         """
+#         print(message)
+#         showHelp()
+#         sys.exit(1)
+#
+#     def add_parser(self, destination, commandName):
+#         parent = argparse.ArgumentParser(add_help=False, conflict_handler="resolve")
+#         child = parent.add_subparsers(dest=destination)
+#         grandchild = CustomParser(child.add_parser(commandName, add_help=False), conflict_handler="resolve")
+#         return grandchild
 
 
 def earlyExit():
@@ -47,66 +48,110 @@ def parse(parseList):
     Parse the user command-line input.
     :return: A parser that has parsed all command-line arguments passed in.
     """
-    parser = CustomParser(
-        description="Display Manager, version 1.0.0",
-        usage="commandLine.py  { help | set | show | brightness | rotate | mirror | underscan }",
-        prefix_chars="--",  # arguments beginning with "--" are optional
-        add_help=False
-    )
+    # todo: fix or remove
+    # parser = CustomParser(
+    #     description="Display Manager, version 1.0.0",
+    #     usage="commandLine.py  { help | set | show | brightness | rotate | mirror | underscan }",
+    #     prefix_chars="--",  # arguments beginning with "--" are optional
+    #     add_help=False
+    # )
+    # primary = parser.add_subparsers(dest="primary")
+    #
+    # pHelp = primary.add_parser("help", add_help=False)
+    # pHelp.add_argument(
+    #     "secondary",
+    #     choices=["set", "show", "brightness", "rotate", "underscan", "mirror"],
+    #     nargs="?",
+    #     default=None,
+    # )
+    #
+    # pSet = primary.add_parser("set", add_help=False)
+    # pSet.add_argument(
+    #     "secondary",
+    #     choices=["help", "closest", "highest", "exact"],
+    #     nargs="?",
+    #     default="closest"
+    # )
+    #
+    # pShow = primary.add_parser("show", add_help=False)
+    # pShow.add_argument(
+    #     "secondary",
+    #     choices=["help", "all", "closest", "highest", "current", "displays"],
+    #     nargs="?",
+    #     default="all"
+    # )
+    #
+    # pBrightness = primary.add_parser("brightness", add_help=False)
+    # pBrightness.add_argument("secondary", choices=["help", "show", "set"])
+    # pBrightness.add_argument("brightness", type=float, nargs="?", default=1)
+    #
+    # pRotate = primary.add_parser("rotate", add_help=False)
+    # pRotate.add_argument("secondary", choices=["help", "set", "show"], nargs="?", default="show")
+    # pRotate.add_argument("rotation", type=int, nargs="?", default=0)
+    #
+    # pMirror = primary.add_parser("mirror", add_help=False)
+    # pMirror.add_argument("secondary", choices=["help", "enable", "disable"])
+    # pMirror.add_argument("-m", "--mirror", type=int)
+    #
+    # pUnderscan = primary.add_parser("underscan", add_help=False)
+    # pUnderscan.add_argument("secondary", choices=["help", "show", "set"])
+    # pUnderscan.add_argument("underscan", type=float, nargs="?")
+    #
+    # for p in [pSet, pShow]:
+    #     p.add_argument("-w", type=int)
+    #     p.add_argument("-h", type=int)
+    #     p.add_argument("-p", type=int, default=32)
+    #     p.add_argument("-r", type=int, default=0)
+    #     p.add_argument("--no-hidpi", action="store_true")
+    #     p.add_argument("--only-hidpi", action="store_true")
+    #
+    # for p in [pSet, pShow, pBrightness, pRotate, pMirror, pUnderscan]:
+    #     p.add_argument("-d", type=int, default=dm.getMainDisplayID())
+    #
+    # return primary.parse_args(parseList)
+
+    parser = argparse.ArgumentParser(add_help=False)
     primary = parser.add_subparsers(dest="primary")
 
-    pHelp = primary.add_parser("help", add_help=False)
-    pHelp.add_argument(
-        "secondary",
-        choices=["set", "show", "brightness", "rotate", "underscan", "mirror"],
-        nargs="?",
-        default=None,
-    )
+    help = primary.add_parser("help", add_help=False)
+    help.add_argument("secondary", choices=["set", "show", "brightness", "rotate", "underscan", "mirror"],
+                      nargs="?", default=None)
 
-    pSet = primary.add_parser("set", add_help=False)
-    pSet.add_argument(
-        "secondary",
-        choices=["help", "closest", "highest", "exact"],
-        nargs="?",
-        default="closest"
-    )
+    set = primary.add_parser("set", add_help=False)
+    set.add_argument("secondary", choices=["help", "closest", "highest", "exact"], nargs="?", default="closest")
 
-    pShow = primary.add_parser("show", add_help=False)
-    pShow.add_argument(
-        "secondary",
-        choices=["help", "all", "closest", "highest", "current", "displays"],
-        nargs="?",
-        default="all"
-    )
+    show = primary.add_parser("show", add_help=False)
+    show.add_argument("secondary", choices=["help", "all", "closest", "highest", "current", "displays"],
+                      nargs="?", default="all")
 
-    pBrightness = primary.add_parser("brightness", add_help=False)
-    pBrightness.add_argument("secondary", choices=["help", "show", "set"])
-    pBrightness.add_argument("brightness", type=float, nargs="?", default=1)
+    brightness = primary.add_parser("brightness", add_help=False)
+    brightness.add_argument("secondary", choices=["help", "show", "set"])
+    brightness.add_argument("brightness", type=float, nargs="?", default=1)
 
-    pRotate = primary.add_parser("rotate", add_help=False)
-    pRotate.add_argument("secondary", choices=["help", "set", "show"], nargs="?", default="show")
-    pRotate.add_argument("rotation", type=int, nargs="?", default=0)
+    rotate = primary.add_parser("rotate", add_help=False)
+    rotate.add_argument("secondary", choices=["help", "set", "show"], nargs="?", default="show")
+    rotate.add_argument("rotation", type=int, nargs="?", default=0)
 
-    pMirror = primary.add_parser("mirror", add_help=False)
-    pMirror.add_argument("secondary", choices=["help", "enable", "disable"])
-    pMirror.add_argument("-m", "--mirror", type=int)
+    underscan = primary.add_parser("underscan", add_help=False)
+    underscan.add_argument("secondary", choices=["help", "show", "set"])
+    underscan.add_argument("underscan", type=float, nargs="?")
 
-    pUnderscan = primary.add_parser("underscan", add_help=False)
-    pUnderscan.add_argument("secondary", choices=["help", "show", "set"])
-    pUnderscan.add_argument("underscan", type=float, nargs="?")
+    mirror = primary.add_parser("mirror", add_help=False)
+    mirror.add_argument("secondary", choices=["help", "enable", "disable"])
+    mirror.add_argument("-m", "--mirror", type=int)
 
-    for p in [pSet, pShow]:
-        p.add_argument("-w", type=int)
-        p.add_argument("-h", type=int)
-        p.add_argument("-p", type=int, default=32)
-        p.add_argument("-r", type=int, default=0)
-        p.add_argument("--no-hidpi", action="store_true")
-        p.add_argument("--only-hidpi", action="store_true")
+    for primary in [set, show]:
+        primary.add_argument("-w", "--width", type=int)
+        primary.add_argument("-h", "--height", type=int)
+        primary.add_argument("-p", "--pixel-depth", type=int, default=32)
+        primary.add_argument("-r", "--refresh", type=int, default=0)
+        primary.add_argument("--no-hidpi", action="store_true")
+        primary.add_argument("--only-hidpi", action="store_true")
 
-    for p in [pSet, pShow, pBrightness, pRotate, pMirror, pUnderscan]:
-        p.add_argument("-d", type=int, default=dm.getMainDisplayID())
+    for primary in [set, show, brightness, rotate, mirror, underscan]:
+        primary.add_argument("-d", "--display", type=int, default=dm.getMainDisplayID())
 
-    return primary.parse_args(parseList)
+    return parser.parse_args(parseList)
 
 
 def getCommand(commandString):
@@ -141,11 +186,27 @@ def getCommand(commandString):
 
     command = None
     if args.primary == "set":
-        command = dm.Command(args.primary, args.secondary, width=args.width, height=args.height, depth=args.depth,
-                             refresh=args.refresh, displayID=args.display, hidpi=hidpi())
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            width=args.width,
+            height=args.height,
+            depth=args.pixel_depth,
+            refresh=args.refresh,
+            displayID=args.display,
+            hidpi=hidpi()
+        )
     elif args.primary == "show":
-        command = dm.Command(args.primary, args.secondary, width=args.width, height=args.height, depth=args.depth,
-                             refresh=args.refresh, displayID=args.display, hidpi=hidpi())
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            width=args.width,
+            height=args.height,
+            depth=args.pixel_depth,
+            refresh=args.refresh,
+            displayID=args.display,
+            hidpi=hidpi()
+        )
     elif args.primary == "brightness":
         command = dm.Command(args.primary, args.secondary, brightness=args.brightness, displayID=args.display)
     elif args.primary == "rotate":
