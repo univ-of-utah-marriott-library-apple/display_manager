@@ -263,12 +263,12 @@ class Command(object):
             self.height = int(height)
         else:
             self.height = None
-        self.depth = int(depth)
-        self.refresh = int(refresh)
+        self.depth = float(depth)
+        self.refresh = float(refresh)
         self.hidpi = int(hidpi)
         self.brightness = float(brightness)
         self.angle = int(angle)
-        self.underscan = int(underscan)
+        self.underscan = float(underscan)
         if mirrorDisplayID:
             self.mirrorDisplayID = int(mirrorDisplayID)
         else:
@@ -402,6 +402,7 @@ def getIOKit():
                 iokit[key] = globals()[key]
 
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
+        iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
 
 
 def getAllDisplays():
@@ -452,7 +453,6 @@ def handleSet(command, width, height, depth, refresh, displayID, hidpi=0):
 
     if command == "closest":
         if width is None or height is None:
-            showHelp("set")
             print("Must have both width and height for closest setting.")
             sys.exit(1)
 
@@ -512,7 +512,6 @@ def handleShow(command, width, height, depth, refresh, displayID, hidpi=0):
 
     elif command == "closest":
         if width is None or height is None:
-            showHelp("show")
             print("Must have both width and height for closest matching.")
             sys.exit(1)
 
@@ -645,142 +644,6 @@ def handleUnderscan(command, underscan, displayID):
             print("Failed to set underscan of display {}; error {}".format(display.displayID, error))
         print("Display: {}{}".format(displayID, " (Main Display)" if display.isMain else ""))
         print("    {:.2f}%".format(underscan * 100))
-
-
-def showHelp(command=None):
-    """
-    Prints out the help information.
-
-    :param command: The command to print information for.
-    """
-    # Give the version information always.
-    print("Display Manager, version 1.0.0")
-
-    information = {}
-
-    information["set"] = "\n".join([
-        "usage: display_manager.py set {{ help | closest | highest | exact }}",
-        "    [-w width] [-h height] [-d depth] [-r refresh]",
-        "    [--display display] [--nohidpi]",
-        "",
-        "commandS",
-        "    help        Print this help information.",
-        "    closest     Set the display settings to the supported resolution that is",
-        "                closest to the specified values.",
-        "    highest     Set the display settings to the highest supported resolution.",
-        "    exact       Set the display settings to the specified values if they are",
-        "                supported. If they are not, don\'t change the display.",
-        "",
-        "OPTIONS",
-        "    -w width            Resolution width.",
-        "    -h height           Resolution height.",
-        "    -d depth            Pixel color depth (default: 32).",
-        "    -r refresh          Refresh rate (default: 0).",
-        "    --display display   Specify a particular display (default: main display).",
-        "    --no-hidpi          Don\'t show HiDPI settings.",
-        "    --only-hidpi        Only show HiDPI settings.",
-        "",
-    ])
-
-    information["show"] = "\n".join([
-        "usage: display_manager.py show {{ help | all | closest | highest | current }}",
-        "    [-w width] [-h height] [-d depth] [-r refresh]",
-        "    [--display display] [--nohidpi]",
-        "",
-        "commandS",
-        "    help        Print this help information.",
-        "    all         Show all supported resolutions for the display.",
-        "    closest     Show the closest matching supported resolution to the specified",
-        "                values.",
-        "    highest     Show the highest supported resolution.",
-        "    current     Show the current display configuration.",
-        "    displays    Just list the current displays and their IDs.",
-        "",
-        "OPTIONS",
-        "    -w width            Resolution width.",
-        "    -h height           Resolution height.",
-        "    -d depth            Pixel color depth (default: 32).",
-        "    -r refresh          Refresh rate (default: 32).",
-        "    --display display   Specify a particular display (default: main display).",
-        "    --no-hidpi          Don\'t show HiDPI settings.",
-        "    --only-hidpi        Only show HiDPI settings.",
-        "",
-    ])
-
-    information["brightness"] = "\n".join([
-        "usage: display_manager.py brightness {{ help | show | set [value] }}",
-        "    [--display display]",
-        "",
-        "commandS",
-        "    help        Print this help information.",
-        "    show        Show the current brightness setting(s).",
-        "    set [value] Sets the brightness to the given value. Must be between 0 and 1.",
-        "",
-        "OPTIONS",
-        "    --display display   Specify a particular display (default: main display).",
-        "",
-    ])
-
-    information["rotate"] = "\n".join([
-        "usage: display_manager.py rotate {{ help | show | set [value] }}"
-        "    [--display display]",
-        "commandS",
-        "    help        Print this help information.",
-        "    show        Show the current display rotation.",
-        "    set [value] Set the rotation to the given value (in degrees). Must be a multiple of 90.",
-        "",
-        "OPTIONS",
-        "    --display display   Specify a particular display (default: main display).",
-        ""
-    ])
-
-    information["mirror"] = "\n".join([
-        "usage: display_manager.py brightness {{ help | enable | disable }}",
-        "    [--diplay display] [--mirror display]",
-        "",
-        "commandS",
-        "    help        Print this help information.",
-        "    enable      Activate mirroring.",
-        "    disable     Deactivate all mirroring.",
-        "",
-        "OPTIONS",
-        "    --display display               Change mirroring settings for \"display\" (default: main display).",
-        "    --mirror display                Set the display to mirror \"display\".",
-        "",
-    ])
-
-    information["underscan"] = "\n".join([
-        "usage: display_manager.py underscan {{ help | show | set [value] }}",
-        "    [--display display]",
-        "",
-        "commandS",
-        "    help        Print this help information.",
-        "    show        Show the current underscan setting(s).",
-        "    set [value] Sets the underscan to the given value. Must be between 0 and 1.",
-        "",
-        "NOTES",
-        "    The underscan setting is provided for by a private Apple API. This means that,",
-        "    while it works fine for now, they could change the functionality at any point",
-        "    without warning.",
-        "",
-    ])
-
-    if command in information:
-        print(information[command])
-    else:
-        print("\n".join([
-            "usage: display_manager.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
-            "",
-            "Use any of the commands with \"help\" to get more information:",
-            "    help        Show this help information.",
-            "    set         Set the display configuration.",
-            "    show        Show available display configurations.",
-            "    brightness  Show or set the current display brightness.",
-            "    rotate      Show or set display rotation.",
-            "    underscan   Show or set the current display underscan.",
-            "    mirror      Set mirroring configuration.",
-            "",
-        ]))
 
 
 def run(commands):

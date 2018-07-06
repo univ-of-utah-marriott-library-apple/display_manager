@@ -12,16 +12,16 @@ import DisplayManager as dm
 
 def earlyExit():
     """
-    Exits before actually doing anything when the user didn"t enter enough parameters.
+    Exits before actually doing anything when the user didn't enter enough parameters.
     """
     # If they don"t include enough arguments, show help and exit with error
     if len(sys.argv) < 2:
-        dm.showHelp()
+        showHelp()
         sys.exit(1)
 
     # Show help; exit is a success
     elif len(sys.argv) == 2 and sys.argv[1] == "--help":
-        dm.showHelp()
+        showHelp()
         sys.exit(0)
 
 
@@ -34,7 +34,7 @@ def parse(parseList):
     primary = parser.add_subparsers(dest="primary")
 
     help = primary.add_parser("help", add_help=False)
-    help.add_argument("secondary", choices=["set", "show", "brightness", "underscan", "mirror"],
+    help.add_argument("secondary", choices=["set", "show", "brightness", "rotate", "underscan", "mirror"],
                       nargs="?", default=None)
 
     set = primary.add_parser("set", add_help=False)
@@ -58,19 +58,18 @@ def parse(parseList):
 
     mirror = primary.add_parser("mirror", add_help=False)
     mirror.add_argument("secondary", choices=["help", "enable", "disable"])
-    mirror.add_argument("--mirror", type=int)
-
-    for primary in [set, show, brightness, underscan, mirror, rotate]:
-        primary.add_argument("--help", action="store_true")
-        primary.add_argument("--display", type=int, default=dm.getMainDisplayID())
+    mirror.add_argument("-m", "--mirror", type=int)
 
     for primary in [set, show]:
         primary.add_argument("-w", "--width", type=int)
         primary.add_argument("-h", "--height", type=int)
-        primary.add_argument("-d", "--depth", type=int, default=32)
+        primary.add_argument("-p", "--pixel depth", type=int, default=32)
         primary.add_argument("-r", "--refresh", type=int, default=0)
         primary.add_argument("--no-hidpi", action="store_true")
         primary.add_argument("--only-hidpi", action="store_true")
+
+    for primary in [set, show, brightness, rotate, mirror, underscan]:
+        primary.add_argument("-d", "--display", type=int, default=dm.getMainDisplayID())
 
     return parser.parse_args(parseList)
 
@@ -80,7 +79,7 @@ def getCommand(commandString):
     Transforms input string into a Command.
     :returns: The resulting Command.
     """
-    earlyExit()  # exits if the user didn"t give enough information, or just wanted help
+    earlyExit()  # exits if the user didn't give enough information, or just wanted help
 
     parseList = []
     for element in commandString.split():
@@ -88,17 +87,17 @@ def getCommand(commandString):
     args = parse(parseList)
 
     if args.primary == "help":  # run help (default)
-        dm.showHelp(command=args.secondary)
+        showHelp(command=args.secondary)
         sys.exit(0)
 
     if args.secondary == "help" or args.help:  # secondary-specific help
-        dm.showHelp(command=args.primary)
+        showHelp(command=args.primary)
         sys.exit(0)
 
     def hidpi():
         hidpi = 0  # show all modes (default)
         if args.only_hidpi or args.no_hidpi:
-            if not (args.only_hidpi and args.no_hidpi):  # If they didn"t give contrary instructions, proceed.
+            if not (args.only_hidpi and args.no_hidpi):  # If they didn't give contrary instructions, proceed.
                 if args.no_hidpi:
                     hidpi = 1  # do not show HiDPI modes
                 elif args.only_hidpi:
@@ -122,6 +121,122 @@ def getCommand(commandString):
         command = dm.Command(args.primary, args.secondary, underscan=args.underscan, displayID=args.display)
 
     return command
+
+
+def showHelp(command=None):
+    """
+    Prints out the help information.
+
+    :param command: The command to print information for.
+    """
+    print("Display Manager, version 1.0.0")
+
+    usage = {"help": "\n".join([
+        "usage: commandLine.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
+        "",
+        "Use any of the commands with \"help\" to get more information:",
+        "    help       Show this help information.",
+        "    set        Set the display configuration.",
+        "    show       Show available display configurations.",
+        "    brightness Show or set the current display brightness.",
+        "    rotate     Show or set display rotation.",
+        "    underscan  Show or set the current display underscan.",
+        "    mirror     Set mirroring configuration.",
+        "",
+    ]), "set": "\n".join([
+        "usage: commandLine.py set {{ help | closest | highest | exact }}",
+        "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
+        "    [--no-hidpi] [--only-hidpi]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    closest    Set the display settings to the supported resolution that is closest to the specified values.",
+        "    highest    Set the display settings to the highest supported resolution.",
+        "    exact      Set the display settings to the specified values if they are supported. If they are not,"
+        "don\'t change the display.",
+        "",
+        "OPTIONS",
+        "    -w width           Resolution width.",
+        "    -h height          Resolution height.",
+        "    -d depth           Pixel color depth (default: 32).",
+        "    -r refresh         Refresh rate (default: 0).",
+        "    -d display         Specify a particular display (default: main display).",
+        "    --no-hidpi         Don\'t show HiDPI settings.",
+        "    --only-hidpi       Only show HiDPI settings.",
+        "",
+    ]), "show": "\n".join([
+        "usage: commandLine.py show {{ help | all | closest | highest | current | displays }}",
+        "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
+        "    [--no-hidpi] [--only-hidpi]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    all        Show all supported resolutions for the display.",
+        "    closest    Show the closest matching supported resolution to the specified values.",
+        "    highest    Show the highest supported resolution.",
+        "    current    Show the current display configuration.",
+        "    displays   List the current displays and their IDs.",
+        "",
+        "OPTIONS",
+        "    -w width           Resolution width.",
+        "    -h height          Resolution height.",
+        "    -d depth           Pixel color depth (default: 32).",
+        "    -r refresh         Refresh rate (default: 32).",
+        "    -d display         Specify a particular display (default: main display).",
+        "    --no-hidpi         Don\'t show HiDPI settings.",
+        "    --only-hidpi       Only show HiDPI settings.",
+        "",
+    ]), "brightness": "\n".join([
+        "usage: commandLine.py brightness {{ help | show | set [val] }}",
+        "    [-d display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current brightness setting(s).",
+        "    set [val]  Sets the brightness to the given value. Must be between 0 and 1.",
+        "",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
+        "",
+    ]), "rotate": "\n".join([
+        "usage: commandLine.py rotate {{ help | show | set [val] }}",
+        "    [-d display]",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current display rotation.",
+        "    set [val]  Set the rotation to the given value (in degrees). Must be a multiple of 90.",
+        "",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
+        ""
+    ]), "mirror": "\n".join([
+        "usage: commandLine.py mirror {{ help | enable | disable }}",
+        "    [-d display] [-m display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    enable     Activate mirroring.",
+        "    disable    Deactivate all mirroring.",
+        "",
+        "OPTIONS",
+        "    -d display         Change mirroring settings for \"display\" (default: main display).",
+        "    -m display         Set the display to mirror \"display\".",
+        "",
+    ]), "underscan": "\n".join([
+        "usage: commandLine.py underscan {{ help | show | set [val] }}",
+        "    [-d display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current underscan setting(s).",
+        "    set [val]  Sets the underscan to the given value. Must be between 0 and 1.",
+        "",
+    ])}
+
+    if command in usage:
+        print(usage[command])
+    else:
+        print(usage["help"])
 
 
 def main():
