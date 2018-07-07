@@ -36,7 +36,8 @@ class App(object):
         self.root.rowconfigure(0, weight=1)
         self.root.geometry("+400+200")
 
-        self.renameImage = tk.PhotoImage(
+        # todo: get the real logo
+        self.logoPic = tk.PhotoImage(
             data='''\
         R0lGODlhWAJRAPcAAAEAAAQECgYJCgwMDQgHCBMODQ4QDhERDg0OEQUHFREOEw4REgoTGhITFBQV
         GhUZGxsbHBkXGCcXFR0iHiwkHRwdIxYZJhAVLyIcIxwjJRcpNiUlJSQlKyUqLCwrLCknJzQqKCgr
@@ -240,8 +241,7 @@ class App(object):
         BAMCAQAAOw==
         '''
         )
-        self.imageLabel = ttk.Label(self.mainFrame, image=self.renameImage).grid(column=1, row=0, sticky=tk.NSEW)
-        # self.imageLabel["image"] = self.renameImage
+        self.imageLabel = ttk.Label(self.mainFrame, image=self.logoPic).grid(column=1, row=0, sticky=tk.NSEW)
         # todo: this separator (increment more than you think you need to; might be other stuff that needs a new row too
         # ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=1, columnspan=8, sticky=tk.EW)
 

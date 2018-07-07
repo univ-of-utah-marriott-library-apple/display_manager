@@ -308,19 +308,192 @@ class Command(object):
         Runs whichever command this Command has stored.
         """
         if self.primary == "set":
-            handleSet(self.secondary, self.width, self.height, self.depth, self.refresh,
-                      self.displayID, self.hidpi)
+            self.handleSet()
         elif self.primary == "show":
-            handleShow(self.secondary, self.width, self.height, self.depth, self.refresh,
-                       self.displayID, self.hidpi)
+            self.handleShow()
         elif self.primary == "brightness":
-            handleBrightness(self.secondary, self.brightness, self.displayID)
+            self.handleBrightness()
         elif self.primary == "rotate":
-            handleRotate(self.secondary, self.angle, self.displayID)
+            self.handleRotate()
         elif self.primary == "underscan":
-            handleUnderscan(self.secondary, self.underscan, self.displayID)
+            self.handleUnderscan()
         elif self.primary == "mirror":
-            handleMirror(self.secondary, self.displayID, self.mirrorDisplayID)
+            self.handleMirror()
+
+    def printNotFound(self):
+        print("    No matching display mode was found. {}".format(
+            "Try removing HiDPI flags to find a mode." if self.hidpi != 0 else ""))
+
+    def handleSet(self):
+        """
+        Sets the display to the correct DisplayMode.
+        """
+        display = Display(self.displayID)
+
+        if self.secondary == "closest":
+            if self.width is None or self.height is None:
+                print("Must have both width and height for closest setting.")
+                sys.exit(1)
+
+            closest = display.closestMode(self.width, self.height, self.depth, self.refresh)
+            if closest:
+                display.setMode(closest)
+            else:
+                self.printNotFound()
+                sys.exit(1)
+
+        elif self.secondary == "highest":
+            highest = display.highestMode(self.hidpi)
+            if highest:
+                display.setMode(highest)
+            else:
+                self.printNotFound()
+                sys.exit(1)
+
+        elif self.secondary == "exact":
+            exact = display.exactMode(self.width, self.height, self.depth, self.refresh, self.hidpi)
+            if exact:
+                display.setMode(exact)
+            else:
+                self.printNotFound()
+                sys.exit(1)
+
+    def handleShow(self):
+        """
+        Shows the user information about connected displays.
+        """
+        display = Display(self.displayID)
+
+        if self.secondary == "all":
+            for display in getAllDisplays():
+                print(
+                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+
+                foundMatching = False  # whether we ended up printing a matching mode or not
+                for mode in sorted(display.allModes, reverse=True):
+                    print("    {}".format(mode))
+                    foundMatching = True
+
+                if not foundMatching:
+                    self.printNotFound()
+
+        elif self.secondary == "closest":
+            if self.width is None or self.height is None:
+                print("Must have both width and height for closest matching.")
+                sys.exit(1)
+
+            closest = display.closestMode(self.width, self.height, self.depth, self.refresh)
+            if closest:
+                print("    {}".format(closest))
+            else:
+                self.printNotFound()
+
+        elif self.secondary == "highest":
+            highest = display.highestMode(self.hidpi)
+            if highest:
+                print("    {}".format(highest))
+            else:
+                self.printNotFound()
+
+        elif self.secondary == "current":
+            for display in getAllDisplays():
+                print(
+                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+
+                current = display.currentMode
+                if current:
+                    print("    {}".format(current))
+                else:
+                    self.printNotFound()
+
+        elif self.secondary == "displays":
+            for display in getAllDisplays():
+                print(
+                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+
+    def handleBrightness(self):
+        """
+        Sets or shows a display's brightness.
+        """
+        display = Display(self.displayID)
+
+        if self.secondary == "show":
+            for display in getAllDisplays():
+                if display.brightness:
+                    print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
+                    print("    {:.2f}%".format(display.brightness * 100))
+                else:
+                    print("Failed to get brightness of display {}".format(display.displayID))
+
+        elif self.secondary == "set":
+            error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayBrightness"],
+                                                        self.brightness)
+            if error:
+                print("Failed to set brightness of display {}; error {}".format(display.displayID, error))
+                # External display brightness probably can't be managed this way
+                print("External displays may not be compatible with Display Manager. \n"
+                      "If this is an external display, try setting manually on device hardware.")
+
+    def handleRotate(self):
+        """
+        Sets or shows a display's rotation.
+        """
+        display = Display(self.displayID)
+
+        if self.secondary == "show":
+            for display in getAllDisplays():
+                print(
+                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+                print("    Rotation: {0} degrees".format(str(int(display.rotation))))
+
+        elif self.secondary == "set":
+            # Get rotation "options", per user input
+            angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
+            rotateCode = 1024
+            if self.angle % 90 != 0:  # user entered inappropriate angle, so we quit
+                print("Can only rotate by multiples of 90 degrees.")
+                sys.exit(1)
+            # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
+            options = rotateCode | (angleCodes[self.angle % 360] << 16)
+
+            # Actually rotate the screen
+            iokit["IOServiceRequestProbe"](display.servicePort, options)
+
+    def handleMirror(self):
+        """
+        Enables or disables mirroring between two displays.
+        """
+        if self.secondary == "enable":
+            mirrorDisplay = Display(self.mirrorDisplayID)
+            display = Display(self.displayID)
+
+            mirrorDisplay.setMirror(display)
+
+        if self.secondary == "disable":
+            for display in getAllDisplays():
+                display.setMirror(None)
+
+    def handleUnderscan(self):
+        """
+        Sets or shows a display's underscan settings.
+        """
+        display = Display(self.displayID)
+
+        if self.secondary == "show":
+            for display in getAllDisplays():
+                (error, self.underscan) = iokit["IODisplayGetFloatParameter"](
+                    display.servicePort, 0, iokit["kDisplayUnderscan"], None)
+                if error:
+                    print("Failed to get underscan value of display {}; error {}".format(display.displayID, error))
+                    continue
+                print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
+                print("    {:.2f}%".format(self.underscan * 100))
+
+        elif self.secondary == "set":
+            error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"],
+                                                        self.underscan)
+            if error:
+                print("Failed to set underscan of display {}; error {}".format(display.displayID, error))
 
 
 class CommandList(object):
@@ -454,217 +627,6 @@ def getAllDisplayIDs():
     if error:
         raise RuntimeError("Unable to get displays list.")
     return displays
-
-
-def handleSet(command, width, height, depth, refresh, displayID, hidpi=0):
-    """
-    Handles all of the options for the "set" command.
-
-    :param command: The command passed in.
-    :param width: Desired width.
-    :param height: Desired height.
-    :param depth: Desired pixel depth.
-    :param refresh: Desired refresh rate.
-    :param displayID: Specific display to configure.
-    :param hidpi: HiDPI settings.
-    """
-    display = Display(displayID)
-
-    def printNotFound():
-        print("    No matching display mode was found. {}".format(
-            "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
-
-    if command == "closest":
-        if width is None or height is None:
-            print("Must have both width and height for closest setting.")
-            sys.exit(1)
-
-        closest = display.closestMode(width, height, depth, refresh)
-        if closest:
-            display.setMode(closest)
-        else:
-            printNotFound()
-            sys.exit(1)
-
-    elif command == "highest":
-        highest = display.highestMode(hidpi)
-        if highest:
-            display.setMode(highest)
-        else:
-            printNotFound()
-            sys.exit(1)
-
-    elif command == "exact":
-        exact = display.exactMode(width, height, depth, refresh, hidpi)
-        if exact:
-            display.setMode(exact)
-        else:
-            printNotFound()
-            sys.exit(1)
-
-
-def handleShow(command, width, height, depth, refresh, displayID, hidpi=0):
-    """
-    Handles all the options for the "show" command.
-
-    :param command: The command passed in.
-    :param width: Desired width.
-    :param height: Desired height.
-    :param depth: Desired pixel depth.
-    :param refresh: Desired refresh rate.
-    :param displayID: Specific display to configure.
-    :param hidpi: HiDPI settings.
-    """
-    display = Display(displayID)
-
-    def printNotFound():
-        print("    No matching display mode was found. {}".format(
-            "Try removing HiDPI flags to find a mode." if hidpi != 0 else ""))
-
-    if command == "all":
-        for display in getAllDisplays():
-            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-
-            foundMatching = False  # whether we ended up printing a matching mode or not
-            for mode in sorted(display.allModes, reverse=True):
-                print("    {}".format(mode))
-                foundMatching = True
-
-            if not foundMatching:
-                printNotFound()
-
-    elif command == "closest":
-        if width is None or height is None:
-            print("Must have both width and height for closest matching.")
-            sys.exit(1)
-
-        closest = display.closestMode(width, height, depth, refresh)
-        if closest:
-            print("    {}".format(closest))
-        else:
-            printNotFound()
-
-    elif command == "highest":
-        highest = display.highestMode(hidpi)
-        if highest:
-            print("    {}".format(highest))
-        else:
-            printNotFound()
-
-    elif command == "current":
-        for display in getAllDisplays():
-            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-
-            current = display.currentMode
-            if current:
-                print("    {}".format(current))
-            else:
-                printNotFound()
-
-    elif command == "displays":
-        for display in getAllDisplays():
-            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-
-
-def handleBrightness(command, brightness, displayID):
-    """
-    Handles all the options for the "brightness" command.
-
-    :param command: The command passed in.
-    :param brightness: The level of brightness to change to.
-    :param displayID: Specific display to configure.
-    """
-    display = Display(displayID)
-
-    if command == "show":
-        for display in getAllDisplays():
-            if display.brightness:
-                print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
-                print("    {:.2f}%".format(display.brightness * 100))
-            else:
-                print("Failed to get brightness of display {}".format(display.displayID))
-
-    elif command == "set":
-        error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayBrightness"], brightness)
-        if error:
-            print("Failed to set brightness of display {}; error {}".format(display.displayID, error))
-            # External display brightness probably can't be managed this way
-            print("External displays may not be compatible with Display Manager. \n"
-                  "If this is an external display, try setting manually on device hardware.")
-
-
-def handleRotate(command, angle, displayID):
-    """
-    Handles all the options for the "rotation" command.
-
-    :param command: The command passed in.
-    :param angle: The display to configure rotation on.
-    :param displayID: The display to configure rotation on.
-    """
-    display = Display(displayID)
-
-    if command == "show":
-        for display in getAllDisplays():
-            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-            print("    Rotation: {0} degrees".format(str(int(display.rotation))))
-
-    elif command == "set":
-        # Get rotation "options", per user input
-        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
-        rotateCode = 1024
-        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
-            print("Can only rotate by multiples of 90 degrees.")
-            sys.exit(1)
-        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
-        options = rotateCode | (angleCodes[angle % 360] << 16)
-
-        # Actually rotate the screen
-        iokit["IOServiceRequestProbe"](display.servicePort, options)
-
-
-def handleMirror(command, displayID, mirrorDisplayID):
-    """
-    Handles all the options for the "mirror" command.
-
-    :param command: The command passed in.
-    :param displayID: The display to configure mirroring on.
-    :param mirrorDisplayID: The display to become a mirror of.
-    """
-    if command == "enable":
-        mirrorDisplay = Display(mirrorDisplayID)
-        display = Display(displayID)
-
-        mirrorDisplay.setMirror(display)
-
-    if command == "disable":
-        for display in getAllDisplays():
-            display.setMirror(None)
-
-
-def handleUnderscan(command, underscan, displayID):
-    """
-    Handles all the options for the "underscan" command.
-
-    :param command: The command passed in.
-    :param underscan: The value to set on the underscan slider.
-    :param displayID: Specific display to configure.
-    """
-    display = Display(displayID)
-
-    if command == "show":
-        for display in getAllDisplays():
-            (error, underscan) = iokit["IODisplayGetFloatParameter"](
-                display.servicePort, 0, iokit["kDisplayUnderscan"], None)
-            if error:
-                print("Failed to get underscan value of display {}; error {}".format(display.displayID, error))
-                continue
-            print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
-            print("    {:.2f}%".format(underscan * 100))
-
-    elif command == "set":
-        error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
-        if error:
-            print("Failed to set underscan of display {}; error {}".format(display.displayID, error))
 
 
 def run(commands):
