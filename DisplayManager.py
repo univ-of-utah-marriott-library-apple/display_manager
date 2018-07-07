@@ -117,7 +117,7 @@ class Display(object):
 
         return highest
 
-    def exactMode(self, width, height, depth=32, refresh=0, hidpi=0):
+    def exactMode(self, width, height, depth=32.0, refresh=0.0, hidpi=0):
         """
         :param width: Desired width
         :param height: Desired height
@@ -134,7 +134,7 @@ class Display(object):
                 return mode
         return None
 
-    def closestMode(self, width, height, depth=32, refresh=0, hidpi=0):
+    def closestMode(self, width, height, depth=32.0, refresh=0.0, hidpi=0):
         """
         :param width: Desired width
         :param height: Desired height
@@ -143,9 +143,9 @@ class Display(object):
         :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI
         :return: The closest Quartz "DisplayMode" interface possible for this display.
         """
-        whdr = None
-        whd = None
-        wh = None
+        whdr = None  # matches width, height, depth, and refresh
+        whd = None   # matches width, height, and depth
+        wh = None    # matches width and height
 
         for mode in self.allModes:
             widthMatch = mode.width == width
@@ -154,7 +154,6 @@ class Display(object):
             refreshMatch = mode.refresh == refresh
             hidpiMatch = self.rightHidpi(mode, hidpi)
 
-            # todo: look into more cases (e.g. right ratio, wrong width & height)
             if widthMatch and heightMatch and depthMatch and refreshMatch and hidpiMatch:
                 return mode
             elif widthMatch and heightMatch and depthMatch and refreshMatch:
@@ -164,7 +163,7 @@ class Display(object):
             elif widthMatch and heightMatch:
                 wh = mode
 
-        for match in [whdr, whd, wh]:
+        for match in [whdr, whd, wh]:  # iterate through the "close" modes in order of closeness
             if match:
                 return match
 
@@ -213,13 +212,17 @@ class DisplayMode(object):
         # Low-hanging fruit
         self.width = Quartz.CGDisplayModeGetWidth(mode)
         self.height = Quartz.CGDisplayModeGetHeight(mode)
-        self.refresh = Quartz.CGDisplayModeGetRefreshRate(mode)
+        self.refresh = float(Quartz.CGDisplayModeGetRefreshRate(mode))
         self.raw = mode
 
         # Pixel depth
-        temp = {"PPPPPPPP": 8, "-RRRRRGGGGGBBBBB": 16,
-                "--------RRRRRRRRGGGGGGGGBBBBBBBB": 32, "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB": 30}
-        self.depth = temp[Quartz.CGDisplayModeCopyPixelEncoding(mode)]
+        depthMap = {
+            "PPPPPPPP": 8.0,
+            "-RRRRRGGGGGBBBBB": 16.0,
+            "--------RRRRRRRRGGGGGGGGBBBBBBBB": 32.0,
+            "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB": 30.0
+        }
+        self.depth = depthMap[Quartz.CGDisplayModeCopyPixelEncoding(mode)]
 
         # HiDPI status
         maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
@@ -259,55 +262,16 @@ class Command(object):
             sys.exit(1)
         self.secondary = secondary
 
-        if width is not None:
-            self.width = int(width)
-        else:
-            self.width = None
-
-        if height is not None:
-            self.height = int(height)
-        else:
-            self.height = None
-
-        if depth is not None:
-            self.depth = float(depth)
-        else:
-            self.depth = None
-
-        if refresh is not None:
-            self.refresh = float(refresh)
-        else:
-            self.refresh = None
-
-        if displayID is not None:
-            self.displayID = int(displayID)
-        else:
-            self.displayID = None
-
-        if hidpi is not None:
-            self.hidpi = int(hidpi)
-        else:
-            self.hidpi = None
-
-        if brightness is not None:
-            self.brightness = float(brightness)
-        else:
-            self.brightness = None
-
-        if angle is not None:
-            self.angle = int(angle)
-        else:
-            self.angle = None
-
-        if underscan is not None:
-            self.underscan = float(underscan)
-        else:
-            self.underscan = None
-
-        if mirrorDisplayID is not None:
-            self.mirrorDisplayID = int(mirrorDisplayID)
-        else:
-            self.mirrorDisplayID = None
+        self.width = int(width) if width is not None else None
+        self.height = int(height) if height is not None else None
+        self.depth = float(depth) if depth is not None else None
+        self.refresh = float(refresh) if refresh is not None else None
+        self.displayID = int(displayID) if displayID is not None else None
+        self.hidpi = int(hidpi) if hidpi is not None else None
+        self.brightness = float(brightness) if brightness is not None else None
+        self.angle = int(angle) if angle is not None else None
+        self.underscan = float(underscan) if underscan is not None else None
+        self.mirrorDisplayID = int(mirrorDisplayID) if mirrorDisplayID is not None else None
 
     def run(self):
         """
@@ -372,8 +336,7 @@ class Command(object):
 
         if self.secondary == "all":
             for display in getAllDisplays():
-                print(
-                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+                print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
                 foundMatching = False  # whether we ended up printing a matching mode or not
                 for mode in sorted(display.allModes, reverse=True):
@@ -403,8 +366,7 @@ class Command(object):
 
         elif self.secondary == "current":
             for display in getAllDisplays():
-                print(
-                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+                print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
                 current = display.currentMode
                 if current:
@@ -414,8 +376,7 @@ class Command(object):
 
         elif self.secondary == "displays":
             for display in getAllDisplays():
-                print(
-                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
+                print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
     def __handleBrightness(self):
         """

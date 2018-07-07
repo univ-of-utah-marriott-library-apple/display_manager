@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/u1036693.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/u1036693.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DisplayManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/DisplayManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commandLine.py" beforeDir="false" afterPath="$PROJECT_DIR$/commandLine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/configReader.py" beforeDir="false" afterPath="$PROJECT_DIR$/configReader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configWriter.py" beforeDir="false" afterPath="$PROJECT_DIR$/configWriter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Examples/AirplayToggle.py" beforeDir="false" afterPath="$PROJECT_DIR$/Examples/AirplayToggle.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -21,10 +18,11 @@
       <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DisplayManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="114" column="76" selection-start-line="114" selection-start-column="76" selection-end-line="114" selection-end-column="76" />
+            <state relative-caret-position="225">
+              <caret line="247" column="22" selection-start-line="247" selection-start-column="22" selection-end-line="247" selection-end-column="22" />
               <folding>
                 <element signature="n#!!doc" />
+                <element signature="e#557#7160#0" />
                 <element signature="e#557#774#1" />
                 <element signature="e#837#1010#0" />
                 <element signature="e#920#992#0" />
@@ -42,13 +40,17 @@
                 <element signature="e#3529#3615#1" />
                 <element signature="e#3143#3760#0" />
                 <element signature="e#3143#3435#1" />
+                <element signature="e#3325#3704#0" />
+                <element signature="e#3325#3556#1" />
+                <element signature="e#3517#3680#0" />
+                <element signature="e#3545#3631#0" />
                 <element signature="e#3756#4327#0" />
                 <element signature="e#3756#4041#1" />
                 <element signature="e#4089#4327#0" />
-                <element signature="e#4409#5562#0" />
+                <element signature="e#4701#6042#0" />
                 <element signature="e#4409#4672#1" />
                 <element signature="e#4778#5472#0" />
-                <element signature="e#5524#5562#0" />
+                <element signature="e#6004#6042#0" />
                 <element signature="e#5601#6272#0" />
                 <element signature="e#5601#5696#1" />
                 <element signature="e#5797#5891#0" />
@@ -58,23 +60,27 @@
                 <element signature="e#6560#6654#0" />
                 <element signature="e#7174#8704#0" />
                 <element signature="e#7174#7240#1" />
-                <element signature="e#7280#8099#0" />
-                <element signature="e#7540#7675#0" />
+                <element signature="e#7776#8610#0" />
+                <element signature="e#8047#8232#0" />
                 <element signature="e#8132#8388#0" />
                 <element signature="e#8242#8387#0" />
                 <element signature="e#8429#8493#0" />
                 <element signature="e#8534#8598#0" />
                 <element signature="e#8639#8704#0" />
+                <element signature="e#9133#18118#0" />
                 <element signature="e#8734#8805#1" />
-                <element signature="e#9075#10543#0" />
+                <element signature="e#9438#10421#0" />
                 <element signature="e#9206#9278#0" />
                 <element signature="e#10176#11063#0" />
                 <element signature="e#10176#10247#1" />
                 <element signature="e#11500#11642#0" />
+                <element signature="e#11524#13008#0" />
                 <element signature="e#11263#11596#1" />
                 <element signature="e#12226#12656#0" />
                 <element signature="e#12297#12390#0" />
                 <element signature="e#12573#12620#0" />
+                <element signature="e#12720#12924#0" />
+                <element signature="e#12877#12924#0" />
                 <element signature="e#12986#13238#0" />
                 <element signature="e#13109#13156#0" />
                 <element signature="e#13136#15423#0" />
@@ -88,7 +94,6 @@
                 <element signature="e#14889#15253#0" />
                 <element signature="e#14942#15253#0" />
                 <element signature="e#15318#15477#0" />
-                <element signature="e#15273#15400#0" />
                 <element signature="e#15466#16719#0" />
                 <element signature="e#14428#14506#1" />
                 <element signature="e#15828#16223#0" />
@@ -141,6 +146,15 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="AirplayToggle.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Examples/AirplayToggle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="9" column="24" lean-forward="true" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="commandLine.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/commandLine.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -156,10 +170,11 @@
       <file leaf-file-name="gui.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
+            <state relative-caret-position="-23">
               <caret line="8" column="9" lean-forward="true" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="9" />
               <folding>
                 <element signature="n#!!doc" />
+                <element signature="e#998#17950#0" />
               </folding>
             </state>
           </provider>
@@ -197,9 +212,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>!</find>
-      <find>.idea</find>
-      <find>pyc</find>
       <find>[a-z]'[a-z]</find>
       <find>don't</find>
       <find>print</find>
@@ -213,7 +225,6 @@
       <find>no matching</find>
       <find>self.bright</find>
       <find>self.config</find>
-      <find>todo</find>
       <find>handle</find>
       <find>command</find>
       <find>underscan</find>
@@ -227,6 +238,10 @@
       <find>self.getio</find>
       <find>highestmode</find>
       <find>allmodes</find>
+      <find>todo</find>
+      <find>depth=</find>
+      <find>int.*depth</find>
+      <find>refresh=</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -470,13 +485,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Examples/AirplayToggle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Examples/MirrorToggle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -494,6 +502,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/gui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-23">
+          <caret line="8" column="9" lean-forward="true" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="9" />
+          <folding>
+            <element signature="n#!!doc" />
+            <element signature="e#998#17950#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/configReader.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -504,22 +523,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gui.py">
+    <entry file="file://$PROJECT_DIR$/Examples/AirplayToggle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="8" column="9" lean-forward="true" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="9" />
-          <folding>
-            <element signature="n#!!doc" />
-          </folding>
+        <state relative-caret-position="135">
+          <caret line="9" column="24" lean-forward="true" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/DisplayManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="114" column="76" selection-start-line="114" selection-start-column="76" selection-end-line="114" selection-end-column="76" />
+        <state relative-caret-position="225">
+          <caret line="247" column="22" selection-start-line="247" selection-start-column="22" selection-end-line="247" selection-end-column="22" />
           <folding>
             <element signature="n#!!doc" />
+            <element signature="e#557#7160#0" />
             <element signature="e#557#774#1" />
             <element signature="e#837#1010#0" />
             <element signature="e#920#992#0" />
@@ -537,13 +554,17 @@
             <element signature="e#3529#3615#1" />
             <element signature="e#3143#3760#0" />
             <element signature="e#3143#3435#1" />
+            <element signature="e#3325#3704#0" />
+            <element signature="e#3325#3556#1" />
+            <element signature="e#3517#3680#0" />
+            <element signature="e#3545#3631#0" />
             <element signature="e#3756#4327#0" />
             <element signature="e#3756#4041#1" />
             <element signature="e#4089#4327#0" />
-            <element signature="e#4409#5562#0" />
+            <element signature="e#4701#6042#0" />
             <element signature="e#4409#4672#1" />
             <element signature="e#4778#5472#0" />
-            <element signature="e#5524#5562#0" />
+            <element signature="e#6004#6042#0" />
             <element signature="e#5601#6272#0" />
             <element signature="e#5601#5696#1" />
             <element signature="e#5797#5891#0" />
@@ -553,23 +574,27 @@
             <element signature="e#6560#6654#0" />
             <element signature="e#7174#8704#0" />
             <element signature="e#7174#7240#1" />
-            <element signature="e#7280#8099#0" />
-            <element signature="e#7540#7675#0" />
+            <element signature="e#7776#8610#0" />
+            <element signature="e#8047#8232#0" />
             <element signature="e#8132#8388#0" />
             <element signature="e#8242#8387#0" />
             <element signature="e#8429#8493#0" />
             <element signature="e#8534#8598#0" />
             <element signature="e#8639#8704#0" />
+            <element signature="e#9133#18118#0" />
             <element signature="e#8734#8805#1" />
-            <element signature="e#9075#10543#0" />
+            <element signature="e#9438#10421#0" />
             <element signature="e#9206#9278#0" />
             <element signature="e#10176#11063#0" />
             <element signature="e#10176#10247#1" />
             <element signature="e#11500#11642#0" />
+            <element signature="e#11524#13008#0" />
             <element signature="e#11263#11596#1" />
             <element signature="e#12226#12656#0" />
             <element signature="e#12297#12390#0" />
             <element signature="e#12573#12620#0" />
+            <element signature="e#12720#12924#0" />
+            <element signature="e#12877#12924#0" />
             <element signature="e#12986#13238#0" />
             <element signature="e#13109#13156#0" />
             <element signature="e#13136#15423#0" />
@@ -583,7 +608,6 @@
             <element signature="e#14889#15253#0" />
             <element signature="e#14942#15253#0" />
             <element signature="e#15318#15477#0" />
-            <element signature="e#15273#15400#0" />
             <element signature="e#15466#16719#0" />
             <element signature="e#14428#14506#1" />
             <element signature="e#15828#16223#0" />
