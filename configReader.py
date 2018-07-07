@@ -6,8 +6,6 @@
 import sys
 import pickle
 import os.path
-sys.path.append("..")  # to allow import from current directory
-import DisplayManager as dm
 
 
 def main():

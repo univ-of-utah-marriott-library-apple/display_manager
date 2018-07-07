@@ -24,6 +24,8 @@ class Display(object):
     """
 
     def __init__(self, displayID):
+        getIOKit()
+
         if displayID in getAllDisplayIDs():
             self.displayID = displayID
         else:
@@ -56,13 +58,39 @@ class Display(object):
         else:
             return brightness
 
+    @property
+    def currentMode(self):
+        """
+        :return: The current Quartz "DisplayMode" interface for this display.
+        """
+        return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
+
+    @property
+    def allModes(self):
+        """
+        :return: All possible Quartz "DisplayMode" interfaces for this display.
+        """
+        modes = []
+        # options forces Quartz to show HiDPI modes
+        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
+        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
+            modes.append(DisplayMode(mode))
+        return modes
+
+    @property
+    def servicePort(self):
+        """
+        :return: The integer representing this display's service port.
+        """
+        return Quartz.CGDisplayIOServicePort(self.displayID)
+
     @staticmethod
     def rightHidpi(mode, hidpi):
         """
         Evaluates whether the mode fits the user's HiDPI specification.
 
         :param mode: The mode to be evaluated.
-        :param hidpi: The desired HiDPI description.
+        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
         :return: Whether the mode fits the HiDPI description specified by the user.
         """
         if (
@@ -74,28 +102,9 @@ class Display(object):
         else:
             return False
 
-    @property
-    def currentMode(self):
-        """
-        :return: The current Quartz "DisplayMode" interface for this display.
-        """
-        return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
-
-    @property
-    def allModes(self, hidpi=0):
-        """
-        :return: All possible Quartz "DisplayMode" interfaces for this display.
-        """
-        modes = []
-        # options forces Quartz to show HiDPI modes
-        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
-        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            if self.rightHidpi(mode, hidpi):
-                modes.append(DisplayMode(mode))
-        return modes
-
     def highestMode(self, hidpi=0):
         """
+        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
         :return: The Quartz "DisplayMode" interface with the highest display resolution for this display.
         """
         highest = None
@@ -103,17 +112,10 @@ class Display(object):
             if highest:
                 if mode > highest and self.rightHidpi(mode, hidpi):
                     highest = mode
-            else:
+            else:  # highest hasn't been set yet, so anything is the highest
                 highest = mode
 
         return highest
-
-    @property
-    def servicePort(self):
-        """
-        :return: The integer representing this display's service port.
-        """
-        return Quartz.CGDisplayIOServicePort(self.displayID)
 
     def exactMode(self, width, height, depth=32, refresh=0, hidpi=0):
         """
@@ -121,6 +123,7 @@ class Display(object):
         :param height: Desired height
         :param depth: Desired pixel depth
         :param refresh: Desired refresh rate
+        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
         :return: The Quartz "DisplayMode" interface matching the description, if it exists; otherwise, None.
         """
         for mode in self.allModes:
@@ -137,6 +140,7 @@ class Display(object):
         :param height: Desired height
         :param depth: Desired pixel depth
         :param refresh: Desired refresh rate
+        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI
         :return: The closest Quartz "DisplayMode" interface possible for this display.
         """
         whdr = None
@@ -246,6 +250,8 @@ class Command(object):
     def __init__(self, primary, secondary, width=None, height=None, depth=None, refresh=None,
                  displayID=None, hidpi=None, brightness=None, angle=None, underscan=None,
                  mirrorDisplayID=None):
+        getIOKit()
+
         if primary in ["set", "show", "brightness", "rotate", "underscan", "mirror"]:
             self.primary = primary
         else:
@@ -303,95 +309,28 @@ class Command(object):
         else:
             self.mirrorDisplayID = None
 
-    def getIOKit(self):
-        """
-        This handles the importing of specific functions and variables from the
-        IOKit framework. IOKit is not natively bridged in PyObjC, so the methods
-        must be found and encoded manually to gain their functionality in Python.
-
-        :return: A dictionary containing several IOKit functions and variables.
-        """
-        global iokit
-        if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
-            # The dictionary which will contain all of the necessary functions and variables from IOKit
-            iokit = {}
-
-            # Retrieve the IOKit framework
-            iokitBundle = objc.initFrameworkWrapper(
-                "IOKit",
-                frameworkIdentifier="com.apple.iokit",
-                frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
-                globals=globals()
-            )
-
-            # The IOKit functions to be retrieved
-            functions = [
-                ("IOServiceGetMatchingServices", b"iI@o^I"),
-                ("IODisplayCreateInfoDictionary", b"@II"),
-                ("IODisplayGetFloatParameter", b"iII@o^f"),
-                ("IODisplaySetFloatParameter", b"iII@f"),
-                ("IOServiceMatching", b"@or*", "", dict(
-                    # This one is obnoxious. The "*" gets pythonified as a char, not a
-                    # char*, so we have to make it interpret as a string.
-                    arguments=
-                    {
-                        0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
-                                c_array_delimited_by_null=True,
-                                type_modifier=objc._C_IN)
-                    }
-                )),
-                ("IOServiceRequestProbe", b"iII"),
-                ("IOIteratorNext", b"II")
-            ]
-
-            # The IOKit variables to be retrieved
-            variables = [
-                ("kIODisplayNoProductName", b"I"),
-                ("kIOMasterPortDefault", b"I"),
-                ("kIODisplayBrightnessKey", b"*"),
-                ("kIODisplayOverscanKey", b"*"),
-                ("kDisplayVendorID", b"*"),
-                ("kDisplayProductID", b"*"),
-                ("kDisplaySerialNumber", b"*")
-            ]
-
-            # Load functions from IOKit into the global namespace
-            objc.loadBundleFunctions(iokitBundle, iokit, functions)
-            # Bridge won't put straight into iokit, so globals()
-            objc.loadBundleVariables(iokitBundle, globals(), variables)
-            # Move only the desired variables into iokit
-            for var in variables:
-                key = "{}".format(var[0])
-                if key in globals():
-                    iokit[key] = globals()[key]
-
-            iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
-            iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
-
     def run(self):
         """
         Runs whichever command this Command has stored.
         """
-        self.getIOKit()
-
         if self.primary == "set":
-            self.handleSet()
+            self.__handleSet()
         elif self.primary == "show":
-            self.handleShow()
+            self.__handleShow()
         elif self.primary == "brightness":
-            self.handleBrightness()
+            self.__handleBrightness()
         elif self.primary == "rotate":
-            self.handleRotate()
+            self.__handleRotate()
         elif self.primary == "underscan":
-            self.handleUnderscan()
+            self.__handleUnderscan()
         elif self.primary == "mirror":
-            self.handleMirror()
+            self.__handleMirror()
 
-    def printNotFound(self):
+    def __printNotFound(self):
         print("    No matching display mode was found. {}".format(
             "Try removing HiDPI flags to find a mode." if self.hidpi != 0 else ""))
 
-    def handleSet(self):
+    def __handleSet(self):
         """
         Sets the display to the correct DisplayMode.
         """
@@ -406,7 +345,7 @@ class Command(object):
             if closest:
                 display.setMode(closest)
             else:
-                self.printNotFound()
+                self.__printNotFound()
                 sys.exit(1)
 
         elif self.secondary == "highest":
@@ -414,7 +353,7 @@ class Command(object):
             if highest:
                 display.setMode(highest)
             else:
-                self.printNotFound()
+                self.__printNotFound()
                 sys.exit(1)
 
         elif self.secondary == "exact":
@@ -422,10 +361,10 @@ class Command(object):
             if exact:
                 display.setMode(exact)
             else:
-                self.printNotFound()
+                self.__printNotFound()
                 sys.exit(1)
 
-    def handleShow(self):
+    def __handleShow(self):
         """
         Shows the user information about connected displays.
         """
@@ -442,7 +381,7 @@ class Command(object):
                     foundMatching = True
 
                 if not foundMatching:
-                    self.printNotFound()
+                    self.__printNotFound()
 
         elif self.secondary == "closest":
             if self.width is None or self.height is None:
@@ -453,14 +392,14 @@ class Command(object):
             if closest:
                 print("    {}".format(closest))
             else:
-                self.printNotFound()
+                self.__printNotFound()
 
         elif self.secondary == "highest":
             highest = display.highestMode(self.hidpi)
             if highest:
                 print("    {}".format(highest))
             else:
-                self.printNotFound()
+                self.__printNotFound()
 
         elif self.secondary == "current":
             for display in getAllDisplays():
@@ -471,14 +410,14 @@ class Command(object):
                 if current:
                     print("    {}".format(current))
                 else:
-                    self.printNotFound()
+                    self.__printNotFound()
 
         elif self.secondary == "displays":
             for display in getAllDisplays():
                 print(
                     "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
 
-    def handleBrightness(self):
+    def __handleBrightness(self):
         """
         Sets or shows a display's brightness.
         """
@@ -501,7 +440,7 @@ class Command(object):
                 print("External displays may not be compatible with Display Manager. \n"
                       "If this is an external display, try setting manually on device hardware.")
 
-    def handleRotate(self):
+    def __handleRotate(self):
         """
         Sets or shows a display's rotation.
         """
@@ -526,7 +465,7 @@ class Command(object):
             # Actually rotate the screen
             iokit["IOServiceRequestProbe"](display.servicePort, options)
 
-    def handleMirror(self):
+    def __handleMirror(self):
         """
         Enables or disables mirroring between two displays.
         """
@@ -540,7 +479,7 @@ class Command(object):
             for display in getAllDisplays():
                 display.setMirror(None)
 
-    def handleUnderscan(self):
+    def __handleUnderscan(self):
         """
         Sets or shows a display's underscan settings.
         """
@@ -600,6 +539,72 @@ class CommandList(object):
             command.run()
         for command in self.commandDict["underscan"]:
             command.run()
+
+
+def getIOKit():
+    """
+    This handles the importing of specific functions and variables from the
+    IOKit framework. IOKit is not natively bridged in PyObjC, so the methods
+    must be found and encoded manually to gain their functionality in Python.
+
+    :return: A dictionary containing several IOKit functions and variables.
+    """
+    global iokit
+    if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
+        # The dictionary which will contain all of the necessary functions and variables from IOKit
+        iokit = {}
+
+        # Retrieve the IOKit framework
+        iokitBundle = objc.initFrameworkWrapper(
+            "IOKit",
+            frameworkIdentifier="com.apple.iokit",
+            frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
+            globals=globals()
+        )
+
+        # The IOKit functions to be retrieved
+        functions = [
+            ("IOServiceGetMatchingServices", b"iI@o^I"),
+            ("IODisplayCreateInfoDictionary", b"@II"),
+            ("IODisplayGetFloatParameter", b"iII@o^f"),
+            ("IODisplaySetFloatParameter", b"iII@f"),
+            ("IOServiceMatching", b"@or*", "", dict(
+                # This one is obnoxious. The "*" gets pythonified as a char, not a
+                # char*, so we have to make it interpret as a string.
+                arguments=
+                {
+                    0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
+                            c_array_delimited_by_null=True,
+                            type_modifier=objc._C_IN)
+                }
+            )),
+            ("IOServiceRequestProbe", b"iII"),
+            ("IOIteratorNext", b"II")
+        ]
+
+        # The IOKit variables to be retrieved
+        variables = [
+            ("kIODisplayNoProductName", b"I"),
+            ("kIOMasterPortDefault", b"I"),
+            ("kIODisplayBrightnessKey", b"*"),
+            ("kIODisplayOverscanKey", b"*"),
+            ("kDisplayVendorID", b"*"),
+            ("kDisplayProductID", b"*"),
+            ("kDisplaySerialNumber", b"*")
+        ]
+
+        # Load functions from IOKit into the global namespace
+        objc.loadBundleFunctions(iokitBundle, iokit, functions)
+        # Bridge won't put straight into iokit, so globals()
+        objc.loadBundleVariables(iokitBundle, globals(), variables)
+        # Move only the desired variables into iokit
+        for var in variables:
+            key = "{}".format(var[0])
+            if key in globals():
+                iokit[key] = globals()[key]
+
+        iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
+        iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
 
 
 def getAllDisplays():

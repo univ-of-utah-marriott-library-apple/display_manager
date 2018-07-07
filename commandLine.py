@@ -6,7 +6,6 @@
 
 import sys
 import argparse
-sys.path.append("..")  # to allow import from current directory
 import DisplayManager as dm
 
 

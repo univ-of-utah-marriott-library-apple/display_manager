@@ -6,9 +6,7 @@
 from __future__ import print_function
 import Tkinter as tk
 import ttk
-import sys
 import re
-sys.path.append("..")  # to allow import from current directory
 import DisplayManager as dm
 import configWriter as cg
 

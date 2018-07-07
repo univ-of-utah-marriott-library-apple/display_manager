@@ -5,7 +5,6 @@
 
 import pickle
 import sys
-sys.path.append("..")  # to allow import from current directory
 import DisplayManager as dm
 import commandLine as cl
 
