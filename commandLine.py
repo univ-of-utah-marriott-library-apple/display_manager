@@ -368,7 +368,7 @@ def main():
     :return:
     """
     command = getCommand(" ".join(sys.argv[1:]))
-    dm.run(command)
+    command.run()
 
 
 if __name__ == "__main__":

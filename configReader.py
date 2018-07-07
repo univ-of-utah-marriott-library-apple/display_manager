@@ -16,7 +16,7 @@ def main():
     if os.path.isfile("./" + fileName):
         with open(sys.argv[1], "r") as file:
             commands = pickle.load(file)
-        dm.run(commands)
+        commands.run()
     else:
         print("File {} not found.".format(fileName))
 

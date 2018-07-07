@@ -303,10 +303,77 @@ class Command(object):
         else:
             self.mirrorDisplayID = None
 
+    def getIOKit(self):
+        """
+        This handles the importing of specific functions and variables from the
+        IOKit framework. IOKit is not natively bridged in PyObjC, so the methods
+        must be found and encoded manually to gain their functionality in Python.
+
+        :return: A dictionary containing several IOKit functions and variables.
+        """
+        global iokit
+        if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
+            # The dictionary which will contain all of the necessary functions and variables from IOKit
+            iokit = {}
+
+            # Retrieve the IOKit framework
+            iokitBundle = objc.initFrameworkWrapper(
+                "IOKit",
+                frameworkIdentifier="com.apple.iokit",
+                frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
+                globals=globals()
+            )
+
+            # The IOKit functions to be retrieved
+            functions = [
+                ("IOServiceGetMatchingServices", b"iI@o^I"),
+                ("IODisplayCreateInfoDictionary", b"@II"),
+                ("IODisplayGetFloatParameter", b"iII@o^f"),
+                ("IODisplaySetFloatParameter", b"iII@f"),
+                ("IOServiceMatching", b"@or*", "", dict(
+                    # This one is obnoxious. The "*" gets pythonified as a char, not a
+                    # char*, so we have to make it interpret as a string.
+                    arguments=
+                    {
+                        0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
+                                c_array_delimited_by_null=True,
+                                type_modifier=objc._C_IN)
+                    }
+                )),
+                ("IOServiceRequestProbe", b"iII"),
+                ("IOIteratorNext", b"II")
+            ]
+
+            # The IOKit variables to be retrieved
+            variables = [
+                ("kIODisplayNoProductName", b"I"),
+                ("kIOMasterPortDefault", b"I"),
+                ("kIODisplayBrightnessKey", b"*"),
+                ("kIODisplayOverscanKey", b"*"),
+                ("kDisplayVendorID", b"*"),
+                ("kDisplayProductID", b"*"),
+                ("kDisplaySerialNumber", b"*")
+            ]
+
+            # Load functions from IOKit into the global namespace
+            objc.loadBundleFunctions(iokitBundle, iokit, functions)
+            # Bridge won't put straight into iokit, so globals()
+            objc.loadBundleVariables(iokitBundle, globals(), variables)
+            # Move only the desired variables into iokit
+            for var in variables:
+                key = "{}".format(var[0])
+                if key in globals():
+                    iokit[key] = globals()[key]
+
+            iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
+            iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
+
     def run(self):
         """
         Runs whichever command this Command has stored.
         """
+        self.getIOKit()
+
         if self.primary == "set":
             self.handleSet()
         elif self.primary == "show":
@@ -535,72 +602,6 @@ class CommandList(object):
             command.run()
 
 
-def getIOKit():
-    """
-    This handles the importing of specific functions and variables from the
-    IOKit framework. IOKit is not natively bridged in PyObjC, so the methods
-    must be found and encoded manually to gain their functionality in Python.
-
-    :return: A dictionary containing several IOKit functions and variables.
-    """
-    global iokit
-    if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
-        # The dictionary which will contain all of the necessary functions and variables from IOKit
-        iokit = {}
-
-        # Retrieve the IOKit framework
-        iokitBundle = objc.initFrameworkWrapper(
-            "IOKit",
-            frameworkIdentifier="com.apple.iokit",
-            frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
-            globals=globals()
-        )
-
-        # The IOKit functions to be retrieved
-        functions = [
-            ("IOServiceGetMatchingServices", b"iI@o^I"),
-            ("IODisplayCreateInfoDictionary", b"@II"),
-            ("IODisplayGetFloatParameter", b"iII@o^f"),
-            ("IODisplaySetFloatParameter", b"iII@f"),
-            ("IOServiceMatching", b"@or*", "", dict(
-                # This one is obnoxious. The "*" gets pythonified as a char, not a
-                # char*, so we have to make it interpret as a string.
-                arguments=
-                {
-                    0: dict(type=objc._C_PTR + objc._C_CHAR_AS_TEXT,
-                            c_array_delimited_by_null=True,
-                            type_modifier=objc._C_IN)
-                }
-            )),
-            ("IOServiceRequestProbe", b"iII"),
-            ("IOIteratorNext", b"II")
-        ]
-
-        # The IOKit variables to be retrieved
-        variables = [
-            ("kIODisplayNoProductName", b"I"),
-            ("kIOMasterPortDefault", b"I"),
-            ("kIODisplayBrightnessKey", b"*"),
-            ("kIODisplayOverscanKey", b"*"),
-            ("kDisplayVendorID", b"*"),
-            ("kDisplayProductID", b"*"),
-            ("kDisplaySerialNumber", b"*")
-        ]
-
-        # Load functions from IOKit into the global namespace
-        objc.loadBundleFunctions(iokitBundle, iokit, functions)
-        # Bridge won't put straight into iokit, so globals()
-        objc.loadBundleVariables(iokitBundle, globals(), variables)
-        # Move only the desired variables into iokit
-        for var in variables:
-            key = "{}".format(var[0])
-            if key in globals():
-                iokit[key] = globals()[key]
-
-        iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
-        iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
-
-
 def getAllDisplays():
     """
     :return: A list containing all currently-online displays.
@@ -627,15 +628,3 @@ def getAllDisplayIDs():
     if error:
         raise RuntimeError("Unable to get displays list.")
     return displays
-
-
-def run(commands):
-    """
-    Called to execute commands.
-    :param commands: What commands have been requested?
-    """
-    getIOKit()
-
-    if commands:
-        runCommands = CommandList(commands)
-        runCommands.run()
