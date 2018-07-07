@@ -59,7 +59,7 @@ class Display(object):
     @staticmethod
     def rightHidpi(mode, hidpi):
         """
-        Evaluates whether the mode fits the user"s HiDPI specification.
+        Evaluates whether the mode fits the user's HiDPI specification.
 
         :param mode: The mode to be evaluated.
         :param hidpi: The desired HiDPI description.
@@ -111,7 +111,7 @@ class Display(object):
     @property
     def servicePort(self):
         """
-        :return: The integer representing this display"s service port.
+        :return: The integer representing this display's service port.
         """
         return Quartz.CGDisplayIOServicePort(self.displayID)
 
@@ -220,7 +220,7 @@ class DisplayMode(object):
         # HiDPI status
         maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
         maxHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # the maximum display width for this display
-        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they"re the same, mode is not HiDPI
+        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
 
     def __str__(self):
         return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
@@ -243,10 +243,9 @@ class Command(object):
     Represents a user-requested command to Display Manager.
     """
 
-    def __init__(self, primary, secondary, width=None, height=None, depth=32, refresh=0,
-                 displayID=None, hidpi=0, brightness=1, angle=0, underscan=1,
+    def __init__(self, primary, secondary, width=None, height=None, depth=None, refresh=None,
+                 displayID=None, hidpi=None, brightness=None, angle=None, underscan=None,
                  mirrorDisplayID=None):
-        # Required for all types of commands
         if primary in ["set", "show", "brightness", "rotate", "underscan", "mirror"]:
             self.primary = primary
         else:
@@ -254,31 +253,55 @@ class Command(object):
             sys.exit(1)
         self.secondary = secondary
 
-        # Command-specific data
-        if width:
+        if width is not None:
             self.width = int(width)
         else:
             self.width = None
-        if height:
+
+        if height is not None:
             self.height = int(height)
         else:
             self.height = None
-        self.depth = float(depth)
-        self.refresh = float(refresh)
-        self.hidpi = int(hidpi)
-        self.brightness = float(brightness)
-        self.angle = int(angle)
-        self.underscan = float(underscan)
-        if mirrorDisplayID:
+
+        if depth is not None:
+            self.depth = float(depth)
+        else:
+            self.depth = None
+
+        if refresh is not None:
+            self.refresh = float(refresh)
+        else:
+            self.refresh = None
+
+        if displayID is not None:
+            self.displayID = int(displayID)
+        else:
+            self.displayID = None
+
+        if hidpi is not None:
+            self.hidpi = int(hidpi)
+        else:
+            self.hidpi = None
+
+        if brightness is not None:
+            self.brightness = float(brightness)
+        else:
+            self.brightness = None
+
+        if angle is not None:
+            self.angle = int(angle)
+        else:
+            self.angle = None
+
+        if underscan is not None:
+            self.underscan = float(underscan)
+        else:
+            self.underscan = None
+
+        if mirrorDisplayID is not None:
             self.mirrorDisplayID = int(mirrorDisplayID)
         else:
             self.mirrorDisplayID = None
-
-        # Need this conditional block because Python doesn't recognize getMainDisplay() in __init__ declaration
-        if displayID:
-            self.displayID = int(displayID)
-        else:
-            self.displayID = getMainDisplayID()
 
     def run(self):
         """
@@ -393,7 +416,7 @@ def getIOKit():
 
         # Load functions from IOKit into the global namespace
         objc.loadBundleFunctions(iokitBundle, iokit, functions)
-        # Bridge won"t put straight into iokit, so globals()
+        # Bridge won't put straight into iokit, so globals()
         objc.loadBundleVariables(iokitBundle, globals(), variables)
         # Move only the desired variables into iokit
         for var in variables:
@@ -556,7 +579,7 @@ def handleBrightness(command, brightness, displayID):
     if command == "show":
         for display in getAllDisplays():
             if display.brightness:
-                print("Display: {}{}".format(displayID, " (Main Display)" if display.isMain else ""))
+                print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
                 print("    {:.2f}%".format(display.brightness * 100))
             else:
                 print("Failed to get brightness of display {}".format(display.displayID))
@@ -565,7 +588,7 @@ def handleBrightness(command, brightness, displayID):
         error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayBrightness"], brightness)
         if error:
             print("Failed to set brightness of display {}; error {}".format(display.displayID, error))
-            # External display brightness probably can"t be managed this way
+            # External display brightness probably can't be managed this way
             print("External displays may not be compatible with Display Manager. \n"
                   "If this is an external display, try setting manually on device hardware.")
 
@@ -642,8 +665,6 @@ def handleUnderscan(command, underscan, displayID):
         error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
         if error:
             print("Failed to set underscan of display {}; error {}".format(display.displayID, error))
-        print("Display: {}{}".format(displayID, " (Main Display)" if display.isMain else ""))
-        print("    {:.2f}%".format(underscan * 100))
 
 
 def run(commands):
