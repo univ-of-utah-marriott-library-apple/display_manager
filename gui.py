@@ -22,279 +22,171 @@ class App(object):
 
         self.mainFrame = ttk.Frame(self.root)
 
-        # self.normalStyle = ttk.Style()
-        # self.normalStyle.configure("Normal.TLabel", foreground="black")
-        #
-        # self.highlightStyle = ttk.Style()
-        # self.highlightStyle.configure("Highlight.TLabel", foreground="blue")
-
         # Set up the window
         self.mainFrame.grid(column=0, row=0)
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.geometry("+400+200")
 
-        # todo: get the real logo
+        # Raw GIF encoding
         self.logoPic = tk.PhotoImage(
-            data='''\
-        R0lGODlhWAJRAPcAAAEAAAQECgYJCgwMDQgHCBMODQ4QDhERDg0OEQUHFREOEw4REgoTGhITFBQV
-        GhUZGxsbHBkXGCcXFR0iHiwkHRwdIxYZJhAVLyIcIxwjJRcpNiUlJSQlKyUqLCwrLCknJzQqKCgr
-        NjMtNSwyOTMzNTM0Ozs7PDk3ODYyK1ExFWo3Ekc3KUQ7OlY0LF8rKD9DPHdIGnBJGUpEO1ZJOVdJ
-        LHZLJXBRMHdhNxknQicqRS01RTM1Qjs8Qzg6Ry86VRkvWEQ9REk+TGYzQD1DSDlFVTlTY0NCQ0RD
-        S0xLTEtHR1NLSVhSS0hJVlJNU1ROWExTWFVSVFtUVFlZWVdVWkhTSGhXSGRaWXFQS2pkXXdoVEtV
-        Z1dZZlFUa2VdZFVpbmxra2dlZ3Rpamdpdnx9fXd2d3FzcFJjWaE0MMQSMMcfO8chPMgjPtQyOPow
-        OolXG4xRF5llHLBtGYhYJ5ZbJ4lVM5hmKYlmN5doN5NsMKhrJqd0KrZ4Kah4N7Z7NqxqN6VZKMh4
-        L+BXLc46U8kqRPwxRoZnRpByT613TIt3bq51bpNYTtFGXtBFVch0TtRTaNJMY9lnevNvVXCNe1aP
-        bj+EbriFObmEKsiIKNmZK8WIN8qUOdiYNtGPLOSZMNujOdymMOmmK/WqKPq1KueoN+2zOfW1NPS0
-        O/u6PPm5N/OsN+CYG/7FOf/MMbKLTI+Idq+PbrCrcJSRYMeWRs6QT9mlRc+nVeeqRuyzRve5RO6y
-        UcySbNOrbuyza+iTUv3FRfvOUPXKbv/rZHJ3hVZxkYF+hdtugN13iHiJh3ajmjOL5kiS342NjYeE
-        hpycnJiVl5CQjrKUjJGpl7ColJadpqqqqqWnqLi4uLa2tbGwrpqjp9CYjuKKmeGFlOyXkc2wkPiq
-        k8q3rPKxsOaap7XKne3Pj9TKtvLMruvZobu6w9m9xLjGyMXFxcfKydHR0d3d3dbV19LQz/DCyvnF
-        w+zVzObk2vjt0Nrd5+np6eXm5fj16/T09Pzz9f////f3+uzu8d3h5yH5BAAAAAAALAAAAABYAlEA
-        AAj+APkJHEiwoMGDCBMO1PdKRQoVgGzlojWLjgULCaj1E/KnHr93AufVoycNm8B+/PzhU8iypcuX
-        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
-        RXatYVEc4fS1X6tJYfhlV+YIAHbNrRlMDAJOjqk9GiNghmrgPyVGKH1QU5Uxgu3F4z9OGCb+U84K
-        B3GIh0WIB24IBz/5h5hkmkK64W5jV6vJrdq9Xem01FJMY2sTJDiuGAImYAF4SSXoAlcogzGgQHcQ
-        YkBGqHtYSiMmE1aW5dUR5LfkLH4Ih3iYB0EoZCr2E2eIrg0ARfmNuquJQdqtxWMWpEqu5GUeYWVr
-        Zul04+RIjgJeANHUAiwQhmkYAzD44WuwhnZY5Vl+tdJohgf+AkQIDXJmZ5nxUzVQgzSQ53mm53q2
-        53v+ToMYu2V+iAdjiId42AZjmIeEAQNlewAYZY7phObpnMFaTGOGliNPXuhqvgwCtgAk+AIywEp4
-        cId8QOJ2BumQbud96AcP3IeTNmmSTmmVPumWbumU9sB82OC+EIdiiIdiWOSadQACQIEISNoz5lkj
-        C1o5ouZqJlACnj1cxdwEiIANAAGG+AJmmAZwGGeRtuqrbmdBZZ2Z9hOKIQDuyduwbt9pRowCdtEG
-        mAAeaIItKBhnqAZrYAd4eId1wAZsWAd88Id8wOq95uu+Zs1GmWhlkz3nkIA6I6tnwIZrQId2oIfo
-        9evHhuzINlBsYIZniAxnaIZmqIZyaAd38FjJBu0V0BZt1tTq0Tbt00bt1Fbt1WbtBQ4IACH/C1hN
-        UCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtj
-        OWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUg
-        WE1QIENvcmUgNS42LWMxMzggNzkuMTU5ODI0LCAyMDE2LzA5LzE0LTAxOjA5OjAxICAgICAgICAi
-        PgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1z
-        eW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIi8+CiA8L3JkZjpSREY+
-        CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+Af/+/fz7+vn49/b19PPy8fDv7u3s6+rp
-        6Ofm5eTj4uHg397d3Nva2djX1tXU09LR0M/OzczLysnIx8bFxMPCwcC/vr28u7q5uLe2tbSzsrGw
-        r66trKuqqainpqWko6KhoJ+enZybmpmYl5aVlJOSkZCPjo2Mi4qJiIeGhYSDgoGAf359fHt6eXh3
-        dnV0c3JxcG9ubWxramloZ2ZlZGNiYWBfXl1cW1pZWFdWVVRTUlFQT05NTEtKSUhHRkVEQ0JBQD8+
-        PTw7Ojk4NzY1NDMyMTAvLi0sKyopKCcmJSQjIiEgHx4dHBsaGRgXFhUUExIREA8ODQwLCgkIBwYF
-        BAMCAQAAOw==
-        '''
+            data="""
+        R0lGODlhvAE8APcAAAAAAP///28HFZwAAp0ABfHX2J8AC96gpOKuseW1uLaXmezIyu/P0e/Q0vPe
+        39nJysJXYcVfaIVCSMhmb895gJBWW9eMk9aLkdiPldeOlNiQltePldeQltqUmuOboZppbeGmq6R5
+        feKrr+Sus+OtsuOusq2Ii7+kpsixs6EAEaAAD7AnN7MxP7Y4RnopMbk/TL9OWcRcZtODi9iPlteP
+        ltC9v6IAE6IAFaIAFqEAFKEAE6wWK6sYLKsaLqwbLqwcL6MAGqMAGKkNJakQJ6kRKKsTKaoUKqoW
+        K6sXLKwYLa0ZLvns7qUAHaQAG6cII6kOKPDq66gDIqcDIvz09hsZGnd1dv37/Onn6Hl4eXh3eP/+
+        //j6+uzu7urs7Ojq6uPl5c3Pz/f4+PP09OXm5t3e3s/Q0HKBgN/h4JoAAJcAAAUDAwMCAgYFBQgH
+        BwwLCw4NDSIgIBAPD+HV1RMSEhQTExYVFRkYGOjg4B4dHUVDQygnJyUkJFdVVTMyMi8uLisqKjw7
+        Ozc2Nvj19YB+flNSUlJRUVBPT01MTEpJSUhHR0A/P/37+/Xz8+/t7efl5ePh4dTS0s3Ly8fFxaup
+        qX9+fn18fHd2dnZ1dXV0dHRzc2xra2hnZ2ZlZWJhYV9eXlxbW1lYWP79/fn4+Pj39+jn5+fm5uXk
+        5OTj497d3drZ2djX19bV1dDPz87Nzc3MzMnIyMjHx8fGxsPCwry7u7q5ubm4uLi3t7e2tra1tbW0
+        tLSzs7Cvr6yrq6inp6OioqGgoJ+enp2cnJuampWUlJSTk4yLi4mIiIeGhoWEhISDg/7+/v39/fv7
+        +/f39/b29vX19fT09PPz8/Dw8O/v7+7u7uzs7Ovr6+np6ePj4+Hh4d/f397e3t3d3dvb29ra2tnZ
+        2dbW1tXV1dLS0tDQ0M7OzsvLy8TExMPDw8HBwb+/v76+vrKysq6urqysrKurq6ioqKWlpZmZmZeX
+        l5GRkY6OjoqKioGBgXt7e3JycnBwcG5ubmpqamNjYwkJCQEBAf///yH5BAEAAP8ALAAAAAC8ATwA
+        AAj/AAMIHEiwoMGDCBMqXMiwocOHECNKnEixosWLGDNq3Mixo8ePIEOKHEmypMmTKFOqXMmypcuX
+        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
+        """
         )
-        self.imageLabel = ttk.Label(self.mainFrame, image=self.logoPic).grid(column=1, row=0, sticky=tk.NSEW)
-        # todo: this separator (increment more than you think you need to; might be other stuff that needs a new row too
-        # ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=1, columnspan=8, sticky=tk.EW)
-
-        # todo: put in some kind of "current" indicator for all selections and default to those values?
+        self.imageLabel = ttk.Label(self.mainFrame, image=self.logoPic)
+        self.imageLabel.grid(column=0, row=0, columnspan=8)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=9, columnspan=8, sticky=tk.EW)
 
         # Display selection
-        ttk.Label(self.mainFrame, text="Display:").grid(column=0, row=1, sticky=tk.E)
+        ttk.Label(self.mainFrame, text="Display:").grid(column=0, row=10, sticky=tk.E)
         self.displayDict = {}
         self.displayDropdown = ttk.Combobox(self.mainFrame, width=32, state="readonly")
-        self.displayDropdown.grid(column=1, row=1, sticky=tk.EW)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=2, columnspan=8, sticky=tk.EW)
+        self.displayDropdown.grid(column=1, row=10, columnspan=7, sticky=tk.EW)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=19, columnspan=8, sticky=tk.EW)
 
         # Mode selection
-        ttk.Label(self.mainFrame, text="Resolution:").grid(column=0, row=3, sticky=tk.E)
+        ttk.Label(self.mainFrame, text="Resolution:").grid(column=0, row=20, sticky=tk.E)
         self.modeDict = {}
         self.modeDropdown = ttk.Combobox(self.mainFrame, width=64, state="readonly")
-        self.modeDropdown.grid(column=1, row=3, sticky=tk.EW)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=4, columnspan=8, sticky=tk.EW)
+        self.modeDropdown.grid(column=1, row=20, columnspan=7, sticky=tk.EW)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=29, columnspan=8, sticky=tk.EW)
 
-        # todo: make brightnessSlider display values as percentages
         # Brightness menu
-        ttk.Label(self.mainFrame, text="Brightness:").grid(column=0, row=5, sticky=tk.E)
+        ttk.Label(self.mainFrame, text="Brightness:").grid(column=0, row=30, sticky=tk.E)
         self.brightnessSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=100)
-        self.brightnessSlider.grid(column=1, row=5, sticky=tk.EW)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=6, columnspan=8, sticky=tk.EW)
+        self.brightnessSlider.grid(column=1, row=30, columnspan=7, sticky=tk.EW)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=39, columnspan=8, sticky=tk.EW)
 
-        # todo: make rotateSlider display values in multiples of 90
         # Rotate menu
-        ttk.Label(self.mainFrame, text="Rotate:").grid(column=0, row=7, sticky=tk.E)
-        self.rotateSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=3)
-        self.rotateSlider.grid(column=1, row=7, sticky=tk.EW)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=8, columnspan=8, sticky=tk.EW)
+        ttk.Label(self.mainFrame, text="Rotate:").grid(column=0, row=40, sticky=tk.E)
+        self.rotateSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=270, resolution=90)
+        self.rotateSlider.grid(column=1, row=40, columnspan=7, sticky=tk.EW)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=49, columnspan=8, sticky=tk.EW)
 
         # Mirroring menu
-        ttk.Label(self.mainFrame, text="Mirror Display:").grid(column=0, row=9, sticky=tk.E)
-        self.mirrorEnabled = False
+        ttk.Label(self.mainFrame, text="Mirror Display:").grid(column=0, row=50, sticky=tk.E)
+        self.mirrorEnabled = tk.BooleanVar()
+        self.mirrorEnabled.set(False)
         self.mirrorDropdown = ttk.Combobox(self.mainFrame, width=32, state="readonly")
-        self.mirrorDropdown.grid(column=1, row=9, sticky=tk.EW)
-        enable = ttk.Button(self.mainFrame, text="Enable", command=lambda: self.__toggleMirroring(True))
-        enable.grid(column=1, row=10, sticky=tk.W)
-        disable = ttk.Button(self.mainFrame, text="Disable", command=lambda: self.__toggleMirroring(False))
-        disable.grid(column=1, row=10, sticky=tk.E)
-        # todo: this separator (increment rows)
-        # ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=10, columnspan=8, sticky=tk.EW)
+        self.mirrorDropdown.grid(column=1, row=50, columnspan=6, sticky=tk.EW)
+        enable = ttk.Checkbutton(self.mainFrame, text="Enable", variable=self.mirrorEnabled)
+        enable.grid(column=7, row=50, sticky=tk.E)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=59, columnspan=8, sticky=tk.EW)
 
         # Underscan menu
-        ttk.Label(self.mainFrame, text="Underscan:").grid(column=0, row=11, sticky=tk.E)
+        ttk.Label(self.mainFrame, text="Underscan:").grid(column=0, row=60, sticky=tk.E)
         self.underscanSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=100)
-        self.underscanSlider.grid(column=1, row=11, sticky=tk.EW)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=12, columnspan=8, sticky=tk.EW)
+        self.underscanSlider.grid(column=1, row=60, columnspan=7, sticky=tk.EW)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=69, columnspan=8, sticky=tk.EW)
 
         # Set/write to config menu
-        ttk.Button(self.mainFrame, text="Set Display", command=self.setDisplay).grid(column=0, row=13, sticky=tk.E)
-        ttk.Button(self.mainFrame, text="Build Config", command=self.buildConfig).grid(column=1, row=13, sticky=tk.E)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=14, columnspan=8, sticky=tk.EW)
+        ttk.Button(self.mainFrame, text="Set Display", command=self.setDisplay).grid(column=0, row=70, sticky=tk.E)
+        ttk.Button(self.mainFrame, text="Build Config", command=self.buildConfig).grid(column=7, row=70, sticky=tk.E)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=79, columnspan=8, sticky=tk.EW)
 
     def __displaySelectionInit(self):
         """
@@ -325,14 +217,16 @@ class App(object):
 
     def __brightnessSelectionInit(self):
         """
-        Set self.brightnessSlider's value to that of the currently selected display.
+        Set self.brightnessSlider's value to that of the currently selected display, and
+        deactivates said slider if the brightness of this display can't be set.
         """
         if self.display.brightness is not None:
             brightness = self.display.brightness * 100
             self.brightnessSlider.set(brightness)
+            self.brightnessSlider.configure(state=tk.NORMAL)
         else:
-            # todo: find a way to deactivate this slider altogether when the display's brightness can't be read/set
-            pass
+            self.brightnessSlider.set(0.0)
+            self.brightnessSlider.configure(state=tk.DISABLED)
 
     def __mirrorSelectionInit(self):
         """
@@ -347,16 +241,18 @@ class App(object):
         self.mirrorDropdown["values"] = otherDisplayIDs
         self.mirrorDropdown.current(0)
 
-    # todo: this -- deactivate slider if it can't be read/set; default to current value
     def __underscanSelectionInit(self):
-        pass
-
-    def __toggleMirroring(self, boolean):
         """
-        Toggles whether mirroring is enabled.
-        :param boolean: True if enabled, False if disabled.
+        Sets self.underscanSlider's value to that of the currently selected display, and
+        deactivates said slider if the underscan of this display can't be set.
         """
-        self.mirrorEnabled = boolean
+        if self.display.underscan is not None:
+            underscan = abs(self.display.underscan - 1) * 100
+            self.underscanSlider.set(underscan)
+            self.underscanSlider.configure(state=tk.NORMAL)
+        else:
+            self.underscanSlider.set(0.0)
+            self.underscanSlider.configure(state=tk.DISABLED)
 
     @property
     def display(self):
@@ -386,7 +282,7 @@ class App(object):
         """
         :return: The currently selected brightness.
         """
-        return int(self.rotateSlider.get() * 90)  # in multiples of 90 degrees
+        return int(self.rotateSlider.get())
 
     @property
     def mirror(self):
@@ -432,7 +328,7 @@ class App(object):
             ),
             dm.Command(
                 "mirror",
-                "enable" if self.mirrorEnabled else "disable",
+                "enable" if self.mirrorEnabled.get() else "disable",
                 mirrorDisplayID=self.mirror.displayID,
                 displayID=self.display.displayID
             ),
@@ -455,7 +351,7 @@ class App(object):
         Set the Display to the currently selected settings.
         """
         commandList = self.__generateCommandList()
-        dm.run(commandList)
+        commandList.run()
 
         self.__reloadDisplay()
 
@@ -473,8 +369,9 @@ class App(object):
         self.__modeSelectionInit()
         self.__brightnessSelectionInit()
         self.__mirrorSelectionInit()
+        self.__underscanSelectionInit()
 
-        self.mirrorEnabled = False  # resets every time the display is switched
+        self.mirrorEnabled.set(False)  # resets every time the display is switched
 
     def start(self):
         """

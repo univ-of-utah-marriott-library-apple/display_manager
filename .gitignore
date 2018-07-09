@@ -58,5 +58,7 @@ docs/_build/
 target/
 
 # Custom
+default
+config
 original
 original/*

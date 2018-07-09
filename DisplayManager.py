@@ -59,6 +59,18 @@ class Display(object):
             return brightness
 
     @property
+    def underscan(self):
+        """
+        :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
+            (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
+        """
+        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], None)
+        if error:
+            return None
+        else:
+            return underscan
+
+    @property
     def currentMode(self):
         """
         :return: The current Quartz "DisplayMode" interface for this display.
@@ -186,7 +198,7 @@ class Display(object):
 
     def setMirror(self, mirrorDisplay):
         """
-        :param mirrorDisplay: The display which will mirror this display.
+        :param mirrorDisplay: The display which this display will mirror.
             Input a NoneType to stop mirroring.
         """
         (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
@@ -198,7 +210,7 @@ class Display(object):
         if mirrorDisplay is None or mirrorDisplay.displayID == self.displayID:
             Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, Quartz.kCGNullDirectDisplay)
         else:
-            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
+            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, mirrorDisplay.displayID, self.displayID)
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
@@ -448,13 +460,11 @@ class Command(object):
 
         if self.secondary == "show":
             for display in getAllDisplays():
-                (error, self.underscan) = iokit["IODisplayGetFloatParameter"](
-                    display.servicePort, 0, iokit["kDisplayUnderscan"], None)
-                if error:
-                    print("Failed to get underscan value of display {}; error {}".format(display.displayID, error))
-                    continue
-                print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
-                print("    {:.2f}%".format(self.underscan * 100))
+                if display.underscan is not None:
+                    print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
+                    print("    {:.2f}%".format(self.underscan * 100))
+                else:
+                    print("Failed to get underscan value of display {}".format(display.displayID))
 
         elif self.secondary == "set":
             error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"],
