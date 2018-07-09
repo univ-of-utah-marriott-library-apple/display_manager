@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/DisplayManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/DisplayManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,10 +16,11 @@
       <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DisplayManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="444" column="41" lean-forward="true" selection-start-line="444" selection-start-column="41" selection-end-line="444" selection-end-column="41" />
+            <state relative-caret-position="345">
+              <caret line="319" lean-forward="true" selection-start-line="319" selection-end-line="319" />
               <folding>
                 <element signature="n#!!doc" />
+                <element signature="e#557#8793#0" />
                 <element signature="e#557#774#1" />
                 <element signature="e#837#1010#0" />
                 <element signature="e#920#992#0" />
@@ -54,6 +55,9 @@
                 <element signature="e#5601#5696#1" />
                 <element signature="e#5797#5891#0" />
                 <element signature="e#6023#6182#0" />
+                <element signature="e#7273#8033#0" />
+                <element signature="e#7275#7340#2" />
+                <element signature="e#7605#7693#0" />
                 <element signature="e#6322#7140#0" />
                 <element signature="e#6322#6459#1" />
                 <element signature="e#6560#6654#0" />
@@ -100,6 +104,14 @@
                 <element signature="e#16275#16790#0" />
                 <element signature="e#16427#16790#0" />
                 <element signature="e#16555#16718#0" />
+                <element signature="e#16764#17244#0" />
+                <element signature="e#15654#15793#1" />
+                <element signature="e#17206#17455#0" />
+                <element signature="e#17259#17455#0" />
+                <element signature="e#18066#18610#0" />
+                <element signature="e#16802#16942#1" />
+                <element signature="e#18483#18621#0" />
+                <element signature="e#18538#18610#0" />
                 <element signature="e#18677#19812#0" />
                 <element signature="e#17232#17365#1" />
                 <element signature="e#17797#18201#0" />
@@ -134,16 +146,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AirplayToggle.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/AirplayToggle.py">
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="24" lean-forward="true" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
+            <state relative-caret-position="803">
+              <caret line="62" column="6" selection-start-line="62" selection-start-column="6" selection-end-line="62" selection-end-column="6" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dev/test.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="150">
@@ -336,11 +348,11 @@
         <option value="$PROJECT_DIR$/configReader.py" />
         <option value="$PROJECT_DIR$/configWriter.py" />
         <option value="$PROJECT_DIR$/Examples/AirplayToggle.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/gui.py" />
         <option value="$PROJECT_DIR$/commandLine.py" />
-        <option value="$PROJECT_DIR$/DisplayManager.py" />
         <option value="$PROJECT_DIR$/dev/test.py" />
+        <option value="$PROJECT_DIR$/DisplayManager.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -419,7 +431,7 @@
     <frame x="286" y="23" width="1448" height="980" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1422652" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1422652" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32884097" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32781458" />
@@ -519,13 +531,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="761">
-          <caret line="61" column="6" selection-start-line="61" selection-start-column="6" selection-end-line="61" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/configReader.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -601,6 +606,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/dev/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Examples/AirplayToggle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
@@ -610,10 +622,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DisplayManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="444" column="41" lean-forward="true" selection-start-line="444" selection-start-column="41" selection-end-line="444" selection-end-column="41" />
+        <state relative-caret-position="345">
+          <caret line="319" lean-forward="true" selection-start-line="319" selection-end-line="319" />
           <folding>
             <element signature="n#!!doc" />
+            <element signature="e#557#8793#0" />
             <element signature="e#557#774#1" />
             <element signature="e#837#1010#0" />
             <element signature="e#920#992#0" />
@@ -648,6 +661,9 @@
             <element signature="e#5601#5696#1" />
             <element signature="e#5797#5891#0" />
             <element signature="e#6023#6182#0" />
+            <element signature="e#7273#8033#0" />
+            <element signature="e#7275#7340#2" />
+            <element signature="e#7605#7693#0" />
             <element signature="e#6322#7140#0" />
             <element signature="e#6322#6459#1" />
             <element signature="e#6560#6654#0" />
@@ -694,6 +710,14 @@
             <element signature="e#16275#16790#0" />
             <element signature="e#16427#16790#0" />
             <element signature="e#16555#16718#0" />
+            <element signature="e#16764#17244#0" />
+            <element signature="e#15654#15793#1" />
+            <element signature="e#17206#17455#0" />
+            <element signature="e#17259#17455#0" />
+            <element signature="e#18066#18610#0" />
+            <element signature="e#16802#16942#1" />
+            <element signature="e#18483#18621#0" />
+            <element signature="e#18538#18610#0" />
             <element signature="e#18677#19812#0" />
             <element signature="e#17232#17365#1" />
             <element signature="e#17797#18201#0" />
@@ -727,10 +751,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dev/test.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+        <state relative-caret-position="803">
+          <caret line="62" column="6" selection-start-line="62" selection-start-column="6" selection-end-line="62" selection-end-column="6" />
         </state>
       </provider>
     </entry>

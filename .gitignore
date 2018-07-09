@@ -10,7 +10,6 @@ __pycache__/
 env/
 build/
 develop-eggs/
-dev/
 dist/
 downloads/
 eggs/
@@ -60,5 +59,7 @@ target/
 # Custom
 default
 config
+dev/
+.idea/
 original
 original/*
