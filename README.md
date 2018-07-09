@@ -13,7 +13,7 @@ A command-line utility which can modify your Mac's display settings.
 * [Usage](#help)
    * [Set](#set) - set the configuration
    * [Show](#show) - look at available configurations
-   * [Mirroring](#mirroring) - configure mirroring
+   * [Mirror](#mirror) - configure mirroring
    * [Brightness](#brightness) - change brightness
    * [Rotate](#rotate) - change display orientation
 
@@ -60,10 +60,10 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 The Display Manager executable supports the following commands:
 
 ```
-$ display_manager.py { help | set | show | mirroring | brightness | rotate }
+$ display_manager.py { help | set | show | brightness | rotate | mirror | underscan }
 ```
 
-The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirroring`), and you can give `help` as an argument to any commands.
+The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirror`), and you can give `help` as an argument to any commands.
 
 The other commands each have their own help instructions, which are detailed below.
 
@@ -82,9 +82,9 @@ The `set` command is used to change the current configuration on a display or ac
 |-----------------------------------|-----------------------------------------------------------------------|
 | `-w width`, `--width width`       | Resolution width.                                                     |
 | `-h height`, `--height height`    | Resolution height.                                                    |
-| `-d depth`, `--depth depth`       | Color depth.                                                          |
-| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz).                                                 |
-| `--display display`               | Only change settings for the display with identifier `display`.       |
+| `-p depth`, `--pixel-depth depth`       | Pixel color depth (default: 32).                                                          |
+| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz) (default: 0).                                                 |
+| `'d display', '--display display`               | Only change settings for the display with identifier `display`.       |
 | `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
 | `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
 
@@ -95,12 +95,6 @@ The `set` command is used to change the current configuration on a display or ac
 $ display_manager.py set highest
 ```
 
-* Set the run display to an exact specification:
-
-```
-$ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
-```
-
 * Set the run display to the closest value to what you want:
 ```
 $ display_manager.py set -w 1024 -h 768 -d 32 -r 70
@@ -108,6 +102,11 @@ $ display_manager.py set -w 1024 -h 768 -d 32 -r 70
 or
 ```
 $ display_manager.py set closest -w 1024 -h 768 -d 32 -r 70
+```
+
+* Set the run display to an exact specification:
+```
+$ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
 ```
 
 * Set display `478176570` to use the highest HiDPI-scaled configuration:
@@ -132,9 +131,9 @@ Use the `show` command to learn more about the supported display configurations 
 |-----------------------------------|-----------------------------------------------------------------------|
 | `-w width`, `--width width`       | Resolution width.                                                     |
 | `-h height`, `--height height`    | Resolution height.                                                    |
-| `-d depth`, `--depth depth`       | Color depth.                                                          |
-| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz).                                                 |
-| `--display display`               | Only show display modes for the display with identifier `display`.    |
+| `-p depth`, `--pixel-depth depth`       | Pixel color depth (default: 32).                                                          |
+| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz) (default: 0).                                                 |
+| `'d display', '--display display`               | Only change settings for the display with identifier `display`.       |
 | `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
 | `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
 
@@ -155,9 +154,9 @@ Display: 478173192
 Display: 478160349
 ```
 
-### Mirroring
+### Mirror
 
-The `mirroring` command is used to configure display mirroring.
+The `mirror` command is used to configure display mirror.
 
 | Subcommand | Purpose                                                                  |
 |------------|--------------------------------------------------------------------------|
@@ -167,19 +166,19 @@ The `mirroring` command is used to configure display mirroring.
 
 | Option                        | Purpose                                               |
 |-------------------------------|-------------------------------------------------------|
-| `--display display`           | Change mirroring settings *for* display `display`.    |
-| `--mirror display`            | Set the display to become a mirror of `display`.      |
+| `-d display`, `--display display`           | Change mirroring settings *for* display `display`.    |
+| `-m display`, `--mirror display`            | Set the above display to become a mirror *of* `display`.      |
 
 #### Examples
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ display_manager.py mirroring enable --display 478176723 --mirror 478176570
+$ display_manager.py mirror enable --display 478176723 --mirror 478176570
 ```
 
 * Stop mirroring:
 ```
-$ display_manager.py mirroring disable
+$ display_manager.py mirror disable
 ```
 
 ### Brightness
