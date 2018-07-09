@@ -1,7 +1,8 @@
 Display Manager
 ===============
 
-A command-line utility which can modify your Mac's display settings.
+An open-source Python library which can modify your Mac's display settings.
+Includes a command-line utility and a GUI for manual display manipulation.
 
 ## Contents
 
@@ -10,7 +11,7 @@ A command-line utility which can modify your Mac's display settings.
 * [Install](#install) - instructions for installing Display Manager
 * [Uninstall](#uninstall) - removal of Display Manager
 * [Purpose](#purpose) - why does this script exist?
-* [Usage](#help)
+* [Command-Line Usage](#help)
    * [Set](#set) - set the configuration
    * [Show](#show) - look at available configurations
    * [Mirror](#mirror) - configure mirroring
@@ -27,7 +28,7 @@ Display Manager is for Mac computers.
 
 Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that do the actual manipulation of the display settings.
 
-If you have replaced the setDefault `/usr/bin/python` binary (which you should never do, by the way), you should ensure that it has the PyObjC bindings set up correctly.
+If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
 
 ## Install
 
@@ -73,7 +74,7 @@ The `set` command is used to change the current configuration on a display or ac
 
 | Subcommand | Purpose                                                                                      |
 |------------|----------------------------------------------------------------------------------------------|
-| `help`     | Prints the help instructions.                                                               |
+| `help`     | Prints the help instructions.                                                                |
 | `closest`  | Set the display to the supported configuration that is closest to the user-supplied values.  |
 | `highest`  | Set the display to the highest supported configuration settings.                             |
 | `exact`    | Set the display to the specified values **if** they form a supported configuration.          |
@@ -82,9 +83,9 @@ The `set` command is used to change the current configuration on a display or ac
 |-----------------------------------|-----------------------------------------------------------------------|
 | `-w width`, `--width width`       | Resolution width.                                                     |
 | `-h height`, `--height height`    | Resolution height.                                                    |
-| `-p depth`, `--pixel-depth depth`       | Pixel color depth (default: 32).                                                          |
-| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz) (default: 0).                                                 |
-| `'d display', '--display display`               | Only change settings for the display with identifier `display`.       |
+| `-p depth`, `--pixel-depth depth` | Pixel color depth (default: 32).                                      |
+| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz) (default: 0).                                    |
+| `'d display', '--display display` | Only change settings for the display with identifier `display`.       |
 | `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
 | `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
 
@@ -120,7 +121,7 @@ Use the `show` command to learn more about the supported display configurations 
 
 | Subcommand    | Purpose                                                                                   |
 |---------------|-------------------------------------------------------------------------------------------|
-| `help`        | Prints the help instructions.                                                            |
+| `help`        | Prints the help instructions.                                                             |
 | `all`         | Shows all available supported display configuration.                                      |
 | `closest`     | Shows the closest supported configuration to the given values.                            |
 | `highest`     | Shows the highest available supported display configuration.                              |
@@ -131,9 +132,9 @@ Use the `show` command to learn more about the supported display configurations 
 |-----------------------------------|-----------------------------------------------------------------------|
 | `-w width`, `--width width`       | Resolution width.                                                     |
 | `-h height`, `--height height`    | Resolution height.                                                    |
-| `-p depth`, `--pixel-depth depth`       | Pixel color depth (default: 32).                                                          |
-| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz) (default: 0).                                                 |
-| `'d display', '--display display`               | Only change settings for the display with identifier `display`.       |
+| `-p depth`, `--pixel-depth depth` | Pixel color depth (default: 32).                                      |
+| `-r refresh`, `--refresh refresh` | Refresh rate (in Hz) (default: 0).                                    |
+| `'d display', '--display display` | Only change settings for the display with identifier `display`.       |
 | `--no-hidpi`                      | Don't use any HiDPI configuration settings.                           |
 | `--only-hidpi`                    | Only use HiDPI-scaled configuration settings.                         |
 
@@ -160,14 +161,14 @@ The `mirror` command is used to configure display mirror.
 
 | Subcommand | Purpose                                                                  |
 |------------|--------------------------------------------------------------------------|
-| `help`     | Prints the help instructions.                                           |
+| `help`     | Prints the help instructions.                                            |
 | `enable`   | Activate mirroring.                                                      |
 | `disable`  | Deactivate mirroring.                                                    |
 
 | Option                        | Purpose                                               |
 |-------------------------------|-------------------------------------------------------|
-| `-d display`, `--display display`           | Change mirroring settings *for* display `display`.    |
-| `-m display`, `--mirror display`            | Set the above display to become a mirror *of* `display`.      |
+| `-d display`, `--display display`  | Change mirroring settings *for* display `display`.        |
+| `-m display`, `--mirror display`   | Set the above display to become a mirror *of* `display`.  |
 
 #### Examples
 
@@ -187,7 +188,7 @@ You can set the brightness on your display with the `brightness` command (assumi
 
 | Subcommand    | Purpose                                               |
 |---------------|-------------------------------------------------------|
-| `help`        | Prints the help instructions.                        |
+| `help`        | Prints the help instructions.                         |
 | `show`        | Show the current brightness setting(s).               |
 
 | Option                | Purpose                                       |
@@ -217,7 +218,7 @@ You can view and change your display's orientation with the `rotate` command.
 
 | Subcommand    | Purpose                                               |
 |---------------|-------------------------------------------------------|
-| `help`        | Prints the help instructions.                        |
+| `help`        | Prints the help instructions.                         |
 | `show`        | Show the current rotation setting(s).                 |
 | `set [value]` | Set display orientation to [value] \(in degrees\).    |
 
