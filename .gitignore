@@ -60,6 +60,5 @@ target/
 default
 config
 dev/
-*.idea/
 original
 original/*
