@@ -5,11 +5,11 @@
 # Programmatically manages Mac displays.
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness.
 
-
 import objc             # access Objective-C functions and variables
 import sys              # exit script with the right codes
 import CoreFoundation   # work with Objective-C data types
 import Quartz           # work with system graphics
+
 
 # Configured for global usage; otherwise, must be re-instantiated each time it is called
 iokit = None
@@ -191,16 +191,26 @@ class Display(object):
         error = Quartz.CGConfigureDisplayWithDisplayMode(configRef, self.displayID, mode.raw, None)
         if error:
             print("Failed to set display configuration: error {}".format(error))
-            error = Quartz.CGCancelDisplayConfiguration(configRef)
+            Quartz.CGCancelDisplayConfiguration(configRef)
             sys.exit(1)
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
+
+    def setBrightness(self, brightness):
+        """
+        :param brightness: The desired brightness, from 0 to 1.
+        """
+        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayBrightness"], brightness)
+        if error:
+            print("Failed to set brightness of display {}; error {}".format(self.displayID, error))
+            # External display brightness probably can't be managed this way
+            print("External displays may not be compatible with Display Manager. \n"
+                  "If this is an external display, try setting manually on device hardware.")
 
     def setRotate(self, angle):
         """
         :param angle: The angle of rotation.
         """
-        # Get rotation "options", per user input
         angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
         rotateCode = 1024
         if angle % 90 != 0:  # user entered inappropriate angle, so we quit
@@ -210,11 +220,15 @@ class Display(object):
         options = rotateCode | (angleCodes[angle % 360] << 16)
 
         # Actually rotate the screen
-        iokit["IOServiceRequestProbe"](self.servicePort, options)
+        error = iokit["IOServiceRequestProbe"](self.servicePort, options)
 
-    def setMirror(self, mirrorDisplay):
+        if error:
+            print("Failed to rotate display {}; error {}".format(self.displayID, error))
+            sys.exit(1)
+
+    def setMirrorOf(self, mirrorDisplay):
         """
-        :param mirrorDisplay: The display which this display will mirror.
+        :param mirrorDisplay: The Display which this Display will mirror.
             Input a NoneType to stop mirroring.
         """
         (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
@@ -226,9 +240,21 @@ class Display(object):
         if mirrorDisplay is None or mirrorDisplay.displayID == self.displayID:
             Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, Quartz.kCGNullDirectDisplay)
         else:
-            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, mirrorDisplay.displayID, self.displayID)
+            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
+
+    def setUnderscan(self, underscan):
+        """
+        :param underscan: Underscan value, from 0 (no underscan) to 1 (maximum underscan).
+        """
+        # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
+        # e.g. 0 -> maximum (100%), 1 -> 0% (default)
+        underscan = float(abs(underscan - 1))
+
+        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
+        if error:
+            print("Failed to set underscan of display {}; error {}".format(self.displayID, error))
 
 
 class DisplayMode(object):
@@ -360,8 +386,6 @@ class Command(object):
         """
         Shows the user information about connected displays.
         """
-        display = Display(self.displayID)
-
         if self.secondary == "all":
             for display in getAllDisplays():
                 print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
@@ -379,6 +403,7 @@ class Command(object):
                 print("Must have both width and height for closest matching.")
                 sys.exit(1)
 
+            display = Display(self.displayID)
             closest = display.closestMode(self.width, self.height, self.depth, self.refresh)
             if closest:
                 print("    {}".format(closest))
@@ -386,6 +411,7 @@ class Command(object):
                 self.__printNotFound()
 
         elif self.secondary == "highest":
+            display = Display(self.displayID)
             highest = display.highestMode(self.hidpi)
             if highest:
                 print("    {}".format(highest))
@@ -410,8 +436,6 @@ class Command(object):
         """
         Sets or shows a display's brightness.
         """
-        display = Display(self.displayID)
-
         if self.secondary == "show":
             for display in getAllDisplays():
                 if display.brightness:
@@ -421,20 +445,13 @@ class Command(object):
                     print("Failed to get brightness of display {}".format(display.displayID))
 
         elif self.secondary == "set":
-            error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayBrightness"],
-                                                        self.brightness)
-            if error:
-                print("Failed to set brightness of display {}; error {}".format(display.displayID, error))
-                # External display brightness probably can't be managed this way
-                print("External displays may not be compatible with Display Manager. \n"
-                      "If this is an external display, try setting manually on device hardware.")
+            display = Display(self.displayID)
+            display.setBrightness(self.brightness)
 
     def __handleRotate(self):
         """
         Sets or shows a display's rotation.
         """
-        display = Display(self.displayID)
-
         if self.secondary == "show":
             for display in getAllDisplays():
                 print(
@@ -442,6 +459,7 @@ class Command(object):
                 print("    Rotation: {0} degrees".format(str(int(display.rotation))))
 
         elif self.secondary == "set":
+            display = Display(self.displayID)
             display.setRotate(self.angle)
 
     def __handleMirror(self):
@@ -449,21 +467,19 @@ class Command(object):
         Enables or disables mirroring between two displays.
         """
         if self.secondary == "enable":
-            mirrorDisplay = Display(self.mirrorDisplayID)
             display = Display(self.displayID)
+            mirrorDisplay = Display(self.mirrorDisplayID)
 
-            mirrorDisplay.setMirror(display)
+            display.setMirrorOf(mirrorDisplay)
 
         if self.secondary == "disable":
             for display in getAllDisplays():
-                display.setMirror(None)
+                display.setMirrorOf(None)
 
     def __handleUnderscan(self):
         """
         Sets or shows a display's underscan settings.
         """
-        display = Display(self.displayID)
-
         if self.secondary == "show":
             for display in getAllDisplays():
                 if display.underscan is not None:
@@ -473,10 +489,8 @@ class Command(object):
                     print("Failed to get underscan value of display {}".format(display.displayID))
 
         elif self.secondary == "set":
-            error = iokit["IODisplaySetFloatParameter"](display.servicePort, 0, iokit["kDisplayUnderscan"],
-                                                        self.underscan)
-            if error:
-                print("Failed to set underscan of display {}; error {}".format(display.displayID, error))
+            display = Display(self.displayID)
+            display.setUnderscan(self.underscan)
 
 
 class CommandList(object):
@@ -610,3 +624,5 @@ def getIOKit():
 
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
         iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
+
+    return iokit

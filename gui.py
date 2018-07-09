@@ -2,7 +2,6 @@
 
 # A GUI that allows users to interface with Display Manager
 
-
 from __future__ import print_function
 import Tkinter as tk
 import ttk
@@ -297,7 +296,7 @@ class App(object):
         """
         :return: The currently selected underscan.
         """
-        return abs((float(self.underscanSlider.get()) / 100) - 1)
+        return float(self.underscanSlider.get() / 100)
 
     def __generateCommandList(self):
         """

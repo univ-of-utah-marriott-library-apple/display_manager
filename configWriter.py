@@ -2,7 +2,6 @@
 
 # Writes to a config file per given Display Manager commands.
 
-
 import pickle
 import sys
 import DisplayManager as dm

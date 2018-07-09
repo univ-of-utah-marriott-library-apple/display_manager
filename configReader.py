@@ -2,7 +2,6 @@
 
 # Reads in a config file and runs the corresponding commands in Display Manager.
 
-
 import sys
 import pickle
 import os.path

@@ -3,43 +3,10 @@
 # This script allows users to access the DisplayManager program through the command line.
 # Passes command parameters into DisplayManager.
 
-
 import sys
 import argparse
 import DisplayManager as dm
-
-
-# todo: fix or remove
-# class CustomParser(argparse.ArgumentParser):
-#     """
-#     A modified version of ArgumentParser that handles errors differently.
-#     """
-#
-#     def error(self, message):
-#         """
-#         When the parser encounters a user error, it comes here.
-#         """
-#         print(message)
-#         showHelp()
-#         sys.exit(1)
-#
-#     def add_parser(self, destination, commandName):
-#         parent = argparse.ArgumentParser(add_help=False, conflict_handler="resolve")
-#         child = parent.add_subparsers(dest=destination)
-#         grandchild = CustomParser(child.add_parser(commandName, add_help=False), conflict_handler="resolve")
-#         return grandchild
-
-
-def earlyExit():
-    """
-    Exits before actually doing anything if the user entered incorrect parameters.
-    """
-    if (
-        len(sys.argv) < 2  # or
-        # sys.argv[1] not in ["help", "set", "show", "brightness", "rotate", "mirror", "underscan"]
-    ):
-        showHelp()
-        sys.exit(1)
+from os import devnull
 
 
 def parse(parseList):
@@ -47,68 +14,6 @@ def parse(parseList):
     Parse the user command-line input.
     :return: A parser that has parsed all command-line arguments passed in.
     """
-    # todo: fix or remove
-    # parser = CustomParser(
-    #     description="Display Manager, version 1.0.0",
-    #     usage="commandLine.py  { help | set | show | brightness | rotate | mirror | underscan }",
-    #     prefix_chars="--",  # arguments beginning with "--" are optional
-    #     add_help=False
-    # )
-    # primary = parser.add_subparsers(dest="primary")
-    #
-    # pHelp = primary.add_parser("help", add_help=False)
-    # pHelp.add_argument(
-    #     "secondary",
-    #     choices=["set", "show", "brightness", "rotate", "underscan", "mirror"],
-    #     nargs="?",
-    #     default=None,
-    # )
-    #
-    # pSet = primary.add_parser("set", add_help=False)
-    # pSet.add_argument(
-    #     "secondary",
-    #     choices=["help", "closest", "highest", "exact"],
-    #     nargs="?",
-    #     default="closest"
-    # )
-    #
-    # pShow = primary.add_parser("show", add_help=False)
-    # pShow.add_argument(
-    #     "secondary",
-    #     choices=["help", "all", "closest", "highest", "current", "displays"],
-    #     nargs="?",
-    #     default="all"
-    # )
-    #
-    # pBrightness = primary.add_parser("brightness", add_help=False)
-    # pBrightness.add_argument("secondary", choices=["help", "show", "set"])
-    # pBrightness.add_argument("brightness", type=float, nargs="?", default=1)
-    #
-    # pRotate = primary.add_parser("rotate", add_help=False)
-    # pRotate.add_argument("secondary", choices=["help", "set", "show"], nargs="?", default="show")
-    # pRotate.add_argument("rotation", type=int, nargs="?", default=0)
-    #
-    # pMirror = primary.add_parser("mirror", add_help=False)
-    # pMirror.add_argument("secondary", choices=["help", "enable", "disable"])
-    # pMirror.add_argument("-m", "--mirror", type=int)
-    #
-    # pUnderscan = primary.add_parser("underscan", add_help=False)
-    # pUnderscan.add_argument("secondary", choices=["help", "show", "set"])
-    # pUnderscan.add_argument("underscan", type=float, nargs="?")
-    #
-    # for p in [pSet, pShow]:
-    #     p.add_argument("-w", type=int)
-    #     p.add_argument("-h", type=int)
-    #     p.add_argument("-p", type=int, default=32)
-    #     p.add_argument("-r", type=int, default=0)
-    #     p.add_argument("--no-hidpi", action="store_true")
-    #     p.add_argument("--only-hidpi", action="store_true")
-    #
-    # for p in [pSet, pShow, pBrightness, pRotate, pMirror, pUnderscan]:
-    #     p.add_argument("-d", type=int, default=dm.getMainDisplayID())
-    #
-    # return primary.parse_args(parseList)
-
     parser = argparse.ArgumentParser(add_help=False)
     primary = parser.add_subparsers(dest="primary")
 
@@ -163,7 +68,19 @@ def parse(parseList):
         default=None
     )
 
-    return parser.parse_args(parseList)
+    # argparse shows its own error message and exits when there's been a parsing error.
+    # We want to show our error, and not theirs. Hence:
+    try:
+        with open(devnull, "w") as nowhere:
+            sys.stderr = nowhere
+            sys.stdout = nowhere
+            args = parser.parse_args(parseList)
+    except SystemExit:
+        sys.stderr = sys.__stderr__
+        sys.stdout = sys.__stdout__
+        showHelp(sys.argv[1])
+        sys.exit(1)
+    return args
 
 
 def getCommand(commandString):
@@ -171,7 +88,9 @@ def getCommand(commandString):
     Transforms input string into a Command.
     :returns: The resulting Command.
     """
-    earlyExit()  # exits if the user didn't give enough information, or just wanted help
+    if len(sys.argv) < 2:
+        showHelp()
+        sys.exit()
 
     parseList = []
     for element in commandString.split():
