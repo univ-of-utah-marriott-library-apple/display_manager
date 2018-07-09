@@ -60,6 +60,6 @@ target/
 default
 config
 dev/
-.idea/
+*.idea/
 original
 original/*
