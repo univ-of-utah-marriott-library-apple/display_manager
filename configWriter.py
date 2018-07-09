@@ -19,15 +19,9 @@ def buildConfig(commandList, filename):
 
 
 def main():
-    print("Write each command out on its own line. After final command, hit return on empty line.")
-
     commands = []
-    while True:
-        line = raw_input()
-        if line:
-            commands.append(cl.getCommand(line))
-        else:
-            break
+    for line in sys.argv[2:]:
+        commands.append(cl.getCommand(line))
 
     commandList = dm.CommandList()
     for command in commands:
@@ -37,5 +31,5 @@ def main():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
+    if len(sys.argv) > 1:
         main()

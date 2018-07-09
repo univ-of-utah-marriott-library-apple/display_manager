@@ -75,6 +75,8 @@ def parse(parseList):
             sys.stderr = nowhere
             sys.stdout = nowhere
             args = parser.parse_args(parseList)
+            sys.stderr = sys.__stderr__
+            sys.stdout = sys.__stdout__
     except SystemExit:
         sys.stderr = sys.__stderr__
         sys.stdout = sys.__stdout__
