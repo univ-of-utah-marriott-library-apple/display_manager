@@ -60,10 +60,10 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 The Display Manager executable supports the following commands:
 
 ```
-$ display_manager.py { help | set | show | brightness | rotate | mirror | underscan }
+$ commandLine.py { help | set | show | brightness | rotate | mirror | underscan }
 ```
 
-The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `display_manager.py help mirror`), and you can give `help` as an argument to any commands.
+The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `commandLine.py help mirror`), and you can give `help` as an argument to any commands.
 
 The other commands each have their own help instructions, which are detailed below.
 
@@ -92,26 +92,26 @@ The `set` command is used to change the current configuration on a display or ac
 
 * Set the run display to its highest supported configuration:
 ```
-$ display_manager.py set highest
+$ commandLine.py set highest
 ```
 
 * Set the run display to the closest value to what you want:
 ```
-$ display_manager.py set -w 1024 -h 768 -d 32 -r 70
+$ commandLine.py set -w 1024 -h 768 -d 32 -r 70
 ```
 or
 ```
-$ display_manager.py set closest -w 1024 -h 768 -d 32 -r 70
+$ commandLine.py set closest -w 1024 -h 768 -d 32 -r 70
 ```
 
 * Set the run display to an exact specification:
 ```
-$ display_manager.py set exact -w 1024 -h 768 -d 32 -r 70
+$ commandLine.py set exact -w 1024 -h 768 -d 32 -r 70
 ```
 
 * Set display `478176570` to use the highest HiDPI-scaled configuration:
 ```
-$ display_manager.py set highest --display 478176570 --only-hidpi
+$ commandLine.py set highest --display 478176570 --only-hidpi
 ```
 
 ### Show
@@ -141,13 +141,13 @@ Use the `show` command to learn more about the supported display configurations 
 
 * Show the run display's highest supported configuration:
 ```
-$ display_manager.py show highest
+$ commandLine.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
 ```
 
 * Show all connected displays and their identifiers:
 ```
-$ display_manager.py show displays
+$ commandLine.py show displays
 Display: 478176570 (Main Display)
 Display: 478176723
 Display: 478173192
@@ -173,12 +173,12 @@ The `mirror` command is used to configure display mirror.
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ display_manager.py mirror enable --display 478176723 --mirror 478176570
+$ commandLine.py mirror enable --display 478176723 --mirror 478176570
 ```
 
 * Stop mirroring:
 ```
-$ display_manager.py mirror disable
+$ commandLine.py mirror disable
 ```
 
 ### Brightness
@@ -198,17 +198,17 @@ You can set the brightness on your display with the `brightness` command (assumi
 
 * Show the current brightness settings of all displays:
 ```
-$ display_manager.py brightness show
+$ commandLine.py brightness show
 ```
 
 * Set the brightness of the run display to its maximum brightness:
 ```
-$ display_manager.py brightness set .4
+$ commandLine.py brightness set .4
 ```
 
 * Set the brightness of display `478176723` to 40% of maximum brightness:
 ```
-$ display_manager.py brightness set .4 --display 478176723
+$ commandLine.py brightness set .4 --display 478176723
 ```
 
 ### Rotate
@@ -229,20 +229,20 @@ You can view and change your display's orientation with the `rotate` command.
 
 * Show the current orientation of all displays (in degrees):
 ```
-$ display_manager.py rotate show
+$ commandLine.py rotate show
 ```
 
 * Rotate the run display by 90 degrees (counter-clockwise):
 ```
-$ display_manager.py rotate set 90
+$ commandLine.py rotate set 90
 ```
 
 * Flip display `478176723` upside-down:
 ```
-$ display_manager.py rotate set 180 --display 478176723
+$ commandLine.py rotate set 180 --display 478176723
 ```
 
 * Restore display `478176723` to default orientation:
 ```
-$ display_manager.py rotate set 0 --display 478176723
+$ commandLine.py rotate set 0 --display 478176723
 ```
