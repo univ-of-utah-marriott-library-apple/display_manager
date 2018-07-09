@@ -196,6 +196,22 @@ class Display(object):
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
+    def setRotate(self, angle):
+        """
+        :param angle: The angle of rotation.
+        """
+        # Get rotation "options", per user input
+        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
+        rotateCode = 1024
+        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
+            print("Can only rotate by multiples of 90 degrees.")
+            sys.exit(1)
+        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
+        options = rotateCode | (angleCodes[angle % 360] << 16)
+
+        # Actually rotate the screen
+        iokit["IOServiceRequestProbe"](self.servicePort, options)
+
     def setMirror(self, mirrorDisplay):
         """
         :param mirrorDisplay: The display which this display will mirror.
@@ -287,7 +303,7 @@ class Command(object):
 
     def run(self):
         """
-        Runs whichever command this Command has stored.
+        Runs the command this Command has stored.
         """
         if self.primary == "set":
             self.__handleSet()
@@ -426,17 +442,7 @@ class Command(object):
                 print("    Rotation: {0} degrees".format(str(int(display.rotation))))
 
         elif self.secondary == "set":
-            # Get rotation "options", per user input
-            angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
-            rotateCode = 1024
-            if self.angle % 90 != 0:  # user entered inappropriate angle, so we quit
-                print("Can only rotate by multiples of 90 degrees.")
-                sys.exit(1)
-            # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
-            options = rotateCode | (angleCodes[self.angle % 360] << 16)
-
-            # Actually rotate the screen
-            iokit["IOServiceRequestProbe"](display.servicePort, options)
+            display.setRotate(self.angle)
 
     def __handleMirror(self):
         """
@@ -512,6 +518,34 @@ class CommandList(object):
             command.run()
 
 
+def getMainDisplayID():
+    """
+    :return: DisplayID of the main display
+    """
+    return Quartz.CGMainDisplayID()
+
+
+def getAllDisplayIDs():
+    """
+    :return: A tuple containing all currently-online displays.
+        Each object in the tuple is a display identifier (as an integer).
+    """
+    (error, displays, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
+    if error:
+        raise RuntimeError("Unable to get displays list.")
+    return displays
+
+
+def getAllDisplays():
+    """
+    :return: A list containing all currently-online displays.
+    """
+    displays = []
+    for displayID in getAllDisplayIDs():
+        displays.append(Display(displayID))
+    return displays
+
+
 def getIOKit():
     """
     This handles the importing of specific functions and variables from the
@@ -576,31 +610,3 @@ def getIOKit():
 
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
         iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
-
-
-def getAllDisplays():
-    """
-    :return: A list containing all currently-online displays.
-    """
-    displays = []
-    for displayID in getAllDisplayIDs():
-        displays.append(Display(displayID))
-    return displays
-
-
-def getMainDisplayID():
-    """
-    :return: DisplayID of the main display
-    """
-    return Quartz.CGMainDisplayID()
-
-
-def getAllDisplayIDs():
-    """
-    :return: A tuple containing all currently-online displays.
-        Each object in the tuple is a display identifier (as an integer).
-    """
-    (error, displays, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
-    if error:
-        raise RuntimeError("Unable to get displays list.")
-    return displays

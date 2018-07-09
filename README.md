@@ -10,8 +10,10 @@ Includes a command-line utility and a GUI for manual display manipulation.
 * [System Requirements](#system-requirements) - what you need
 * [Install](#install) - instructions for installing Display Manager
 * [Uninstall](#uninstall) - removal of Display Manager
-* [Purpose](#purpose) - why does this script exist?
-* [Command-Line Usage](#help)
+* [Purpose](#purpose) - why does this library exist?
+* [Library](#library) - what can you do with this library?
+   * [Examples](#examples) - potential use cases for this library
+* [Command-Line Usage](#help) - how to use the command line interface
    * [Set](#set) - set the configuration
    * [Show](#show) - look at available configurations
    * [Mirror](#mirror) - configure mirroring
@@ -56,9 +58,38 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
    * We support all the features of SetDisplay
    * Plans for additional features (AirPlay configuration, HDMI underscan settings, etc.)
 
+## Library
+
+The Display Manager library is based off the contents of DisplayManager.py, which contains 4 classes and 4 helper methods.
+
+The `Display` class is a virtual representation of a connected physical display. It allows developers to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
+The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
+The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as a developer sees fit.
+The `CommandList` class is simply a container (for `command`s) that allows developers to execute several commands at once.
+
+`getMainDisplayID` returns the DisplayID (required to initialize `Display`) of the primary display; `getAllDisplayIDs` returns a list containing all such DisplayIDs; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows developers to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much easier to go through `Command`s and `Display`s instead)
+
+### Examples
+
+Say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
+
+```
+for display in getAllDisplays():
+    display.setMode(display.highestMode())
+```
+
+Perhaps you'd like all the displays of the computers you manage to rotate to 90 degrees. The following would work:
+
+```
+display = Display(getMainDisplayID())
+display.setRotate(90)
+```
+
+For System Admins using software like Jamf or Outset, the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
+
 ## Usage
 
-The Display Manager executable supports the following commands:
+The Display Manager command-line interface supports the following commands:
 
 ```
 $ commandLine.py { help | set | show | brightness | rotate | mirror | underscan }
