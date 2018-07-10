@@ -14,8 +14,8 @@ def buildConfig(commandList, filename):
     :param commandList: The DisplayManager.CommandList to write to the file.
     :param filename: The name of the file to write to.
     """
-    with open("./config/" + filename, "w") as file:
-        pickle.dump(commandList, file)
+    with open("./cfg/" + filename, "w") as f:
+        pickle.dump(commandList, f)
 
 
 def main():

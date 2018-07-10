@@ -108,14 +108,14 @@ def getCommand(commandString):
         sys.exit(0)
 
     def hidpi():
-        hidpi = 0  # show all modes (default)
+        hidpiVal = 0  # show all modes (default)
         if args.only_hidpi or args.no_hidpi:
             if not (args.only_hidpi and args.no_hidpi):  # If they didn't give contrary instructions, proceed.
                 if args.no_hidpi:
-                    hidpi = 1  # do not show HiDPI modes
+                    hidpiVal = 1  # do not show HiDPI modes
                 elif args.only_hidpi:
-                    hidpi = 2  # show only HiDPI modes
-        return hidpi
+                    hidpiVal = 2  # show only HiDPI modes
+        return hidpiVal
 
     command = None
     if args.primary == "set":

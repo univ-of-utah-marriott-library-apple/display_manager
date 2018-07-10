@@ -25,10 +25,12 @@
           <option value="main.DisplayManager.getMainDisplayID" />
           <option value="configWriter.raw_input" />
           <option value="Quartz.*" />
+          <option value="objc.*" />
+          <option value="CoreFoundation.*" />
         </list>
       </option>
     </inspection_tool>
-    <inspection_tool class="SpellCheckingInspection" enabled="true" level="WARNING" enabled_by_default="true">
+    <inspection_tool class="SpellCheckingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <option name="processCode" value="true" />
       <option name="processLiterals" value="true" />
       <option name="processComments" value="true" />

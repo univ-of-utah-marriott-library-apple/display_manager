@@ -7,7 +7,7 @@ import Tkinter as tk
 import ttk
 import re
 import DisplayManager as dm
-from Extras import configWriter as cg
+import configWriter as cg
 
 
 class App(object):
@@ -359,7 +359,7 @@ class App(object):
         Build a config file with the currently selected settings.
         """
         commandList = self.__generateCommandList()
-        cg.buildConfig(commandList, "config")
+        cg.buildConfig(commandList, "cfg")
 
     def __reloadDisplay(self):
         """

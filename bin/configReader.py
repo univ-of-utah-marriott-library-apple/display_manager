@@ -10,9 +10,9 @@ import os.path
 def main():
     filename = sys.argv[1]
 
-    if os.path.isfile("./config/" + filename):
-        with open(sys.argv[1], "r") as file:
-            commands = pickle.load(file)
+    if os.path.isfile("./cfg/" + filename):
+        with open(sys.argv[1], "r") as f:
+            commands = pickle.load(f)
         commands.run()
     else:
         print("File {} not found.".format(filename))
