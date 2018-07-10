@@ -58,7 +58,7 @@ def parse(parseList):
     pMirror.add_argument("-m", "--mirror", type=int)
 
     for p in [pSet, pShow, pBrightness, pRotate, pMirror, pUnderscan]:
-        p.add_argument("-d", "--display", type=int, default=dm.getMainDisplayID())
+        p.add_argument("-d", "--display", type=int, default=dm.getMainDisplay().displayID)
 
     pHelp = primary.add_parser("help", add_help=False)
     pHelp.add_argument(

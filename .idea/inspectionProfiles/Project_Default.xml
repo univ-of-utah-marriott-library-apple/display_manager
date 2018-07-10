@@ -24,6 +24,7 @@
         <list>
           <option value="main.DisplayManager.getMainDisplayID" />
           <option value="configWriter.raw_input" />
+          <option value="Quartz.*" />
         </list>
       </option>
     </inspection_tool>

@@ -24,9 +24,16 @@ class Display(object):
     """
 
     def __init__(self, displayID):
+        """
+        :param displayID: The DisplayID of the display to manipulate
+        """
         getIOKit()
 
-        if displayID in getAllDisplayIDs():
+        allDisplayIDs = []
+        for display in getAllDisplays():
+            allDisplayIDs.append(display.displayID)
+
+        if displayID in allDisplayIDs:
             self.displayID = displayID
         else:
             print("Display {} not found.".format(displayID))
@@ -534,11 +541,11 @@ class CommandList(object):
             command.run()
 
 
-def getMainDisplayID():
+def getMainDisplay():
     """
-    :return: DisplayID of the main display
+    :return: The main Display.
     """
-    return Quartz.CGMainDisplayID()
+    return Display(Quartz.CGMainDisplayID())
 
 
 def getAllDisplayIDs():
@@ -556,8 +563,13 @@ def getAllDisplays():
     """
     :return: A list containing all currently-online displays.
     """
+    (error, displayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
+    if error:
+        print("Unable to get displays list.")
+        sys.exit(1)
+
     displays = []
-    for displayID in getAllDisplayIDs():
+    for displayID in displayIDs:
         displays.append(Display(displayID))
     return displays
 
