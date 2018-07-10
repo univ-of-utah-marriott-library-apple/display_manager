@@ -68,7 +68,9 @@ class Display(object):
         if error:
             return None
         else:
-            return underscan
+            # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
+            # e.g. 0 -> maximum (100%), 1 -> 0% (default)
+            return float(abs(underscan - 1))
 
     @property
     def currentMode(self):
