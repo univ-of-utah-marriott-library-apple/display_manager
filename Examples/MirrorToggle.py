@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-import DisplayManager as dm
+from lib import DisplayManager as dm
 
 
 def main():

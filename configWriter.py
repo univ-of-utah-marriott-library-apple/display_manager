@@ -4,7 +4,7 @@
 
 import pickle
 import sys
-import DisplayManager as dm
+from lib import DisplayManager as dm
 import commandLine as cl
 
 
