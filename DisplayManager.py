@@ -548,17 +548,6 @@ def getMainDisplay():
     return Display(Quartz.CGMainDisplayID())
 
 
-def getAllDisplayIDs():
-    """
-    :return: A tuple containing all currently-online displays.
-        Each object in the tuple is a display identifier (as an integer).
-    """
-    (error, displays, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
-    if error:
-        raise RuntimeError("Unable to get displays list.")
-    return displays
-
-
 def getAllDisplays():
     """
     :return: A list containing all currently-online displays.

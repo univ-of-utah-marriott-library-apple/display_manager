@@ -64,7 +64,7 @@ The `DisplayMode` class is a simple representation of Quartz's Display Modes. Di
 The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as one sees fit.
 The `CommandList` class is simply a container (for `command`s) that allows one to execute several commands at once.
 
-`getMainDisplayID` returns the DisplayID (required to initialize `Display`) of the primary display; `getAllDisplayIDs` returns a list containing all such DisplayIDs; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much easier to go through `Command`s and `Display`s instead)
+`getMainDisplay` returns the primary `Display`; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Command`s and `Display`s instead, if possible)
 
 ### Examples
 
