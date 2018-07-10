@@ -57,7 +57,7 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 
 ## Library
 
-The Display Manager library is based off the contents of DisplayManager.py, which contains 4 classes and 4 helper methods.
+The Display Manager library is based off the contents of DisplayManager.py, which contains the following:
 
 The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
 The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
