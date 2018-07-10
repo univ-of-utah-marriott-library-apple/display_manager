@@ -4,6 +4,7 @@
 # Passes command parameters into DisplayManager.
 
 import sys
+import re
 import argparse
 import DisplayManager as dm
 from os import devnull
@@ -282,15 +283,36 @@ def main():
     """
     Called on execution. Parses input and calls Display Manager.
     """
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+
+    # Exit if the user didn't provide any arguments
+    if len(args) < 1:
         showHelp()
         sys.exit(1)
-    else:
-        for command in sys.argv:
-            print(command)
 
-    command = getCommand(" ".join(sys.argv[1:]))
-    command.run()
+    # Check whether we've received several commands, or only one
+    numCommands = 0
+    for arg in args:
+        numCommands += len(re.findall(
+            r"(help)|(set)|(show)|(brightness)|(rotate)|(mirror)|(underscan)", arg
+        ))
+
+    # The user provided multiple different commands
+    if numCommands > 1:
+        commands = dm.CommandList()
+        for command in args:
+            commands.addCommands(getCommand(command))
+        commands.run()
+
+    # The user provided only one command
+    elif numCommands == 1:
+        command = getCommand(" ".join(args))
+        command.run()
+
+    # The user didn't provide any valid commands, so exit
+    else:
+        showHelp()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
