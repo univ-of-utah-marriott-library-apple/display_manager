@@ -5,7 +5,7 @@
 import pickle
 import sys
 from lib import DisplayManager as dm
-import commandLine as cl
+from bin import commandLine as cl
 
 
 def buildConfig(commandList, filename):

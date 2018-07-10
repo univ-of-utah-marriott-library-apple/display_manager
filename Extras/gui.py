@@ -7,7 +7,7 @@ import Tkinter as tk
 import ttk
 import re
 from lib import DisplayManager as dm
-import configWriter as cg
+from Extras import configWriter as cg
 
 
 class App(object):

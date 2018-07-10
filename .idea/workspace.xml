@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/DisplayManager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Examples/AirplayToggle.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/commandLine.py" beforeDir="false" afterPath="$PROJECT_DIR$/commandLine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configWriter.py" beforeDir="false" afterPath="$PROJECT_DIR$/configWriter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/DisplayManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/DisplayManager.py" afterDir="false" />
-    </list>
+    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,15 +11,18 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/DisplayManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-206">
-              <caret line="31" column="55" lean-forward="true" selection-start-line="31" selection-start-column="55" selection-end-line="31" selection-end-column="55" />
+            <state relative-caret-position="135">
+              <caret line="17" column="11" lean-forward="true" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
               <folding>
                 <element signature="n#!!doc" />
+                <element signature="e#557#10657#0" />
                 <element signature="e#557#774#1" />
+                <element signature="e#819#1202#0" />
                 <element signature="e#819#870#1" />
+                <element signature="e#1151#1223#0" />
                 <element signature="e#1038#1177#0" />
                 <element signature="e#1038#1123#1" />
                 <element signature="e#1225#1356#0" />
@@ -143,6 +138,8 @@
                 <element signature="e#20915#21003#0" />
                 <element signature="e#20692#20722#2" />
                 <element signature="e#22499#22695#0" />
+                <element signature="e#22499#22572#1" />
+                <element signature="e#21723#21779#0" />
                 <element signature="e#21278#24012#0" />
                 <element signature="e#20575#20894#1" />
                 <element signature="e#21023#23283#0" />
@@ -157,16 +154,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MirrorToggle.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/MirrorToggle.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="24" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="commandLine.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="commandLine.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/commandLine.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="120">
@@ -471,9 +459,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="286" y="23" width="1448" height="980" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1422652" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1422652" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32884097" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32781458" />
@@ -644,50 +631,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/commandLine.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="87" column="7" selection-start-line="87" selection-start-column="7" selection-end-line="87" selection-end-column="7" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#1250#6217#0" />
-            <element signature="e#1267#1393#1" />
-            <element signature="e#4541#4829#0" />
-            <element signature="e#6076#6159#0" />
-            <element signature="e#2704#2933#0" />
-            <element signature="e#2752#2933#0" />
-            <element signature="e#6293#6397#0" />
-            <element signature="e#6449#8933#0" />
-            <element signature="e#6064#6156#1" />
-            <element signature="e#6392#6482#0" />
-            <element signature="e#6639#6691#0" />
-            <element signature="e#6786#6836#0" />
-            <element signature="e#6650#7048#0" />
-            <element signature="e#6745#7027#0" />
-            <element signature="e#6860#7027#0" />
-            <element signature="e#7203#7399#0" />
-            <element signature="e#7500#7702#0" />
-            <element signature="e#7821#7936#0" />
-            <element signature="e#8025#8133#0" />
-            <element signature="e#8222#8383#0" />
-            <element signature="e#8430#8543#0" />
-            <element signature="e#8968#14099#0" />
-            <element signature="e#8968#9075#1" />
-            <element signature="e#9133#14004#0" />
-            <element signature="e#9152#9771#0" />
-            <element signature="e#9791#10920#0" />
-            <element signature="e#10296#10439#0" />
-            <element signature="e#10941#12111#0" />
-            <element signature="e#12138#12610#0" />
-            <element signature="e#12633#13095#0" />
-            <element signature="e#13118#13626#0" />
-            <element signature="e#13652#14002#0" />
-            <element signature="e#13861#14017#0" />
-            <element signature="e#10974#11063#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/configReader.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -704,12 +647,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/DisplayManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-206">
-          <caret line="31" column="55" lean-forward="true" selection-start-line="31" selection-start-column="55" selection-end-line="31" selection-end-column="55" />
+        <state relative-caret-position="135">
+          <caret line="17" column="11" lean-forward="true" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
           <folding>
             <element signature="n#!!doc" />
+            <element signature="e#557#10657#0" />
             <element signature="e#557#774#1" />
+            <element signature="e#819#1202#0" />
             <element signature="e#819#870#1" />
+            <element signature="e#1151#1223#0" />
             <element signature="e#1038#1177#0" />
             <element signature="e#1038#1123#1" />
             <element signature="e#1225#1356#0" />
@@ -825,6 +771,8 @@
             <element signature="e#20915#21003#0" />
             <element signature="e#20692#20722#2" />
             <element signature="e#22499#22695#0" />
+            <element signature="e#22499#22572#1" />
+            <element signature="e#21723#21779#0" />
             <element signature="e#21278#24012#0" />
             <element signature="e#20575#20894#1" />
             <element signature="e#21023#23283#0" />
@@ -834,6 +782,50 @@
             <element signature="e#21970#22172#0" />
             <element signature="e#22351#22669#0" />
             <element signature="e#23021#23123#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/commandLine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="87" column="7" selection-start-line="87" selection-start-column="7" selection-end-line="87" selection-end-column="7" />
+          <folding>
+            <element signature="n#!!doc" />
+            <element signature="e#1250#6217#0" />
+            <element signature="e#1267#1393#1" />
+            <element signature="e#4541#4829#0" />
+            <element signature="e#6076#6159#0" />
+            <element signature="e#2704#2933#0" />
+            <element signature="e#2752#2933#0" />
+            <element signature="e#6293#6397#0" />
+            <element signature="e#6449#8933#0" />
+            <element signature="e#6064#6156#1" />
+            <element signature="e#6392#6482#0" />
+            <element signature="e#6639#6691#0" />
+            <element signature="e#6786#6836#0" />
+            <element signature="e#6650#7048#0" />
+            <element signature="e#6745#7027#0" />
+            <element signature="e#6860#7027#0" />
+            <element signature="e#7203#7399#0" />
+            <element signature="e#7500#7702#0" />
+            <element signature="e#7821#7936#0" />
+            <element signature="e#8025#8133#0" />
+            <element signature="e#8222#8383#0" />
+            <element signature="e#8430#8543#0" />
+            <element signature="e#8968#14099#0" />
+            <element signature="e#8968#9075#1" />
+            <element signature="e#9133#14004#0" />
+            <element signature="e#9152#9771#0" />
+            <element signature="e#9791#10920#0" />
+            <element signature="e#10296#10439#0" />
+            <element signature="e#10941#12111#0" />
+            <element signature="e#12138#12610#0" />
+            <element signature="e#12633#13095#0" />
+            <element signature="e#13118#13626#0" />
+            <element signature="e#13652#14002#0" />
+            <element signature="e#13861#14017#0" />
+            <element signature="e#10974#11063#1" />
           </folding>
         </state>
       </provider>
