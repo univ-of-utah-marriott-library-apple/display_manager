@@ -4,8 +4,8 @@
 
 import pickle
 import sys
-from lib import DisplayManager as dm
-from bin import commandLine as cl
+import DisplayManager as dm
+import commandLine as cl
 
 
 def buildConfig(commandList, filename):
@@ -14,7 +14,7 @@ def buildConfig(commandList, filename):
     :param commandList: The DisplayManager.CommandList to write to the file.
     :param filename: The name of the file to write to.
     """
-    with open(filename, "w") as file:
+    with open("./config/" + filename, "w") as file:
         pickle.dump(commandList, file)
 
 

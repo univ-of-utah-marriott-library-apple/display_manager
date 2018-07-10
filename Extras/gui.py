@@ -6,7 +6,7 @@ from __future__ import print_function
 import Tkinter as tk
 import ttk
 import re
-from lib import DisplayManager as dm
+import DisplayManager as dm
 from Extras import configWriter as cg
 
 

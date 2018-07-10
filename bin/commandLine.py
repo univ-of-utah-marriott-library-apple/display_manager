@@ -5,7 +5,7 @@
 
 import sys
 import argparse
-from lib import DisplayManager as dm
+import DisplayManager as dm
 from os import devnull
 
 

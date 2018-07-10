@@ -8,14 +8,14 @@ import os.path
 
 
 def main():
-    fileName = sys.argv[1]
+    filename = sys.argv[1]
 
-    if os.path.isfile("./" + fileName):
+    if os.path.isfile("./config/" + filename):
         with open(sys.argv[1], "r") as file:
             commands = pickle.load(file)
         commands.run()
     else:
-        print("File {} not found.".format(fileName))
+        print("File {} not found.".format(filename))
 
 
 if __name__ == "__main__":
