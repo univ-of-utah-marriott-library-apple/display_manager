@@ -2,7 +2,7 @@ Display Manager
 ===============
 
 An open-source Python library which can modify your Mac's display settings.
-Includes a command-line utility and a GUI for manual display manipulation.
+Includes a command-line utility and a few example apps.
 
 ## Contents
 
@@ -42,9 +42,7 @@ Once the download has completed, double-click the `.dmg` file. This will open a 
 
 ## Uninstall
 
-To remove Display Manager from your system, download the .dmg and run the "Uninstall Display Manager [x.x.x]" package to uninstall it, where *x.x.x* represents the version number. The version is not relevant, as all of the Display Manager uninstallers will work on any version of Display Manager.
-
-At the end it will say "Installation Successful" but don't believe it - this will only remove files.
+To remove Display Manager from your system, download the .dmg and run the "Uninstall Display Manager [x.x.x]" package to uninstall it.
 
 ## Purpose
 
@@ -55,19 +53,18 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 * Better readability
    * For those not well-versed in C-style languages, Python can be easier to read through (and modify, if necessary)
 * More features
-   * We support all the features of SetDisplay
-   * Plans for additional features (AirPlay configuration, HDMI underscan settings, etc.)
+   * We support all the features of SetDisplay, as well as a few new features, including HDMI underscan settings, display rotation, etc.
 
 ## Library
 
 The Display Manager library is based off the contents of DisplayManager.py, which contains 4 classes and 4 helper methods.
 
-The `Display` class is a virtual representation of a connected physical display. It allows developers to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
+The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
 The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
-The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as a developer sees fit.
-The `CommandList` class is simply a container (for `command`s) that allows developers to execute several commands at once.
+The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as one sees fit.
+The `CommandList` class is simply a container (for `command`s) that allows one to execute several commands at once.
 
-`getMainDisplayID` returns the DisplayID (required to initialize `Display`) of the primary display; `getAllDisplayIDs` returns a list containing all such DisplayIDs; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows developers to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much easier to go through `Command`s and `Display`s instead)
+`getMainDisplayID` returns the DisplayID (required to initialize `Display`) of the primary display; `getAllDisplayIDs` returns a list containing all such DisplayIDs; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much easier to go through `Command`s and `Display`s instead)
 
 ### Examples
 
@@ -85,7 +82,7 @@ display = Display(getMainDisplayID())
 display.setRotate(90)
 ```
 
-For System Admins using software like Jamf or Outset, the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
+For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
 
 ## Usage
 
@@ -122,12 +119,12 @@ The `set` command is used to change the current configuration on a display or ac
 
 #### Examples
 
-* Set the run display to its highest supported configuration:
+* Set the main display to its highest supported configuration:
 ```
 $ commandLine.py set highest
 ```
 
-* Set the run display to the closest value to what you want:
+* Set the main display to the closest value to what you want:
 ```
 $ commandLine.py set -w 1024 -h 768 -d 32 -r 70
 ```
@@ -136,14 +133,14 @@ or
 $ commandLine.py set closest -w 1024 -h 768 -d 32 -r 70
 ```
 
-* Set the run display to an exact specification:
+* Set the main display to an exact specification:
 ```
-$ commandLine.py set exact -w 1024 -h 768 -d 32 -r 70
+$ commandLine.py set exact -w 1024 -h 768 -p 32 -r 70
 ```
 
 * Set display `478176570` to use the highest HiDPI-scaled configuration:
 ```
-$ commandLine.py set highest --display 478176570 --only-hidpi
+$ commandLine.py set highest -d 478176570 --only-hidpi
 ```
 
 ### Show
@@ -171,7 +168,7 @@ Use the `show` command to learn more about the supported display configurations 
 
 #### Examples
 
-* Show the run display's highest supported configuration:
+* Show the current display's highest supported configuration:
 ```
 $ commandLine.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
@@ -205,7 +202,7 @@ The `mirror` command is used to configure display mirror.
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ commandLine.py mirror enable --display 478176723 --mirror 478176570
+$ commandLine.py mirror enable -d 478176723 -m 478176570
 ```
 
 * Stop mirroring:
@@ -224,23 +221,23 @@ You can set the brightness on your display with the `brightness` command (assumi
 
 | Option                | Purpose                                       |
 |-----------------------|-----------------------------------------------|
-| `--display display`   | Change the brightness on display `display`.   |
+| `-d [display]`, `--display [display]`  | Change the brightness on display `display`.   |
 
 #### Examples
 
-* Show the current brightness settings of all displays:
+* Show the brightness settings of all displays:
 ```
 $ commandLine.py brightness show
 ```
 
-* Set the brightness of the run display to its maximum brightness:
+* Set the brightness of the main display to its maximum brightness:
 ```
 $ commandLine.py brightness set .4
 ```
 
 * Set the brightness of display `478176723` to 40% of maximum brightness:
 ```
-$ commandLine.py brightness set .4 --display 478176723
+$ commandLine.py brightness set .4 -d 478176723
 ```
 
 ### Rotate
@@ -255,7 +252,7 @@ You can view and change your display's orientation with the `rotate` command.
 
 | Option                | Purpose                                       |
 |-----------------------|-----------------------------------------------|
-| `--display display`   | Change the orientation of display `display`.  |
+| `--display [display]`   | Change the orientation of `display`.  |
 
 #### Examples
 
@@ -264,17 +261,17 @@ You can view and change your display's orientation with the `rotate` command.
 $ commandLine.py rotate show
 ```
 
-* Rotate the run display by 90 degrees (counter-clockwise):
+* Rotate the main display by 90 degrees (counter-clockwise):
 ```
 $ commandLine.py rotate set 90
 ```
 
 * Flip display `478176723` upside-down:
 ```
-$ commandLine.py rotate set 180 --display 478176723
+$ commandLine.py rotate set 180 -d 478176723
 ```
 
 * Restore display `478176723` to default orientation:
 ```
-$ commandLine.py rotate set 0 --display 478176723
+$ commandLine.py rotate set 0 -d 478176723
 ```
