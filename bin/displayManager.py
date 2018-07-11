@@ -4,10 +4,14 @@
 # Passes command parameters into DisplayManager.
 
 import sys
-import re
+import os
 import argparse
+import pickle
 import DisplayManager as dm
-from os import devnull
+
+
+class CommandSyntaxError(Exception):
+    pass
 
 
 def showHelp(command=None):
@@ -88,7 +92,7 @@ def showHelp(command=None):
         "commands",
         "    help       Print this help information.",
         "    show       Show the current display rotation.",
-        "    set [val]  Set the rotation to the given value (in degrees). Must be a multiple of 90.",
+        "    set [val]  Set the rotation to the given angle (in degrees). Must be a multiple of 90.",
         "",
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
@@ -160,13 +164,13 @@ def parse(parseList):
     pRotate.add_argument("secondary", choices=["help", "set", "show"], nargs="?", default="show")
     pRotate.add_argument("rotation", type=int, nargs="?", default=0)
 
-    pUnderscan = primary.add_parser("underscan", add_help=False)
-    pUnderscan.add_argument("secondary", choices=["help", "show", "set"])
-    pUnderscan.add_argument("underscan", type=float, nargs="?", default=1)
-
     pMirror = primary.add_parser("mirror", add_help=False)
     pMirror.add_argument("secondary", choices=["help", "enable", "disable"])
     pMirror.add_argument("-m", "--mirror", type=int)
+
+    pUnderscan = primary.add_parser("underscan", add_help=False)
+    pUnderscan.add_argument("secondary", choices=["help", "show", "set"])
+    pUnderscan.add_argument("underscan", type=float, nargs="?", default=1)
 
     for p in [pSet, pShow, pBrightness, pRotate, pMirror, pUnderscan]:
         p.add_argument("-d", "--display", type=int, default=dm.getMainDisplay().displayID)
@@ -182,7 +186,7 @@ def parse(parseList):
     # argparse shows its own error message and exits when there's been a parsing error.
     # We want to show our error, and not theirs. Hence:
     try:
-        with open(devnull, "w") as nowhere:
+        with open(os.devnull, "w") as nowhere:
             sys.stderr = nowhere
             sys.stdout = nowhere
             args = parser.parse_args(parseList)
@@ -191,8 +195,7 @@ def parse(parseList):
     except SystemExit:
         sys.stderr = sys.__stderr__
         sys.stdout = sys.__stdout__
-        showHelp(sys.argv[1])
-        sys.exit(1)
+        raise CommandSyntaxError
     return args
 
 
@@ -290,29 +293,34 @@ def main():
         showHelp()
         sys.exit(1)
 
-    # Check whether we've received several commands, or only one
-    numCommands = 0
-    for arg in args:
-        numCommands += len(re.findall(
-            r"(help)|(set)|(show)|(brightness)|(rotate)|(mirror)|(underscan)", arg
-        ))
+    # Did the user try to open a config?
+    # todo: change/remove filename
+    filename = "/Volumes/Data/Users/u1036693/Projects/DisplayManager/Extras/dev/cfg/" + args[0]
+    if len(args) == 1 and os.path.isfile(filename):
+        try:
+            with open(filename, "r") as f:
+                commands = pickle.load(f)
+            commands.run()
+        except:  # todo: narrow down types of errors
+            print("Invalid file {}".format(filename))
+            sys.exit(1)
+        sys.exit(0)
 
-    # The user provided multiple different commands
-    if numCommands > 1:
-        commands = dm.CommandList()
-        for command in args:
-            commands.addCommands(getCommand(command))
-        commands.run()
-
-    # The user provided only one command
-    elif numCommands == 1:
+    try:
+        # Run the args as only one command
         command = getCommand(" ".join(args))
         command.run()
-
-    # The user didn't provide any valid commands, so exit
-    else:
-        showHelp()
-        sys.exit(1)
+    except CommandSyntaxError:
+        try:
+            # Run the args as multiple commands
+            commands = dm.CommandList()
+            for command in args:
+                commands.addCommands(getCommand(command))
+            commands.run()
+        except CommandSyntaxError:
+            # User entered invalid command(s)
+            showHelp()
+            sys.exit(1)
 
 
 if __name__ == "__main__":

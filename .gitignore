@@ -60,5 +60,7 @@ target/
 default
 config
 dev/
+cfg/
+bin/cfg/
 original
 original/*
