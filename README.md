@@ -263,7 +263,7 @@ The `mirror` command is used to configure display mirroring.
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ displayManager.py mirror enable -d 478176723 -m 478176570
+$ displayManager.py mirror set -d 478176723 -m 478176570
 ```
 
 * Stop mirroring:
