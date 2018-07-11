@@ -2,7 +2,7 @@ Display Manager
 ===============
 
 An open-source Python library which can modify your Mac's display settings.
-Includes a command-line utility and a few example apps.
+Includes the library itself, and a command-line API + GUI to use it in prespecified ways.
 
 ## Contents
 
@@ -39,16 +39,7 @@ If you have replaced the setDefault `/usr/bin/python` binary (which is not gener
 
 ## Purpose
 
-Display Manager was designed as a replacement to the old SetDisplay.c program that administrators have been using for years. While SetDisplay still works and can do many things, we decided to port the project to Python for a few reasons:
-
-* Greater compatibility
-   * Python is not a compiled language, so any potential architecture changes in the future won't affect it
-   
-* Better readability
-   * For those not well-versed in C-style languages, Python can be easier to read through (and modify, if necessary)
-
-* More features
-   * We support all the features of SetDisplay, as well as a few new features, including HDMI underscan settings, display rotation, etc.
+Display Manager programmatically manages Mac displays, including display resolution, color depth, refresh rate, brightness, rotation, screen mirroring, and HDMI underscan. Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
    
 ## Get Started
 
@@ -64,18 +55,20 @@ The Display Manager suite comes in 3 parts: the Display Manager library (Display
 
 ### Library
 
-The Display Manager library is based off the contents of DisplayManager.py, which contains the following:
+The Display Manager library is housed in DisplayManager.py, which contains the following:
 
-The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
-The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
-The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as one sees fit.
-The `CommandList` class is simply a container (for `command`s) that allows one to execute several commands at once.
+* The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
+* The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
+* The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as one sees fit.
+* The `CommandList` class is a smart container (for `command`s) that allows one to execute several commands at once without command interference
 
-`getMainDisplay` returns the primary `Display`; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Command`s and `Display`s instead, if possible)
+* `getMainDisplay` returns the primary `Display`;
+* `getAllDisplays` returns a `Display` for each connected display
+* `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Command`s and `Display`s instead, if possible)
 
 ### Command-Line API
 
-The command-line API, accessed via displayManager.py, allows you to manually set [display resolution, pixel depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
+The command-line API, accessed via displayManager.py, allows you to manually set [display resolution, pixel color depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
 
 ### GUI
 
@@ -121,11 +114,7 @@ $ displayManager.py set highest
 
 * Set the main display to the closest value to what you want:
 ```
-$ displayManager.py set -w 1024 -h 768 -d 32 -r 70
-```
-or
-```
-$ displayManager.py set closest -w 1024 -h 768 -d 32 -r 70
+$ displayManager.py set -w 1024 -h 768
 ```
 
 * Set the main display to an exact specification:
@@ -163,7 +152,7 @@ Use the `show` command to learn more about the supported display configurations 
 
 #### Examples
 
-* Show the current display's highest supported configuration:
+* Show the main display's highest supported configuration:
 ```
 $ displayManager.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
@@ -176,6 +165,11 @@ Display: 478176570 (Main Display)
 Display: 478176723
 Display: 478173192
 Display: 478160349
+```
+
+* Show the current configuration of `478176570`:
+```
+$ displayManager.py show current -d 478176570
 ```
 
 ### Brightness
@@ -273,7 +267,7 @@ $ displayManager.py mirror disable
 
 ### Underscan
 
-The `underscan` command can configure display underscan settings.
+The `underscan` command can configure HDMI underscan settings.
 
 | Subcommand    | Purpose                                               |
 |---------------|-------------------------------------------------------|
@@ -287,12 +281,12 @@ The `underscan` command can configure display underscan settings.
 
 #### Examples
 
-* Set main display to 0% underscan
+* Set main display to 0% underscan:
 ```
 $ displayManager.py underscan set 0
 ```
 
-* Set display `478176723` to 42% underscan
+* Set display `478176723` to 42% underscan:
 ```
 $ displayManager.py underscan set .42 -d 478176723
 ```
@@ -380,10 +374,10 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 #### Outset
 
-Perhaps you're managing several wall-mounted monitors that are flipped upside-down, and you'd like them to automatically display right-side-up. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
+Perhaps you're managing several wall-mounted HDMI displays that are flipped upside-down, and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
 
 ```
-displayManager.py rotate set 180
+displayManager.py "rotate set 180" "underscan set .5"
 ```
 
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
@@ -392,5 +386,5 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 | Date | Version | Update |
 |------------|-------|----------------------------------------------------------------|
-| 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library and the new command-line API, added the ability to run multiple commands at once, added a GUI, and added rotation and underscan features. |
+| 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library and the new command-line API, added the ability to run multiple commands at once, added a GUI, and added rotation and HDMI underscan features. |
 | 2015-10-28 | 0.1.0 | Legacy iteration of Display Manager. Created command-line API. |
