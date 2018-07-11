@@ -14,7 +14,7 @@ Includes a command-line utility and a few example apps.
 	* [Library](#library)
 	* [Command-Line API](#command-line-api)
 	* [GUI](#gui)
-* [Command-Line Usage](#help) - how to use the command-line API
+* [Command-Line Usage](#command-line-usage) - how to use the command-line API
 	* [Set](#set)
 	* [Show](#show)
 	* [Brightness](#brightness)
@@ -77,17 +77,15 @@ The command-line API, accessed via displayManager.py, allows you to manually set
 
 TODO SOON!
 
-## Usage
+## Command-Line Usage
 
-The Display Manager command-line interface supports the following commands:
+The Display Manager command-line API supports the following commands:
 
 ```
 $ displayManager.py { help | set | show | brightness | rotate | mirror | underscan }
 ```
 
-The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `displayManager.py help mirror`), and you can give `help` as an argument to any commands.
-
-The other commands each have their own help instructions, which are detailed below.
+The `help` option prints out relevant usage information (similar to this document). You can give any commands as an argument to `help` (e.g. `displayManager.py help mirror`), and you can give `help` as an argument to any commands. Each command has its own help information, which is detailed below:
 
 ### Set
 
@@ -297,19 +295,31 @@ $ displayManager.py underscan set .42 -d 478176723
 
 ## Admin Usage
 
-Say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
+Display Manager allows you to manipulate displays in a variety of ways. You can write your own scripts with the [Display Manager library](#library), manually configure displays through the [command-line API](#command-line-api), or access the functionality of the command-line API through the [GUI](#gui). A few potential use cases are outlined below:
+
+### Library
+
+First, import the Display Manager library, like so:
+
+```
+from DisplayManager import *
+```
+
+Next, say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
 
 ```
 for display in getAllDisplays():
     display.setMode(display.highestMode())
 ```
 
-Perhaps you'd like all the displays of the computers you manage to rotate to 90 degrees. The following would work:
+Perhaps you'd like your main display to rotate to 90 degrees. The following would work:
 
 ```
-display = Display(getMainDisplayID())
+display = getMainDisplay()
 display.setRotate(90)
 ```
+
+You can use any of the properties and methods of Display objects to configure their settings, precisely as is done in the [command-line API](#command-line-api). 
 
 For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
 
