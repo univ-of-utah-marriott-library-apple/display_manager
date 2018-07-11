@@ -7,13 +7,18 @@ Includes a command-line utility and a few example apps.
 ## Contents
 
 * [Contact](#contact) - how to reach us
+
 * [System Requirements](#system-requirements) - what you need
+
 * [Purpose](#purpose) - why does this library exist?
+
 * [Get Started](#get-started) - how to get started with Display Manager
+
 * [Overview](#overview) - what is included in this library?
 	* [Library](#library)
 	* [Command-Line API](#command-line-api)
 	* [GUI](#gui)
+	
 * [Command-Line Usage](#command-line-usage) - how to use the command-line API
 	* [Set](#set)
 	* [Show](#show)
@@ -21,20 +26,20 @@ Includes a command-line utility and a few example apps.
 	* [Rotate](#rotate)
 	* [Mirror](#mirror)
 	* [Underscan](#underscan)
+	
 * [Admin Usage](#admin-usage) - how System Administrators might use this library
 	* [Library Examples](#library-examples)
 	* [Command-Line Examples](#command-line-examples)
+	
 * [Update History](#update-history)
 
 ## Contact
 
-If you have any comments, questions, or other [send us an email](mailto:mlib-its-mac-github@lists.utah.edu). Thanks!
+If you have any comments, questions, or concerns, feel free to [send us an email](mailto:mlib-its-mac-github@lists.utah.edu).
 
 ## System Requirements
 
-Display Manager is for Mac computers.
-
-Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that do the actual manipulation of the display settings.
+Display Manager only runs on Mac computers. It depends on the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that perform display manipulations.
 
 If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
 
@@ -44,8 +49,10 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 
 * Greater compatibility
    * Python is not a compiled language, so any potential architecture changes in the future won't affect it
+   
 * Better readability
    * For those not well-versed in C-style languages, Python can be easier to read through (and modify, if necessary)
+
 * More features
    * We support all the features of SetDisplay, as well as a few new features, including HDMI underscan settings, display rotation, etc.
    
@@ -53,7 +60,7 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
 
 First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
 
-UPDATE WHEN INSTALLER, PACKAGE, ETC. ARE COMPLETE!!!
+*TODO: UPDATE WHEN INSTALLER, PACKAGE, ETC. ARE COMPLETE!!!*
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 
@@ -74,7 +81,7 @@ The `CommandList` class is simply a container (for `command`s) that allows one t
 
 ### Command-Line API
 
-The command-line API, accessed via displayManager.py, allows you to manually set [display resolution, pixel depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [underscan](#underscan).
+The command-line API, accessed via displayManager.py, allows you to manually set [display resolution, pixel depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
 
 ### GUI
 
