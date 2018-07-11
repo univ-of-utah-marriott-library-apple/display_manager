@@ -22,10 +22,13 @@ Includes a command-line utility and a few example apps.
 	* [Mirror](#mirror)
 	* [Underscan](#underscan)
 * [Admin Usage](#admin-usage) - how System Administrators might use this library
+	* [Library Examples](#library-examples)
+	* [Command-Line Examples](#command-line-examples)
+* [Update History](#update-history)
 
 ## Contact
 
-If you have any comments, questions, or other input, either [file an issue](../../issues) or [send us an email](mailto:mlib-its-mac-github@lists.utah.edu). Thanks!
+If you have any comments, questions, or other [send us an email](mailto:mlib-its-mac-github@lists.utah.edu). Thanks!
 
 ## System Requirements
 
@@ -297,7 +300,7 @@ $ displayManager.py underscan set .42 -d 478176723
 
 Display Manager allows you to manipulate displays in a variety of ways. You can write your own scripts with the [Display Manager library](#library), manually configure displays through the [command-line API](#command-line-api), or access the functionality of the command-line API through the [GUI](#gui). A few potential use cases are outlined below:
 
-### Library
+### Library Examples
 
 First, import the Display Manager library, like so:
 
@@ -319,7 +322,54 @@ display = getMainDisplay()
 display.setRotate(90)
 ```
 
-You can use any of the properties and methods of Display objects to configure their settings, precisely as is done in the [command-line API](#command-line-api). 
+You can use any of the properties and methods of `Display` objects to configure their settings, which is exactly how the [command-line API](#command-line-api) works. You can also configure displays through `Command`s, like this:
 
-For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
+```
+command = Command("brightness", "set", brightness=.4)
+command.run()
+```
 
+This would perform the same `Command` as entering the following into the command line:
+
+```
+$ displayManager.py brightness set .4
+```
+
+For more complex usage, initialize a `CommandList`, which runs several commands simultaneously in a non-interfering pattern. To do so, pass it `Commands` through the `.addCommands(commands)` method. An example:
+
+```
+commandA = Command("underscan", "set", underscan=.4)
+commandB = Command("rotate", "set", angle=180)
+commandC = Command("brightness", "set", brightness=1)
+
+commands = CommandList()
+commands.append(commandA)
+commands.append(commandB)
+commands.append(commandC)
+commands.run()
+```
+
+### Command-Line Examples
+
+In some cases, it may be desirable to configure displays from the command line, whether manually or via a script. Say you'd like a script to automatically set a display to its highest available resolution. The following would do just that:
+
+```
+$ displayManager.py set highest
+```
+
+But, in many cases, you might want to call several such commands at the same time. Of course, you may write them out line-by-line, but this takes a little longer, and more importantly, running several commands in this way may lead to undesired interference between commands. As such, this is recommended:
+
+```
+$ displayManager.py "set highest" "rotate set 90" "brightness set .5" ...
+```
+
+In this way, you may pass in as many commands as you like, and Display Manager will find a way to run them simultaneously without encountering configuration errors.
+
+For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), writing simple startup scripts like these at boot or login may be quite useful. For example, these scripts might be placed in Outset's run at login directory, or a Jamf policy might contain scripts like these with parameters that correspond to desired settings.
+
+## Update History
+
+| Date | Version | Update |
+|------|---------|--------|
+| 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library and the new command-line API, added the ability to run multiple commands at once, added a GUI, and added rotation and underscan features. |
+| 2015-10-28 | 0.1.0 | Legacy iteration of Display Manager. Created command-line API. |
