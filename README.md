@@ -387,7 +387,7 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 #### Outset
 
-Perhaps you're managing several wall-mounted Apple TVs that are flipped upside-down, and you'd like them to automatically display tvOS right-side-up. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
+Perhaps you're managing several wall-mounted monitors that are flipped upside-down, and you'd like them to automatically display tvOS right-side-up. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
 
 ```
 displayManager.py rotate set 180
