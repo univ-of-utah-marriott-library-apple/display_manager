@@ -3,11 +3,13 @@
 # A GUI that allows users to interface with Display Manager
 
 from __future__ import print_function
+import os
 import Tkinter as tk
 import ttk
+import tkFileDialog
 import re
+import pickle
 import DisplayManager as dm
-import configWriter as cg
 
 
 class App(object):
@@ -144,7 +146,8 @@ class App(object):
         ttk.Label(self.mainFrame, text="Display:").grid(column=0, row=10, sticky=tk.E)
         self.displayDict = {}
         self.displayDropdown = ttk.Combobox(self.mainFrame, width=32, state="readonly")
-        self.displayDropdown.grid(column=1, row=10, columnspan=7, sticky=tk.EW)
+        self.displayDropdown.grid(column=1, row=10, columnspan=6, sticky=tk.EW)
+        ttk.Button(self.mainFrame, text="Refresh", command=self.__reloadDisplay).grid(column=7, row=10, sticky=tk.E)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=19, columnspan=8, sticky=tk.EW)
 
         # Mode selection
@@ -205,14 +208,20 @@ class App(object):
         """
         Add all the DisplayModes of the currently selected display to self.modeDropdown.
         """
+        # Add self.display's DisplayModes to self.modeDropdown in reverse sorted order
         sortedModeStrings = []
         for mode in sorted(self.display.allModes, reverse=True):
             modeString = mode.__str__()
             self.modeDict[modeString] = mode
             sortedModeStrings.append(modeString)
-
         self.modeDropdown["values"] = sortedModeStrings
-        self.modeDropdown.current(0)
+
+        # Set the default mode to the current mode, if possible
+        currentModeString = self.display.currentMode.__str__()
+        if currentModeString in self.modeDropdown["values"]:
+            self.modeDropdown.current(self.modeDropdown["values"].index(currentModeString))
+        else:
+            self.modeDropdown.current(0)
 
     def __brightnessSelectionInit(self):
         """
@@ -226,6 +235,19 @@ class App(object):
         else:
             self.brightnessSlider.set(0.0)
             self.brightnessSlider.configure(state=tk.DISABLED)
+
+    def __rotateSelectionInit(self):
+        """
+        Set self.rotateSlider's value to that of the currently selected display, and
+        deactivates said slider if the rotation of this display can't be set.
+        """
+        if self.display.rotation is not None:
+            rotation = self.display.rotation
+            self.rotateSlider.set(rotation)
+            self.rotateSlider.configure(state=tk.NORMAL)
+        else:
+            self.rotateSlider.set(0)
+            self.rotateSlider.configure(state=tk.DISABLED)
 
     def __mirrorSelectionInit(self):
         """
@@ -309,10 +331,19 @@ class App(object):
 
     def buildConfig(self):
         """
-        Build a config file with the currently selected settings.
+        Build a config file with the currently selected settings and save it where
+        the user specifies.
         """
-        commandList = self.__generateCommandList()
-        cg.buildConfig(commandList, "cfg")
+        # Ask the user where to store the file
+        f = tkFileDialog.asksaveasfile(
+            mode='w',
+            initialdir=os.getcwd(),
+            initialfile="config",
+        )
+        if f is not None:  # if the user didn't cancel
+            commandList = self.__generateCommandList()
+            pickle.dump(commandList, f)
+            f.close()
 
     def __generateCommandList(self):
         """
@@ -367,6 +398,7 @@ class App(object):
         """
         self.__modeSelectionInit()
         self.__brightnessSelectionInit()
+        self.__rotateSelectionInit()
         self.__mirrorSelectionInit()
         self.__underscanSelectionInit()
 
