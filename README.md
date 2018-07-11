@@ -27,9 +27,10 @@ Includes a command-line utility and a few example apps.
 	* [Mirror](#mirror)
 	* [Underscan](#underscan)
 	
-* [Admin Usage](#admin-usage) - how System Administrators might use this library
+* [Usage Examples](#usage-examples) - potential use cases for Display Manager
 	* [Library Examples](#library-examples)
 	* [Command-Line Examples](#command-line-examples)
+	* [System Administration Examples](#system-administration-examples)
 	
 * [Update History](#update-history)
 
@@ -85,7 +86,7 @@ The command-line API, accessed via displayManager.py, allows you to manually set
 
 ### GUI
 
-TODO SOON!
+*TODO: ADD THIS SOON!*
 
 ## Command-Line Usage
 
@@ -303,7 +304,7 @@ $ displayManager.py underscan set 0
 $ displayManager.py underscan set .42 -d 478176723
 ```
 
-## Admin Usage
+## Usage Examples
 
 Display Manager allows you to manipulate displays in a variety of ways. You can write your own scripts with the [Display Manager library](#library), manually configure displays through the [command-line API](#command-line-api), or access the functionality of the command-line API through the [GUI](#gui). A few potential use cases are outlined below:
 
@@ -364,15 +365,35 @@ In some cases, it may be desirable to configure displays from the command line, 
 $ displayManager.py set highest
 ```
 
-But, in many cases, you might want to call several such commands at the same time. Of course, you may write them out line-by-line, but this takes a little longer, and more importantly, running several commands in this way may lead to undesired interference between commands. As such, this is recommended:
+But, in many cases, you might want to call several such commands at the same time. Of course, you may write them out line-by-line, but this takes a little longer, and more importantly, running several commands in this way may lead to undesired interference between commands. As such, it is recommended that multiple commands be run like so:
 
 ```
-$ displayManager.py "set highest" "rotate set 90" "brightness set .5" ...
+$ displayManager.py "set -w 1920 -h 1080" "rotate set 90" "brightness set .5" ...
 ```
 
 In this way, you may pass in as many commands as you like, and Display Manager will find a way to run them simultaneously without encountering configuration errors.
 
-For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), writing simple startup scripts like these at boot or login may be quite useful. For example, these scripts might be placed in Outset's run at login directory, or a Jamf policy might contain scripts like these with parameters that correspond to desired settings.
+### System Administration Examples
+
+#### Jamf
+
+Suppose you'd like all computers in a particular [Jamf Pro](https://www.jamf.com/products/jamf-pro/) scope to default to their highest retina-enabled resolution at maximum brightness at login. You could create such a policy, and add a script containing the following to it:
+
+```
+displayManager.py "set highest --only-hidpi" "brightness set 1"
+```
+
+For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
+
+#### Outset
+
+Perhaps you're managing several wall-mounted Apple TVs that are flipped upside-down, and you'd like them to automatically display tvOS right-side-up. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
+
+```
+displayManager.py rotate set 180
+```
+
+For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
 
 ## Update History
 
