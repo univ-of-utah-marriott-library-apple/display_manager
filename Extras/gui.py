@@ -298,6 +298,22 @@ class App(object):
         """
         return float(self.underscanSlider.get() / 100)
 
+    def setDisplay(self):
+        """
+        Set the Display to the currently selected settings.
+        """
+        commandList = self.__generateCommandList()
+        commandList.run()
+
+        self.__reloadDisplay()
+
+    def buildConfig(self):
+        """
+        Build a config file with the currently selected settings.
+        """
+        commandList = self.__generateCommandList()
+        cg.buildConfig(commandList, "cfg")
+
     def __generateCommandList(self):
         """
         :return: All currently selected commands, in the form of a DisplayManager.CommandList.
@@ -344,22 +360,6 @@ class App(object):
             commandList.addCommands(command)
 
         return commandList
-
-    def setDisplay(self):
-        """
-        Set the Display to the currently selected settings.
-        """
-        commandList = self.__generateCommandList()
-        commandList.run()
-
-        self.__reloadDisplay()
-
-    def buildConfig(self):
-        """
-        Build a config file with the currently selected settings.
-        """
-        commandList = self.__generateCommandList()
-        cg.buildConfig(commandList, "cfg")
 
     def __reloadDisplay(self):
         """

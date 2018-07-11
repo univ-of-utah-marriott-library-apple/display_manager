@@ -17,7 +17,6 @@ class CommandSyntaxError(Exception):
 def showHelp(command=None):
     """
     Prints out the help information.
-
     :param command: The command to print information for.
     """
     print("Display Manager, version 1.0.0")
@@ -116,6 +115,8 @@ def showHelp(command=None):
         "    help       Print this help information.",
         "    show       Show the current underscan setting(s).",
         "    set [val]  Sets the underscan to the given value. Must be between 0 and 1.",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
     ])}
 
     if command in usage:

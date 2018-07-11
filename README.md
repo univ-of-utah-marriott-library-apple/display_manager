@@ -183,33 +183,6 @@ Display: 478173192
 Display: 478160349
 ```
 
-### Mirror
-
-The `mirror` command is used to configure display mirror.
-
-| Subcommand | Purpose                                                                  |
-|------------|--------------------------------------------------------------------------|
-| `help`     | Prints the help instructions.                                            |
-| `enable`   | Activate mirroring.                                                      |
-| `disable`  | Deactivate mirroring.                                                    |
-
-| Option                        | Purpose                                               |
-|-------------------------------|-------------------------------------------------------|
-| `-d display`, `--display display`  | Change mirroring settings *for* display `display`.        |
-| `-m display`, `--mirror display`   | Set the above display to become a mirror *of* `display`.  |
-
-#### Examples
-
-* Set display `478176723` to become a mirror of `478176570`:
-```
-$ commandLine.py mirror enable -d 478176723 -m 478176570
-```
-
-* Stop mirroring:
-```
-$ commandLine.py mirror disable
-```
-
 ### Brightness
 
 You can set the brightness on your display with the `brightness` command (assuming your display supports it).
@@ -252,7 +225,7 @@ You can view and change your display's orientation with the `rotate` command.
 
 | Option                | Purpose                                       |
 |-----------------------|-----------------------------------------------|
-| `--display [display]`   | Change the orientation of `display`.  |
+| `--display [display]`   | Change the orientation of `display`.        |
 
 #### Examples
 
@@ -274,4 +247,57 @@ $ commandLine.py rotate set 180 -d 478176723
 * Restore display `478176723` to default orientation:
 ```
 $ commandLine.py rotate set 0 -d 478176723
+```
+
+### Mirror
+
+The `mirror` command is used to configure display mirroring.
+
+| Subcommand | Purpose                                                                  |
+|------------|--------------------------------------------------------------------------|
+| `help`     | Prints the help instructions.                                            |
+| `enable`   | Activate mirroring.                                                      |
+| `disable`  | Deactivate mirroring.                                                    |
+
+| Option                        | Purpose                                               |
+|-------------------------------|-------------------------------------------------------|
+| `-d display`, `--display display`  | Change mirroring settings *for* display `display`.        |
+| `-m display`, `--mirror display`   | Set the above display to become a mirror *of* `display`.  |
+
+#### Examples
+
+* Set display `478176723` to become a mirror of `478176570`:
+```
+$ commandLine.py mirror enable -d 478176723 -m 478176570
+```
+
+* Stop mirroring:
+```
+$ commandLine.py mirror disable
+```
+
+### Underscan
+
+The `underscan` command can configure display underscan settings.
+
+| Subcommand    | Purpose                                               |
+|---------------|-------------------------------------------------------|
+| `help`        | Prints the help instructions.                         |
+| `show`        | Show the current underscan setting(s).                |
+| `set [value]` | Set display underscan to [value] between 0 and 1.     |
+
+| Option                | Purpose                                       |
+|-----------------------|-----------------------------------------------|
+| `--display [display]`   | Change the orientation of `display`.        |
+
+#### Examples
+
+* Set main display to 0% underscan
+```
+$ commandLine.py underscan set 0
+```
+
+* Set display `478176723` to 42% underscan
+```
+$ commandLine.py underscan set .42 -d 478176723
 ```
