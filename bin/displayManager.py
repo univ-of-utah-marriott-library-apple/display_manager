@@ -30,8 +30,8 @@ def showHelp(command=None):
         "    show       Show available display configurations.",
         "    brightness Show or set the current display brightness.",
         "    rotate     Show or set display rotation.",
-        "    underscan  Show or set the current display underscan.",
         "    mirror     Set mirroring configuration.",
+        "    underscan  Show or set the current display underscan.",
     ]), "set": "\n".join([
         "usage: commandLine.py set {{ help | closest | highest | exact }}",
         "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
@@ -96,12 +96,12 @@ def showHelp(command=None):
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
     ]), "mirror": "\n".join([
-        "usage: commandLine.py mirror {{ help | enable | disable }}",
+        "usage: commandLine.py mirror {{ help | set | disable }}",
         "    [-d display] [-m display]",
         "",
         "commands",
         "    help       Print this help information.",
-        "    enable     Activate mirroring.",
+        "    set        Activate mirroring.",
         "    disable    Deactivate all mirroring.",
         "",
         "OPTIONS",
@@ -166,7 +166,7 @@ def parse(parseList):
     pRotate.add_argument("rotation", type=int, nargs="?", default=0)
 
     pMirror = primary.add_parser("mirror", add_help=False)
-    pMirror.add_argument("secondary", choices=["help", "enable", "disable"])
+    pMirror.add_argument("secondary", choices=["help", "set", "disable"])
     pMirror.add_argument("-m", "--mirror", type=int)
 
     pUnderscan = primary.add_parser("underscan", add_help=False)
@@ -316,7 +316,7 @@ def main():
             # Run the args as multiple commands
             commands = dm.CommandList()
             for command in args:
-                commands.addCommands(getCommand(command))
+                commands.addCommand(getCommand(command))
             commands.run()
         except CommandSyntaxError:
             # User entered invalid command(s)

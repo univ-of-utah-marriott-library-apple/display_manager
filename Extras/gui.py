@@ -388,7 +388,7 @@ class App(object):
 
         commandList = dm.CommandList()
         for command in commands:
-            commandList.addCommands(command)
+            commandList.addCommand(command)
 
         return commandList
 

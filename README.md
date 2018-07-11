@@ -251,7 +251,7 @@ The `mirror` command is used to configure display mirroring.
 | Subcommand | Purpose                                                                  |
 |------------|--------------------------------------------------------------------------|
 | `help`     | Prints the help instructions.                                            |
-| `enable`   | Activate mirroring.                                                      |
+| `set`      | Activate mirroring.                                                    |
 | `disable`  | Deactivate mirroring.                                                    |
 
 | Option                        | Purpose                                               |
@@ -336,7 +336,7 @@ This would perform the same `Command` as entering the following into the command
 $ displayManager.py brightness set .4
 ```
 
-For more complex usage, initialize a `CommandList`, which runs several commands simultaneously in a non-interfering pattern. To do so, pass it `Commands` through the `.addCommands(commands)` method. An example:
+For more complex usage, initialize a `CommandList`, which runs several commands simultaneously in a non-interfering pattern. To do so, pass it `Commands` through the `.addCommand(command)` method. An example:
 
 ```
 commandA = Command("underscan", "set", underscan=.4)

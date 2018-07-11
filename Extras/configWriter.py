@@ -25,7 +25,7 @@ def main():
 
     commandList = dm.CommandList()
     for command in commands:
-        commandList.addCommands(command)
+        commandList.addCommand(command)
 
     buildConfig(commandList, sys.argv[1])
 
