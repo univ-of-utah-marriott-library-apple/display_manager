@@ -377,7 +377,7 @@ In this way, you may pass in as many commands as you like, and Display Manager w
 
 #### Jamf
 
-Suppose you'd like all computers in a particular [Jamf Pro](https://www.jamf.com/products/jamf-pro/) scope to default to their highest retina-enabled resolution at maximum brightness at login. You could create such a policy, and add a script containing the following to it:
+Suppose you'd like all computers in a particular [Jamf Pro](https://www.jamf.com/products/jamf-pro/) scope to default to their highest retina-friendly resolution at maximum brightness at login. You could create such a policy, and add a script containing the following to it:
 
 ```
 displayManager.py "set highest --only-hidpi" "brightness set 1"
