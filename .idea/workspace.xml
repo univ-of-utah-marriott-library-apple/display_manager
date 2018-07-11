@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Extras/configWriter.py" beforeDir="false" afterPath="$PROJECT_DIR$/Extras/configWriter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Extras/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/Extras/gui.py" afterDir="false" />
-    </list>
+    <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -156,11 +152,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gui.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="gui.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Extras/gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="559">
-              <caret line="331" column="26" selection-start-line="331" selection-start-column="26" selection-end-line="331" selection-end-column="26" />
+            <state relative-caret-position="765">
+              <caret line="392" column="26" lean-forward="true" selection-start-line="392" selection-start-column="26" selection-end-line="392" selection-end-column="26" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#80#117#0" expanded="true" />
@@ -216,11 +212,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="configReader.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="configReader.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Extras/dev/old/configReader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="15" column="22" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
+            <state relative-caret-position="300">
+              <caret line="22" column="14" lean-forward="true" selection-start-line="22" selection-start-column="14" selection-end-line="22" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -667,6 +663,12 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cfg">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/DisplayManager.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
@@ -806,34 +808,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Extras/dev/old/configReader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="15" column="22" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cfg">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Extras/configWriter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="16" column="34" lean-forward="true" selection-start-line="16" selection-start-column="34" selection-end-line="16" selection-end-column="34" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#82#95#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/Extras/gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="559">
-          <caret line="331" column="26" selection-start-line="331" selection-start-column="26" selection-end-line="331" selection-end-column="26" />
+        <state relative-caret-position="765">
+          <caret line="392" column="26" lean-forward="true" selection-start-line="392" selection-start-column="26" selection-end-line="392" selection-end-column="26" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#80#117#0" expanded="true" />
@@ -885,6 +863,24 @@
             <element signature="e#18952#18989#1" />
             <element signature="e#19202#19231#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Extras/configWriter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="16" column="34" lean-forward="true" selection-start-line="16" selection-start-column="34" selection-end-line="16" selection-end-column="34" />
+          <folding>
+            <element signature="n#!!doc" />
+            <element signature="e#82#95#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Extras/dev/old/configReader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="22" column="14" lean-forward="true" selection-start-line="22" selection-start-column="14" selection-end-line="22" selection-end-column="14" />
         </state>
       </provider>
     </entry>

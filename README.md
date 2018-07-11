@@ -8,17 +8,20 @@ Includes a command-line utility and a few example apps.
 
 * [Contact](#contact) - how to reach us
 * [System Requirements](#system-requirements) - what you need
-* [Install](#install) - instructions for installing Display Manager
-* [Uninstall](#uninstall) - removal of Display Manager
 * [Purpose](#purpose) - why does this library exist?
-* [Library](#library) - what can you do with this library?
-   * [Examples](#examples) - potential use cases for this library
-* [Command-Line Usage](#help) - how to use the command line interface
-   * [Set](#set) - set the configuration
-   * [Show](#show) - look at available configurations
-   * [Mirror](#mirror) - configure mirroring
-   * [Brightness](#brightness) - change brightness
-   * [Rotate](#rotate) - change display orientation
+* [Get Started](#get-started) - how to get started with Display Manager
+* [Overview](#overview) - what is included in this library?
+	* [Library](#library)
+	* [Command-Line API](#command-line-api)
+	* [GUI](#gui)
+* [Command-Line Usage](#help) - how to use the command-line API
+	* [Set](#set)
+	* [Show](#show)
+	* [Brightness](#brightness)
+	* [Rotate](#rotate)
+	* [Mirror](#mirror)
+	* [Underscan](#underscan)
+* [Admin Usage](#admin-usage) - how System Administrators might use this library
 
 ## Contact
 
@@ -32,18 +35,6 @@ Display Manager depends uses the Apple-supplied Python 2.7 binary, which lives a
 
 If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
 
-## Install
-
-First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
-
-[Then download the latest installer for Display Manager here!](../../releases/)
-
-Once the download has completed, double-click the `.dmg` file. This will open a window in Finder where you should see two packages (files ending in `.pkg`). Double click the one named "Display Manager [x.x.x].pkg" (where *x.x.x* represents the current version number). This will launch the installer, which will guide you through the installation process. (Follow the on-screen instructions to complete the installation.)
-
-## Uninstall
-
-To remove Display Manager from your system, download the .dmg and run the "Uninstall Display Manager [x.x.x]" package to uninstall it.
-
 ## Purpose
 
 Display Manager was designed as a replacement to the old SetDisplay.c program that administrators have been using for years. While SetDisplay still works and can do many things, we decided to port the project to Python for a few reasons:
@@ -54,8 +45,20 @@ Display Manager was designed as a replacement to the old SetDisplay.c program th
    * For those not well-versed in C-style languages, Python can be easier to read through (and modify, if necessary)
 * More features
    * We support all the features of SetDisplay, as well as a few new features, including HDMI underscan settings, display rotation, etc.
+   
+## Get Started
 
-## Library
+First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
+
+UPDATE WHEN INSTALLER, PACKAGE, ETC. ARE COMPLETE!!!
+
+Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
+
+## Overview
+
+The Display Manager suite comes in 3 parts: the Display Manager library (DisplayManager.py), the command-line API (displayManager.py), and the GUI (gui.py).
+
+### Library
 
 The Display Manager library is based off the contents of DisplayManager.py, which contains the following:
 
@@ -66,33 +69,23 @@ The `CommandList` class is simply a container (for `command`s) that allows one t
 
 `getMainDisplay` returns the primary `Display`; `getAllDisplays` returns a `Display` for each connected display; `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Command`s and `Display`s instead, if possible)
 
-### Examples
+### Command-Line API
 
-Say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
+The command-line API, accessed via displayManager.py, allows you to manually set [display resolution, pixel depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [underscan](#underscan).
 
-```
-for display in getAllDisplays():
-    display.setMode(display.highestMode())
-```
+### GUI
 
-Perhaps you'd like all the displays of the computers you manage to rotate to 90 degrees. The following would work:
-
-```
-display = Display(getMainDisplayID())
-display.setRotate(90)
-```
-
-For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
+TODO SOON!
 
 ## Usage
 
 The Display Manager command-line interface supports the following commands:
 
 ```
-$ commandLine.py { help | set | show | brightness | rotate | mirror | underscan }
+$ displayManager.py { help | set | show | brightness | rotate | mirror | underscan }
 ```
 
-The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `commandLine.py help mirror`), and you can give `help` as an argument to any commands.
+The `help` option just prints out relevant information, and is interchangeable with `--help`. You can give any commands as an argument to `help` (e.g. `displayManager.py help mirror`), and you can give `help` as an argument to any commands.
 
 The other commands each have their own help instructions, which are detailed below.
 
@@ -121,26 +114,26 @@ The `set` command is used to change the current configuration on a display or ac
 
 * Set the main display to its highest supported configuration:
 ```
-$ commandLine.py set highest
+$ displayManager.py set highest
 ```
 
 * Set the main display to the closest value to what you want:
 ```
-$ commandLine.py set -w 1024 -h 768 -d 32 -r 70
+$ displayManager.py set -w 1024 -h 768 -d 32 -r 70
 ```
 or
 ```
-$ commandLine.py set closest -w 1024 -h 768 -d 32 -r 70
+$ displayManager.py set closest -w 1024 -h 768 -d 32 -r 70
 ```
 
 * Set the main display to an exact specification:
 ```
-$ commandLine.py set exact -w 1024 -h 768 -p 32 -r 70
+$ displayManager.py set exact -w 1024 -h 768 -p 32 -r 70
 ```
 
 * Set display `478176570` to use the highest HiDPI-scaled configuration:
 ```
-$ commandLine.py set highest -d 478176570 --only-hidpi
+$ displayManager.py set highest -d 478176570 --only-hidpi
 ```
 
 ### Show
@@ -170,13 +163,13 @@ Use the `show` command to learn more about the supported display configurations 
 
 * Show the current display's highest supported configuration:
 ```
-$ commandLine.py show highest
+$ displayManager.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
 ```
 
 * Show all connected displays and their identifiers:
 ```
-$ commandLine.py show displays
+$ displayManager.py show displays
 Display: 478176570 (Main Display)
 Display: 478176723
 Display: 478173192
@@ -200,17 +193,17 @@ You can set the brightness on your display with the `brightness` command (assumi
 
 * Show the brightness settings of all displays:
 ```
-$ commandLine.py brightness show
+$ displayManager.py brightness show
 ```
 
 * Set the brightness of the main display to its maximum brightness:
 ```
-$ commandLine.py brightness set .4
+$ displayManager.py brightness set .4
 ```
 
 * Set the brightness of display `478176723` to 40% of maximum brightness:
 ```
-$ commandLine.py brightness set .4 -d 478176723
+$ displayManager.py brightness set .4 -d 478176723
 ```
 
 ### Rotate
@@ -231,22 +224,22 @@ You can view and change your display's orientation with the `rotate` command.
 
 * Show the current orientation of all displays (in degrees):
 ```
-$ commandLine.py rotate show
+$ displayManager.py rotate show
 ```
 
 * Rotate the main display by 90 degrees (counter-clockwise):
 ```
-$ commandLine.py rotate set 90
+$ displayManager.py rotate set 90
 ```
 
 * Flip display `478176723` upside-down:
 ```
-$ commandLine.py rotate set 180 -d 478176723
+$ displayManager.py rotate set 180 -d 478176723
 ```
 
 * Restore display `478176723` to default orientation:
 ```
-$ commandLine.py rotate set 0 -d 478176723
+$ displayManager.py rotate set 0 -d 478176723
 ```
 
 ### Mirror
@@ -268,12 +261,12 @@ The `mirror` command is used to configure display mirroring.
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ commandLine.py mirror enable -d 478176723 -m 478176570
+$ displayManager.py mirror enable -d 478176723 -m 478176570
 ```
 
 * Stop mirroring:
 ```
-$ commandLine.py mirror disable
+$ displayManager.py mirror disable
 ```
 
 ### Underscan
@@ -294,10 +287,29 @@ The `underscan` command can configure display underscan settings.
 
 * Set main display to 0% underscan
 ```
-$ commandLine.py underscan set 0
+$ displayManager.py underscan set 0
 ```
 
 * Set display `478176723` to 42% underscan
 ```
-$ commandLine.py underscan set .42 -d 478176723
+$ displayManager.py underscan set .42 -d 478176723
 ```
+
+## Admin Usage
+
+Say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
+
+```
+for display in getAllDisplays():
+    display.setMode(display.highestMode())
+```
+
+Perhaps you'd like all the displays of the computers you manage to rotate to 90 degrees. The following would work:
+
+```
+display = Display(getMainDisplayID())
+display.setRotate(90)
+```
+
+For System Admins using software like [Jamf](https://www.jamf.com/products/jamf-pro/) or [Outset](https://github.com/chilcote/outset), the ability to configure a startup script that automatically configures any number of Macs to certain display settings at boot or login may be quite useful.
+
