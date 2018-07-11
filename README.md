@@ -10,10 +10,12 @@ Includes a command-line utility and a few example apps.
 * [System Requirements](#system-requirements) - what you need
 * [Purpose](#purpose) - why does this library exist?
 * [Get Started](#get-started) - how to get started with Display Manager
+
 * [Overview](#overview) - what is included in this library?
 	* [Library](#library)
 	* [Command-Line API](#command-line-api)
 	* [GUI](#gui)
+
 * [Command-Line Usage](#command-line-usage) - how to use the command-line API
 	* [Set](#set)
 	* [Show](#show)
@@ -21,10 +23,12 @@ Includes a command-line utility and a few example apps.
 	* [Rotate](#rotate)
 	* [Mirror](#mirror)
 	* [Underscan](#underscan)
+
 * [Usage Examples](#usage-examples) - potential use cases for Display Manager
 	* [Library Examples](#library-examples)
 	* [Command-Line Examples](#command-line-examples)
 	* [System Administration Examples](#system-administration-examples)
+
 * [Update History](#update-history)
 
 ## Contact
