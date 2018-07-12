@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/DisplayManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/DisplayManager.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,8 +17,8 @@
       <file leaf-file-name="DisplayManager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/DisplayManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="327" column="22" selection-start-line="327" selection-start-column="22" selection-end-line="327" selection-end-column="22" />
+            <state relative-caret-position="255">
+              <caret line="522" selection-start-line="522" selection-end-line="522" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#610#11150#0" />
@@ -86,7 +86,7 @@
                 <element signature="e#11859#11923#0" />
                 <element signature="e#11964#12028#0" />
                 <element signature="e#12069#12134#0" />
-                <element signature="e#12809#20307#0" />
+                <element signature="e#12844#20398#0" />
                 <element signature="e#12164#12235#1" />
                 <element signature="e#13114#14097#0" />
                 <element signature="e#12628#12700#0" />
@@ -102,7 +102,7 @@
                 <element signature="e#14962#15012#0" />
                 <element signature="e#15066#15300#0" />
                 <element signature="e#15250#15300#0" />
-                <element signature="e#15338#17301#0" />
+                <element signature="e#16014#17940#0" />
                 <element signature="e#15338#15414#1" />
                 <element signature="e#15463#15947#0" />
                 <element signature="e#15512#15947#0" />
@@ -110,9 +110,8 @@
                 <element signature="e#16003#16424#0" />
                 <element signature="e#16065#16155#0" />
                 <element signature="e#16480#16696#0" />
-                <element signature="e#16752#17094#0" />
-                <element signature="e#16801#17094#0" />
-                <element signature="e#17151#17301#0" />
+                <element signature="e#17420#17736#0" />
+                <element signature="e#17790#17940#0" />
                 <element signature="e#17345#17967#0" />
                 <element signature="e#17345#17406#1" />
                 <element signature="e#17456#17831#0" />
@@ -232,7 +231,7 @@
         <entry file="file://$PROJECT_DIR$/Extras/dev/old/configReader.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="105">
-              <caret line="9" column="11" lean-forward="true" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
+              <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
             </state>
           </provider>
         </entry>
@@ -254,7 +253,7 @@
         <entry file="file://$PROJECT_DIR$/bin/displayManager.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="150">
-              <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+              <caret line="15" selection-start-line="15" selection-end-line="15" />
               <folding>
                 <element signature="e#291#295#0" />
                 <element signature="e#271#5402#0" />
@@ -738,14 +737,14 @@
     <entry file="file://$PROJECT_DIR$/Extras/dev/old/configReader.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
-          <caret line="9" column="11" lean-forward="true" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
+          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bin/displayManager.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
-          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
           <folding>
             <element signature="e#291#295#0" />
             <element signature="e#271#5402#0" />
@@ -796,8 +795,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/DisplayManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="327" column="22" selection-start-line="327" selection-start-column="22" selection-end-line="327" selection-end-column="22" />
+        <state relative-caret-position="255">
+          <caret line="522" selection-start-line="522" selection-end-line="522" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#610#11150#0" />
@@ -865,7 +864,7 @@
             <element signature="e#11859#11923#0" />
             <element signature="e#11964#12028#0" />
             <element signature="e#12069#12134#0" />
-            <element signature="e#12809#20307#0" />
+            <element signature="e#12844#20398#0" />
             <element signature="e#12164#12235#1" />
             <element signature="e#13114#14097#0" />
             <element signature="e#12628#12700#0" />
@@ -881,7 +880,7 @@
             <element signature="e#14962#15012#0" />
             <element signature="e#15066#15300#0" />
             <element signature="e#15250#15300#0" />
-            <element signature="e#15338#17301#0" />
+            <element signature="e#16014#17940#0" />
             <element signature="e#15338#15414#1" />
             <element signature="e#15463#15947#0" />
             <element signature="e#15512#15947#0" />
@@ -889,9 +888,8 @@
             <element signature="e#16003#16424#0" />
             <element signature="e#16065#16155#0" />
             <element signature="e#16480#16696#0" />
-            <element signature="e#16752#17094#0" />
-            <element signature="e#16801#17094#0" />
-            <element signature="e#17151#17301#0" />
+            <element signature="e#17420#17736#0" />
+            <element signature="e#17790#17940#0" />
             <element signature="e#17345#17967#0" />
             <element signature="e#17345#17406#1" />
             <element signature="e#17456#17831#0" />

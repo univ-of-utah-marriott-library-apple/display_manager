@@ -8,7 +8,8 @@ Includes the library itself, and a command-line API + GUI to use it in prespecif
 
 * [Contact](#contact) - how to reach us
 * [System Requirements](#system-requirements) - what you need
-* [Purpose](#purpose) - why does this library exist?
+* [Purpose](#purpose) - what can be done with Display manager?
+* [Limitations](#limitations) - what *can't* be done with Display manager?
 * [Get Started](#get-started) - how to get started with Display Manager
 * [Overview](#overview) - what is included in this library?
  * [Library](#library)
@@ -40,6 +41,17 @@ If you have replaced the setDefault `/usr/bin/python` binary (which is not gener
 ## Purpose
 
 Display Manager programmatically manages Mac displays, including display resolution, color depth, refresh rate, brightness, rotation, screen mirroring, and HDMI underscan. Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
+
+Several intended use-cases for Display Manager are elaborated in [usage examples](#usage-examples).
+
+## Limitations
+
+Currently, Display Manager has a few important limitations that are worth noting:
+
+* Can't configure displays at Mac login screen.
+ * Recommended workaround: simply configure displays *during* login/logout, or while logged in. Settings persist after logout, so whichever configurations you set during logout will remain active at the login screen.
+* Displays are controlled via `DisplayID`, so any interactions with external displays via the command line must be performed by reference to that display's `DisplayID`. (However, any interactions with the main display don't need to specify its `DisplayID` -- it is implied, unless otherwise noted.)
+ * Recommended workaround: try manipulating the external displays (e.g. brightness, rotation, resolution, etc.) by their `DisplayID` to see which physical screens they correspond to.
    
 ## Get Started
 
