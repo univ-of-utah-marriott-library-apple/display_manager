@@ -621,6 +621,7 @@ class CommandList(object):
                     # "mirror" commands are the most complicated to deal with
                     elif commandType == "mirror":
                         command = commands[-1]
+
                         if command.secondary == "set":
                             display = Display(displayID)
                             # The current Display that the above "display" is mirroring
@@ -642,6 +643,9 @@ class CommandList(object):
                                 # First disable mirroring, then enable it for new mirror
                                 display.setMirrorOf(None)
                                 display.setMirrorOf(mirrorDisplay)
+
+                        elif command.secondary == "disable":
+                            command.run()
 
 
 def getMainDisplay():

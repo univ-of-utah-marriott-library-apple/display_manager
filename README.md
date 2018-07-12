@@ -84,7 +84,9 @@ The command-line API, accessed via dim.py, allows you to manually set [display r
 
 ### GUI
 
-*TODO: ADD THIS SOON!*
+First, set the display you'd like to configure the settings for in the "Display: " dropdown menu. Any time you select a display, all of the other menus automatically switch to that display's current settings, but you can refresh them manually by clicking the "refresh" button.
+
+Next, select the display settings you'd like from the other menus. Note that the brightness, rotation, and underscan sliders default to 0 and cannot be changed if your display does not allow us to access them. To configure mirroring, select the display you'd like to mirror, and click "enable" to enable, and "disable" to disable.
 
 ## Command-Line Usage
 
