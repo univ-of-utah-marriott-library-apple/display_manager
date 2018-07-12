@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-# This script allows users to access the DisplayManager program through the command line.
-# Passes command parameters into DisplayManager.
+# This script allows users to access Display Manager through the command line.
 
 import sys
 import os
 import argparse
 import pickle
-import DisplayManager as dm
+import display_manager as dm
 
 
 class CommandSyntaxError(Exception):
@@ -16,13 +15,12 @@ class CommandSyntaxError(Exception):
 
 def showHelp(command=None):
     """
-    Prints out the help information.
     :param command: The command to print information for.
     """
     print("Display Manager, version 1.0.0")
 
     usage = {"help": "\n".join([
-        "usage: commandLine.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
+        "usage: dim.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
         "",
         "Use any of the commands with \"help\" to get more information:",
         "    help       Show this help information.",
@@ -33,7 +31,7 @@ def showHelp(command=None):
         "    mirror     Set mirroring configuration.",
         "    underscan  Show or set the current display underscan.",
     ]), "set": "\n".join([
-        "usage: commandLine.py set {{ help | closest | highest | exact }}",
+        "usage: dim.py set {{ help | closest | highest | exact }}",
         "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
         "    [--no-hidpi] [--only-hidpi]",
         "",
@@ -53,7 +51,7 @@ def showHelp(command=None):
         "    --no-hidpi         Don\'t show HiDPI settings.",
         "    --only-hidpi       Only show HiDPI settings.",
     ]), "show": "\n".join([
-        "usage: commandLine.py show {{ help | all | closest | highest | current | displays }}",
+        "usage: dim.py show {{ help | all | closest | highest | current | displays }}",
         "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
         "    [--no-hidpi] [--only-hidpi]",
         "",
@@ -75,7 +73,7 @@ def showHelp(command=None):
         "    --only-hidpi       Only show HiDPI settings.",
         "",
     ]), "brightness": "\n".join([
-        "usage: commandLine.py brightness {{ help | show | set [val] }}",
+        "usage: dim.py brightness {{ help | show | set [val] }}",
         "    [-d display]",
         "",
         "commands",
@@ -86,7 +84,7 @@ def showHelp(command=None):
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
     ]), "rotate": "\n".join([
-        "usage: commandLine.py rotate {{ help | show | set [val] }}",
+        "usage: dim.py rotate {{ help | show | set [val] }}",
         "    [-d display]",
         "commands",
         "    help       Print this help information.",
@@ -96,7 +94,7 @@ def showHelp(command=None):
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
     ]), "mirror": "\n".join([
-        "usage: commandLine.py mirror {{ help | set | disable }}",
+        "usage: dim.py mirror {{ help | set | disable }}",
         "    [-d display] [-m display]",
         "",
         "commands",
@@ -108,7 +106,7 @@ def showHelp(command=None):
         "    -d display         Change mirroring settings for \"display\" (default: main display).",
         "    -m display         Set the display to mirror \"display\".",
     ]), "underscan": "\n".join([
-        "usage: commandLine.py underscan {{ help | show | set [val] }}",
+        "usage: dim.py underscan {{ help | show | set [val] }}",
         "    [-d display]",
         "",
         "commands",
@@ -295,14 +293,13 @@ def main():
         sys.exit(1)
 
     # Did the user try to open a config?
-    # todo: change/remove filename
-    filename = "/Volumes/Data/Users/u1036693/Projects/DisplayManager/Extras/dev/cfg/" + args[0]
+    filename = args[0]
     if len(args) == 1 and os.path.isfile(filename):
         try:
             with open(filename, "r") as f:
                 commands = pickle.load(f)
             commands.run()
-        except:  # todo: narrow down types of errors
+        except:
             print("Invalid file {}".format(filename))
             sys.exit(1)
         sys.exit(0)
