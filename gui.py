@@ -8,8 +8,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-import pickle
-import DisplayManager as dm
+import display_manager as dm
 
 
 class App(object):
@@ -185,9 +184,9 @@ class App(object):
         self.underscanSlider.grid(column=1, row=60, columnspan=7, sticky=tk.EW)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=69, columnspan=8, sticky=tk.EW)
 
-        # Set/write to config menu
+        # Set/build script menu
         ttk.Button(self.mainFrame, text="Set Display", command=self.setDisplay).grid(column=0, row=70, sticky=tk.E)
-        ttk.Button(self.mainFrame, text="Build Config", command=self.buildConfig).grid(column=7, row=70, sticky=tk.E)
+        ttk.Button(self.mainFrame, text="Build Script", command=self.buildScript).grid(column=7, row=70, sticky=tk.E)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=79, columnspan=8, sticky=tk.EW)
 
     def __displaySelectionInit(self):
@@ -296,14 +295,20 @@ class App(object):
         """
         :return: The currently selected brightness.
         """
-        return float(self.brightnessSlider.get()) / 100
+        if self.brightnessSlider.get():
+            return float(self.brightnessSlider.get()) / 100
+        else:
+            return 0
 
     @property
     def rotation(self):
         """
         :return: The currently selected brightness.
         """
-        return int(self.rotateSlider.get())
+        if self.rotateSlider.get():
+            return int(self.rotateSlider.get())
+        else:
+            return 0
 
     @property
     def mirror(self):
@@ -318,36 +323,39 @@ class App(object):
         """
         :return: The currently selected underscan.
         """
-        return float(self.underscanSlider.get() / 100)
+        if self.underscanSlider.get():
+            return float(self.underscanSlider.get() / 100)
+        else:
+            return 0
 
     def setDisplay(self):
         """
         Set the Display to the currently selected settings.
         """
-        commandList = self.__generateCommandList()
+        commandList = self.__generateScriptText()
         commandList.run()
 
         self.__reloadDisplay()
 
-    def buildConfig(self):
+    def buildScript(self):
         """
-        Build a config file with the currently selected settings and save it where
+        Build a script with the currently selected settings and save it where
         the user specifies.
         """
         # Ask the user where to store the file
         f = tkFileDialog.asksaveasfile(
             mode='w',
             initialdir=os.getcwd(),
-            initialfile="config",
+            defaultextension='.sh',
+            initialfile="set",
         )
         if f is not None:  # if the user didn't cancel
-            commandList = self.__generateCommandList()
-            pickle.dump(commandList, f)
+            f.write("#!/bin/bash\n\n" + self.__generateScriptText())
             f.close()
 
-    def __generateCommandList(self):
+    def __generateScriptText(self):
         """
-        :return: All currently selected commands, in the form of a DisplayManager.CommandList.
+        :return: A script which configures the display to the current settings
         """
         commands = [
             dm.Command(
@@ -383,14 +391,14 @@ class App(object):
                 "set",
                 underscan=self.underscan,
                 displayID=self.display.displayID
-            )
+            ),
         ]
 
-        commandList = dm.CommandList()
+        commandStrings = []
         for command in commands:
-            commandList.addCommand(command)
+            commandStrings.append('"' + command.__str__() + '"')
 
-        return commandList
+        return "dim.py " + " ".join(commandStrings)
 
     def __reloadDisplay(self):
         """

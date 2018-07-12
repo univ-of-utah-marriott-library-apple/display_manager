@@ -57,7 +57,7 @@ Currently, Display Manager has a few important limitations that are worth noting
 
 First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
 
-*TODO: UPDATE WHEN INSTALLER, PACKAGE, ETC. ARE COMPLETE!!!*
+If you meet them, download the [installer](/../../installer/install.pkg). Follow the prompts on-screen to install Display Manager.
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 

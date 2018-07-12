@@ -150,8 +150,8 @@ def parse(parseList):
     for p in [pSet, pShow]:
         p.add_argument("-w", "--width", type=int)
         p.add_argument("-h", "--height", type=int)
-        p.add_argument("-p", "--pixel-depth", type=int, default=32)
-        p.add_argument("-r", "--refresh", type=int, default=0)
+        p.add_argument("-p", "--pixel-depth", type=float, default=32)
+        p.add_argument("-r", "--refresh", type=float, default=0)
         p.add_argument("--no-hidpi", action="store_true")
         p.add_argument("--only-hidpi", action="store_true")
 

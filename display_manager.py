@@ -353,6 +353,36 @@ class Command(object):
         self.underscan = float(underscan) if underscan is not None else None
         self.mirrorDisplayID = int(mirrorDisplayID) if mirrorDisplayID is not None else None
 
+    def __str__(self):
+        """
+        :return: A string which would result in this command via the command line
+        """
+        stringList = []
+
+        for positional in [self.primary, self.secondary, self.brightness, self.angle, self.underscan]:
+            if positional is not None:
+                stringList.append(str(positional))
+
+        if self.width is not None:
+            stringList.append("-w " + str(self.width))
+        if self.height is not None:
+            stringList.append("-h " + str(self.height))
+        if self.depth is not None:
+            stringList.append("-p " + str(self.depth))
+        if self.refresh is not None:
+            stringList.append("-r " + str(self.refresh))
+        if self.displayID is not None:
+            stringList.append("-d " + str(self.displayID))
+        if self.mirrorDisplayID is not None:
+            stringList.append("-m " + str(self.mirrorDisplayID))
+
+        if self.hidpi == 1:  # do not show HiDPI modes
+            stringList.append("--no-hidpi")
+        elif self.hidpi == 2:  # only show HiDPI modes
+            stringList.append("--only-hidpi")
+
+        return " ".join(stringList)
+
     def run(self):
         """
         Runs the command this Command has stored.
@@ -590,26 +620,28 @@ class CommandList(object):
 
                     # "mirror" commands are the most complicated to deal with
                     elif commandType == "mirror":
-                        display = Display(displayID)
-                        # The current Display that the above "display" is mirroring
-                        currentMirror = display.mirrorOf
-                        # Become a mirror of most recently requested display
-                        mirrorDisplay = Display(commands[-1].mirrorDisplayID)
+                        command = commands[-1]
+                        if command.secondary == "set":
+                            display = Display(displayID)
+                            # The current Display that the above "display" is mirroring
+                            currentMirror = display.mirrorOf
+                            # Become a mirror of most recently requested display
+                            mirrorDisplay = Display(command.mirrorDisplayID)
 
-                        # If display is not a mirror of any other display
-                        if currentMirror is None:
-                            display.setMirrorOf(mirrorDisplay)
+                            # If display is not a mirror of any other display
+                            if currentMirror is None:
+                                display.setMirrorOf(mirrorDisplay)
 
-                        # The user requested that this display mirror itself, or that it mirror a display
-                        # which it is already mirroring. In either case, nothing should be done
-                        elif display == currentMirror or currentMirror == mirrorDisplay:
-                            pass
+                            # The user requested that this display mirror itself, or that it mirror a display
+                            # which it is already mirroring. In either case, nothing should be done
+                            elif display == currentMirror or currentMirror == mirrorDisplay:
+                                pass
 
-                        # display is already a mirror, but not of the requested display
-                        else:
-                            # First disable mirroring, then enable it for new mirror
-                            display.setMirrorOf(None)
-                            display.setMirrorOf(mirrorDisplay)
+                            # display is already a mirror, but not of the requested display
+                            else:
+                                # First disable mirroring, then enable it for new mirror
+                                display.setMirrorOf(None)
+                                display.setMirrorOf(mirrorDisplay)
 
 
 def getMainDisplay():
