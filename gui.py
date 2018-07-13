@@ -398,7 +398,7 @@ class App(object):
         for command in commands:
             commandStrings.append('"' + command.__str__() + '"')
 
-        return "dim.py " + " ".join(commandStrings)
+        return "dm.py " + " ".join(commandStrings)
 
     def __reloadDisplay(self):
         """

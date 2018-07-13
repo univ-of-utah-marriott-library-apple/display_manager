@@ -20,7 +20,7 @@ def showHelp(command=None):
     print("Display Manager, version 1.0.0")
 
     usage = {"help": "\n".join([
-        "usage: dim.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
+        "usage: dm.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
         "",
         "Use any of the commands with \"help\" to get more information:",
         "    help       Show this help information.",
@@ -31,7 +31,7 @@ def showHelp(command=None):
         "    mirror     Set mirroring configuration.",
         "    underscan  Show or set the current display underscan.",
     ]), "set": "\n".join([
-        "usage: dim.py set {{ help | closest | highest | exact }}",
+        "usage: dm.py set {{ help | closest | highest | exact }}",
         "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
         "    [--no-hidpi] [--only-hidpi]",
         "",
@@ -51,7 +51,7 @@ def showHelp(command=None):
         "    --no-hidpi         Don\'t show HiDPI settings.",
         "    --only-hidpi       Only show HiDPI settings.",
     ]), "show": "\n".join([
-        "usage: dim.py show {{ help | all | closest | highest | current | displays }}",
+        "usage: dm.py show {{ help | all | closest | highest | current | displays }}",
         "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
         "    [--no-hidpi] [--only-hidpi]",
         "",
@@ -73,7 +73,7 @@ def showHelp(command=None):
         "    --only-hidpi       Only show HiDPI settings.",
         "",
     ]), "brightness": "\n".join([
-        "usage: dim.py brightness {{ help | show | set [val] }}",
+        "usage: dm.py brightness {{ help | show | set [val] }}",
         "    [-d display]",
         "",
         "commands",
@@ -84,7 +84,7 @@ def showHelp(command=None):
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
     ]), "rotate": "\n".join([
-        "usage: dim.py rotate {{ help | show | set [val] }}",
+        "usage: dm.py rotate {{ help | show | set [val] }}",
         "    [-d display]",
         "commands",
         "    help       Print this help information.",
@@ -94,7 +94,7 @@ def showHelp(command=None):
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
     ]), "mirror": "\n".join([
-        "usage: dim.py mirror {{ help | set | disable }}",
+        "usage: dm.py mirror {{ help | set | disable }}",
         "    [-d display] [-m display]",
         "",
         "commands",
@@ -106,7 +106,7 @@ def showHelp(command=None):
         "    -d display         Change mirroring settings for \"display\" (default: main display).",
         "    -m display         Set the display to mirror \"display\".",
     ]), "underscan": "\n".join([
-        "usage: dim.py underscan {{ help | show | set [val] }}",
+        "usage: dm.py underscan {{ help | show | set [val] }}",
         "    [-d display]",
         "",
         "commands",
