@@ -40,7 +40,7 @@ If you have replaced the setDefault `/usr/bin/python` binary (which is not gener
 
 ## Purpose
 
-Display Manager programmatically manages Mac displays, including display resolution, color depth, refresh rate, brightness, rotation, screen mirroring, and HDMI underscan. Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
+Display Manager programmatically manages Mac displays, including [display resolution, pixel color depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
 
 Several intended use-cases for Display Manager are elaborated in [usage examples](#usage-examples).
 
@@ -57,17 +57,17 @@ Currently, Display Manager has a few important limitations that are worth noting
 
 First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
 
-If you meet them, download the [installer](./Display Manager.pkg). Follow the prompts on-screen to install Display Manager. (The installer puts the [Display Manager library ("display_manager.py)](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface ("dm.py")](#command-line-api) in `/usr/local/bin`.)
+If you meet them, download the [installer](./Display Manager.pkg). Follow the prompts on-screen to install Display Manager. (The installer puts the [Display Manager library ("display_manager_lib.py)](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface ("display_manager.py")](#command-line-api) in `/usr/local/bin`.)
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 
 ## Overview
 
-The Display Manager suite comes in 3 parts: the Display Manager library (dm.py), the command-line API (dm.py), and the GUI (gui.py).
+The Display Manager suite comes in 3 parts: the Display Manager library (display_manager_lib.py), the command-line API (display_manager.py), and the GUI (gui.py).
 
 ### Library
 
-The Display Manager library is housed in dm.py, which contains the following:
+The Display Manager library is housed in display_manager_lib.py, which contains the following:
 
 * The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
 * The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
@@ -80,7 +80,7 @@ The Display Manager library is housed in dm.py, which contains the following:
 
 ### Command-Line API
 
-The command-line API, accessed via dm.py, allows you to manually set [display resolution, pixel color depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
+The command-line API, accessed via display_manager.py, allows you to manually set [display resolution, pixel color depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
 
 ### GUI
 
@@ -96,7 +96,7 @@ To configure screen mirroring, select the display you'd like to mirror, and choo
 
 ![mirroring menu](resources/gui_3)
 
-Finally, select either "Set Display" or "Build Script". If you click "Set Display", the display will be configured to the settings you've selected. If you pick "Build Script", you'll be given a choice to save a script which sets your display to these settings automatically whenever run (using the `dm.py [commands...]` [interface](#command-line-api)).
+Finally, select either "Set Display" or "Build Script". If you click "Set Display", the display will be configured to the settings you've selected. If you pick "Build Script", you'll be given a file dialog to save a script which sets your display to these settings automatically whenever run (using the commands seen in `display_manager.py` [interface](#command-line-api)).
 
 ![set and build buttons](resources/gui_4)
 
@@ -105,14 +105,18 @@ Finally, select either "Set Display" or "Build Script". If you click "Set Displa
 The Display Manager command-line API supports the following commands:
 
 ```
-$ dm.py { help | set | show | brightness | rotate | mirror | underscan }
+$ display_manager.py { help | set | show | brightness | rotate | mirror | underscan }
 ```
 
-The `help` option prints out relevant usage information (similar to this document). You can give any commands as an argument to `help` (e.g. `dm.py help mirror`), and you can give `help` as an argument to any commands. Each command has its own help information, which is detailed below:
+The `help` option prints out relevant usage information (similar to this document). You can give any commands as an argument to `help` (e.g. `display_manager.py help mirror`), and you can give `help` as an argument to any commands. Each command has its own help information, which is detailed below:
 
 ### Set
 
 The `set` command is used to change the current configuration on a display or across all displays. It does not ask for confirmation; be careful about what you put in here. Running desired settings through `show` beforehand is recommended.
+
+Notes:
+* "Pixel color depth" is determined by the number of bits which encode RGB values for a single pixel. For more information, see [here](https://en.wikipedia.org/wiki/Color_depth).
+* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
 
 | Secondary Commands | Purpose                                                                                      |
 |------------|----------------------------------------------------------------------------------------------|
@@ -135,22 +139,22 @@ The `set` command is used to change the current configuration on a display or ac
 
 * Set the main display to its highest supported configuration:
 ```
-$ dm.py set highest
+$ display_manager.py set highest
 ```
 
 * Set the main display to the closest value to what you want:
 ```
-$ dm.py set -w 1024 -h 768
+$ display_manager.py set -w 1024 -h 768
 ```
 
 * Set the main display to an exact specification:
 ```
-$ dm.py set exact -w 1024 -h 768 -p 32 -r 70
+$ display_manager.py set exact -w 1024 -h 768 -p 32 -r 70
 ```
 
 * Set display `478176570` to use the highest HiDPI-scaled configuration:
 ```
-$ dm.py set highest -d 478176570 --only-hidpi
+$ display_manager.py set highest -d 478176570 --only-hidpi
 ```
 
 ### Show
@@ -180,13 +184,13 @@ Use the `show` command to learn more about the supported display configurations 
 
 * Show the main display's highest supported configuration:
 ```
-$ dm.py show highest
+$ display_manager.py show highest
 resolution: 1600x1200; pixel depth: 32; refresh rate: 60.0; ratio: 1.33:1
 ```
 
 * Show all connected displays and their identifiers:
 ```
-$ dm.py show displays
+$ display_manager.py show displays
 Display: 478176570 (Main Display)
 Display: 478176723
 Display: 478173192
@@ -195,7 +199,7 @@ Display: 478160349
 
 * Show the current configuration of `478176570`:
 ```
-$ dm.py show current -d 478176570
+$ display_manager.py show current -d 478176570
 ```
 
 ### Brightness
@@ -215,17 +219,17 @@ You can set the brightness on your display with the `brightness` command (assumi
 
 * Show the brightness settings of all displays:
 ```
-$ dm.py brightness show
+$ display_manager.py brightness show
 ```
 
 * Set the brightness of the main display to its maximum brightness:
 ```
-$ dm.py brightness set .4
+$ display_manager.py brightness set .4
 ```
 
 * Set the brightness of display `478176723` to 40% of maximum brightness:
 ```
-$ dm.py brightness set .4 -d 478176723
+$ display_manager.py brightness set .4 -d 478176723
 ```
 
 ### Rotate
@@ -246,22 +250,22 @@ You can view and change your display's orientation with the `rotate` command.
 
 * Show the current orientation of all displays (in degrees):
 ```
-$ dm.py rotate show
+$ display_manager.py rotate show
 ```
 
 * Rotate the main display by 90 degrees (counter-clockwise):
 ```
-$ dm.py rotate set 90
+$ display_manager.py rotate set 90
 ```
 
 * Flip display `478176723` upside-down:
 ```
-$ dm.py rotate set 180 -d 478176723
+$ display_manager.py rotate set 180 -d 478176723
 ```
 
 * Restore display `478176723` to default orientation:
 ```
-$ dm.py rotate set 0 -d 478176723
+$ display_manager.py rotate set 0 -d 478176723
 ```
 
 ### Underscan
@@ -282,12 +286,12 @@ The `underscan` command can configure HDMI underscan settings.
 
 * Set main display to 0% underscan:
 ```
-$ dm.py underscan set 0
+$ display_manager.py underscan set 0
 ```
 
 * Set display `478176723` to 42% underscan:
 ```
-$ dm.py underscan set .42 -d 478176723
+$ display_manager.py underscan set .42 -d 478176723
 ```
 
 ### Mirror
@@ -309,12 +313,12 @@ The `mirror` command is used to configure display mirroring.
 
 * Set display `478176723` to become a mirror of `478176570`:
 ```
-$ dm.py mirror set -d 478176723 -m 478176570
+$ display_manager.py mirror set -d 478176723 -m 478176570
 ```
 
 * Stop mirroring:
 ```
-$ dm.py mirror disable
+$ display_manager.py mirror disable
 ```
 
 ## Usage Examples
@@ -353,7 +357,7 @@ command.run()
 This would perform the same `Command` as entering the following into the command line:
 
 ```
-$ dm.py brightness set .4
+$ display_manager.py brightness set .4
 ```
 
 For more complex usage, initialize a `CommandList`, which runs several commands simultaneously in a non-interfering pattern. To do so, pass it `Commands` through the `.addCommand(command)` method. An example:
@@ -375,13 +379,13 @@ commands.run()
 In some cases, it may be desirable to configure displays from the command line, whether manually or via a script. Say you'd like a script to automatically set a display to its highest available resolution. The following would do just that:
 
 ```
-$ dm.py set highest
+$ display_manager.py set highest
 ```
 
 But, in many cases, you might want to call several such commands at the same time. Of course, you may write them out line-by-line, but this takes a little longer, and more importantly, running several commands in this way may lead to undesired interference between commands. As such, it is recommended that multiple commands be run like so:
 
 ```
-$ dm.py "set -w 1920 -h 1080" "rotate set 90" "brightness set .5" ...
+$ display_manager.py "set -w 1920 -h 1080" "rotate set 90" "brightness set .5" ...
 ```
 
 In this way, you may pass in as many commands as you like, and Display Manager will find a way to run them simultaneously without encountering configuration errors.
@@ -393,7 +397,7 @@ In this way, you may pass in as many commands as you like, and Display Manager w
 Suppose you'd like all computers in a particular [Jamf Pro](https://www.jamf.com/products/jamf-pro/) scope to default to their highest retina-friendly resolution at maximum brightness at login. You could create such a policy, and add a script containing the following to it:
 
 ```
-dm.py "set highest --only-hidpi" "brightness set 1"
+display_manager.py "set highest --only-hidpi" "brightness set 1"
 ```
 
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
@@ -403,7 +407,7 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 Perhaps you're managing several wall-mounted HDMI displays that are flipped upside-down via [Outset](https://github.com/chilcote/outset), and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
 
 ```
-dm.py "rotate set 180" "underscan set .5"
+display_manager.py "rotate set 180" "underscan set .5"
 ```
 
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).

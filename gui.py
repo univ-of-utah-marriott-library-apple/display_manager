@@ -8,7 +8,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-import display_manager as dm
+import display_manager_lib as dm
 
 
 class App(object):
@@ -398,7 +398,7 @@ class App(object):
         for command in commands:
             commandStrings.append('"' + command.__str__() + '"')
 
-        return "dm.py " + " ".join(commandStrings)
+        return "display_manager.py " + " ".join(commandStrings)
 
     def __reloadDisplay(self):
         """

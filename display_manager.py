@@ -1,728 +1,325 @@
 #!/usr/bin/python
 
-# Display Manager, version 1.0.0
+# This script allows users to access Display Manager through the command line.
 
-# Programmatically manages Mac displays.
-# Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness.
-
-import sys              # exit script with the right codes
-import collections      # for specialized containers
-import objc             # access Objective-C functions and variables
-import CoreFoundation   # work with Objective-C data types
-import Quartz           # work with system graphics
+import sys
+import os
+import argparse
+import pickle
+import display_manager_lib as dm
 
 
-# Configured for global usage; otherwise, must be re-instantiated each time it is called
-iokit = None
+class CommandSyntaxError(Exception):
+    pass
 
 
-class Display(object):
+def showHelp(command=None):
     """
-    Virtual representation of a physical display.
-
-    Contains properties regarding display information for a given physical display, along with a few
-    useful helper functions to configure the display.
+    :param command: The command to print information for.
     """
+    print("Display Manager, version 1.0.0")
 
-    def __init__(self, displayID):
-        """
-        :param displayID: The DisplayID of the display to manipulate
-        """
-        getIOKit()
+    usage = {"help": "\n".join([
+        "usage: display_manager.py {{ help | set | show | brightness | rotate | mirror | underscan }}",
+        "",
+        "Use any of the commands with \"help\" to get more information:",
+        "    help       Show this help information.",
+        "    set        Set the display configuration.",
+        "    show       Show available display configurations.",
+        "    brightness Show or set the current display brightness.",
+        "    rotate     Show or set display rotation.",
+        "    mirror     Set mirroring configuration.",
+        "    underscan  Show or set the current display underscan.",
+    ]), "set": "\n".join([
+        "usage: display_manager.py set {{ help | closest | highest | exact }}",
+        "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
+        "    [--no-hidpi] [--only-hidpi]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    closest    Set the display settings to the supported resolution that is closest to the specified values.",
+        "    highest    Set the display settings to the highest supported resolution.",
+        "    exact      Set the display settings to the specified values if they are supported. If they are not, "
+        "don\'t change the display.",
+        "",
+        "OPTIONS",
+        "    -w width           Resolution width.",
+        "    -h height          Resolution height.",
+        "    -p pixel-depth     Pixel color depth (default: 32).",
+        "    -r refresh         Refresh rate (default: 0).",
+        "    -d display         Specify a particular display (default: main display).",
+        "    --no-hidpi         Don\'t show HiDPI settings.",
+        "    --only-hidpi       Only show HiDPI settings.",
+    ]), "show": "\n".join([
+        "usage: display_manager.py show {{ help | all | closest | highest | current | displays }}",
+        "    [-d display] [-w width] [-h height] [-d pixel depth] [-r refresh]",
+        "    [--no-hidpi] [--only-hidpi]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    all        Show all supported resolutions for the display.",
+        "    closest    Show the closest matching supported resolution to the specified values.",
+        "    highest    Show the highest supported resolution.",
+        "    current    Show the current display configuration.",
+        "    displays   List the current displays and their IDs.",
+        "",
+        "OPTIONS",
+        "    -w width           Resolution width.",
+        "    -h height          Resolution height.",
+        "    -p pixel-depth     Pixel color depth (default: 32).",
+        "    -r refresh         Refresh rate (default: 0).",
+        "    -d display         Specify a particular display (default: main display).",
+        "    --no-hidpi         Don\'t show HiDPI settings.",
+        "    --only-hidpi       Only show HiDPI settings.",
+        "",
+    ]), "brightness": "\n".join([
+        "usage: display_manager.py brightness {{ help | show | set [val] }}",
+        "    [-d display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current brightness setting(s).",
+        "    set [val]  Sets the brightness to the given value. Must be between 0 and 1.",
+        "",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
+    ]), "rotate": "\n".join([
+        "usage: display_manager.py rotate {{ help | show | set [val] }}",
+        "    [-d display]",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current display rotation.",
+        "    set [val]  Set the rotation to the given angle (in degrees). Must be a multiple of 90.",
+        "",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
+    ]), "underscan": "\n".join([
+        "usage: display_manager.py underscan {{ help | show | set [val] }}",
+        "    [-d display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current underscan setting(s).",
+        "    set [val]  Sets the underscan to the given value. Must be between 0 and 1.",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
+    ]), "mirror": "\n".join([
+        "usage: display_manager.py mirror {{ help | set | disable }}",
+        "    [-d display] [-m display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    set        Activate mirroring.",
+        "    disable    Deactivate all mirroring.",
+        "",
+        "OPTIONS",
+        "    -d display         Change mirroring settings for \"display\" (default: main display).",
+        "    -m display         Set the display to mirror \"display\".",
+    ])}
 
-        # Check whether displayID is actually a display
-        (error, allDisplayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
-        if displayID not in allDisplayIDs or error:
-            print("Display {} not found.".format(displayID))
-            sys.exit(1)
-        else:
-            self.displayID = displayID
-
-    def __eq__(self, display):
-        return self.displayID == display.displayID
-
-    @property
-    def isMain(self):
-        """
-        :return: Boolean for whether this display is the main display
-        """
-        return Quartz.CGDisplayIsMain(self.displayID)
-
-    @property
-    def brightness(self):
-        """
-        :return: Brightness of this display, from 0 to 1.
-        """
-        service = self.servicePort
-        (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0, iokit["kDisplayBrightness"], None)
-        if error:
-            return None
-        else:
-            return brightness
-
-    @property
-    def rotation(self):
-        """
-        :return: Rotation of this display, in degrees.
-        """
-        return int(Quartz.CGDisplayRotation(self.displayID))
-
-    @property
-    def underscan(self):
-        """
-        :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
-            (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
-        """
-        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], None)
-        if error:
-            return None
-        else:
-            # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
-            # e.g. 0 -> maximum (100%), 1 -> 0% (default)
-            return float(abs(underscan - 1))
-
-    @property
-    def mirrorOf(self):
-        """
-        Checks whether self is mirroring another display
-        :return: The Display that self is mirroring; if self is not mirroring
-            any display, returns None
-        """
-        # The display which self is mirroring
-        masterDisplayID = Quartz.CGDisplayMirrorsDisplay(self.displayID)
-        if masterDisplayID == Quartz.kCGNullDirectDisplay:
-            # self is not mirroring any display
-            return None
-        else:
-            return Display(masterDisplayID)
-
-    @property
-    def currentMode(self):
-        """
-        :return: The current Quartz "DisplayMode" interface for this display.
-        """
-        return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
-
-    @property
-    def allModes(self):
-        """
-        :return: All possible Quartz "DisplayMode" interfaces for this display.
-        """
-        modes = []
-        # options forces Quartz to show HiDPI modes
-        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
-        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            modes.append(DisplayMode(mode))
-        return modes
-
-    @property
-    def servicePort(self):
-        """
-        :return: The integer representing this display's service port.
-        """
-        return Quartz.CGDisplayIOServicePort(self.displayID)
-
-    @staticmethod
-    def __rightHidpi(mode, hidpi):
-        """
-        Evaluates whether the mode fits the user's HiDPI specification.
-
-        :param mode: The mode to be evaluated.
-        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
-        :return: Whether the mode fits the HiDPI description specified by the user.
-        """
-        if (
-                (hidpi == 0)  # fits HiDPI or non-HiDPI (default)
-                or (hidpi == 1 and not mode.hidpi)  # fits only non-HiDPI
-                or (hidpi == 2 and mode.hidpi)  # fits only HiDPI
-        ):
-            return True
-        else:
-            return False
-
-    def highestMode(self, hidpi=0):
-        """
-        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
-        :return: The Quartz "DisplayMode" interface with the highest display resolution for this display.
-        """
-        highest = None
-        for mode in self.allModes:
-            if highest:
-                if mode > highest and self.__rightHidpi(mode, hidpi):
-                    highest = mode
-            else:  # highest hasn't been set yet, so anything is the highest
-                highest = mode
-
-        return highest
-
-    def exactMode(self, width, height, depth=32.0, refresh=0.0, hidpi=0):
-        """
-        :param width: Desired width
-        :param height: Desired height
-        :param depth: Desired pixel depth
-        :param refresh: Desired refresh rate
-        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
-        :return: The Quartz "DisplayMode" interface matching the description, if it exists; otherwise, None.
-        """
-        for mode in self.allModes:
-            if (
-                    mode.width == width and mode.height == height and mode.depth == depth and
-                    mode.refresh == refresh and self.__rightHidpi(mode, hidpi)
-            ):
-                return mode
-        return None
-
-    def closestMode(self, width, height, depth=32.0, refresh=0.0, hidpi=0):
-        """
-        :param width: Desired width
-        :param height: Desired height
-        :param depth: Desired pixel depth
-        :param refresh: Desired refresh rate
-        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI
-        :return: The closest Quartz "DisplayMode" interface possible for this display.
-        """
-        whdr = None  # matches width, height, depth, and refresh
-        whd = None   # matches width, height, and depth
-        wh = None    # matches width and height
-
-        for mode in self.allModes:
-            widthMatch = mode.width == width
-            heightMatch = mode.height == height
-            depthMatch = mode.depth == depth
-            refreshMatch = mode.refresh == refresh
-            hidpiMatch = self.__rightHidpi(mode, hidpi)
-
-            if widthMatch and heightMatch and depthMatch and refreshMatch and hidpiMatch:
-                return mode
-            elif widthMatch and heightMatch and depthMatch and refreshMatch:
-                whdr = mode
-            elif widthMatch and heightMatch and depthMatch:
-                whd = mode
-            elif widthMatch and heightMatch:
-                wh = mode
-
-        for match in [whdr, whd, wh]:  # iterate through the "close" modes in order of closeness
-            if match:
-                return match
-
-    def setMode(self, mode):
-        """
-        :param mode: The Quartz "DisplayMode" interface to set this display to.
-        """
-        (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
-        if error:
-            print("Could not begin display configuration: error {}".format(error))
-            sys.exit(1)
-
-        error = Quartz.CGConfigureDisplayWithDisplayMode(configRef, self.displayID, mode.raw, None)
-        if error:
-            print("Failed to set display configuration: error {}".format(error))
-            Quartz.CGCancelDisplayConfiguration(configRef)
-            sys.exit(1)
-
-        Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
-
-    def setBrightness(self, brightness):
-        """
-        :param brightness: The desired brightness, from 0 to 1.
-        """
-        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayBrightness"], brightness)
-        if error:
-            print("Failed to set brightness of display {}; error {}".format(self.displayID, error))
-            # External display brightness probably can't be managed this way
-            print("External displays may not be compatible with Display Manager. \n"
-                  "If this is an external display, try setting manually on device hardware.")
-
-    def setRotate(self, angle):
-        """
-        :param angle: The angle of rotation.
-        """
-        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
-        rotateCode = 1024
-        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
-            print("Can only rotate by multiples of 90 degrees.")
-            sys.exit(1)
-        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
-        options = rotateCode | (angleCodes[angle % 360] << 16)
-
-        # Actually rotate the screen
-        error = iokit["IOServiceRequestProbe"](self.servicePort, options)
-
-        if error:
-            print("Failed to rotate display {}; error {}".format(self.displayID, error))
-            sys.exit(1)
-
-    def setUnderscan(self, underscan):
-        """
-        :param underscan: Underscan value, from 0 (no underscan) to 1 (maximum underscan).
-        """
-        # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
-        # e.g. 0 -> maximum (100%), 1 -> 0% (default)
-        underscan = float(abs(underscan - 1))
-
-        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
-        if error:
-            print("Failed to set underscan of display {}; error {}".format(self.displayID, error))
-
-    def setMirrorOf(self, mirrorDisplay):
-        """
-        :param mirrorDisplay: The Display which this Display will mirror.
-            Input a NoneType to stop mirroring.
-        """
-        (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
-        if error:
-            print("Could not begin display configuration: error {}".format(error))
-            sys.exit(1)
-
-        # Will be passed a None mirrorDisplay to disable mirroring. Cannot mirror self.
-        if mirrorDisplay is None or mirrorDisplay.displayID == self.displayID:
-            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, Quartz.kCGNullDirectDisplay)
-        else:
-            Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
-
-        Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
+    if command in usage:
+        print(usage[command])
+    else:
+        print(usage["help"])
 
 
-class DisplayMode(object):
+def parse(parseList):
     """
-    Represents a DisplayMode as implemented in Quartz.
+    Parse the user command-line input.
+    :return: A parser that has parsed all command-line arguments passed in.
     """
+    parser = argparse.ArgumentParser(add_help=False)
+    primary = parser.add_subparsers(dest="primary")
 
-    def __init__(self, mode):
-        # Low-hanging fruit
-        self.width = Quartz.CGDisplayModeGetWidth(mode)
-        self.height = Quartz.CGDisplayModeGetHeight(mode)
-        self.refresh = float(Quartz.CGDisplayModeGetRefreshRate(mode))
-        self.raw = mode
+    pSet = primary.add_parser("set", add_help=False)
+    pSet.add_argument(
+        "secondary",
+        choices=["help", "closest", "highest", "exact"],
+        nargs="?",
+        default="closest"
+    )
 
-        # Pixel depth
-        depthMap = {
-            "PPPPPPPP": 8.0,
-            "-RRRRRGGGGGBBBBB": 16.0,
-            "--------RRRRRRRRGGGGGGGGBBBBBBBB": 32.0,
-            "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB": 30.0
-        }
-        self.depth = depthMap[Quartz.CGDisplayModeCopyPixelEncoding(mode)]
+    pShow = primary.add_parser("show", add_help=False)
+    pShow.add_argument(
+        "secondary",
+        choices=["help", "all", "closest", "highest", "current", "displays"],
+        nargs="?",
+        default="all"
+    )
 
-        # HiDPI status
-        maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
-        maxHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # the maximum display width for this display
-        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
+    for p in [pSet, pShow]:
+        p.add_argument("-w", "--width", type=int)
+        p.add_argument("-h", "--height", type=int)
+        p.add_argument("-p", "--pixel-depth", type=float, default=32)
+        p.add_argument("-r", "--refresh", type=float, default=0)
+        p.add_argument("--no-hidpi", action="store_true")
+        p.add_argument("--only-hidpi", action="store_true")
 
-    def __str__(self):
-        return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
-            "width": self.width, "height": self.height, "depth": self.depth,
-            "refresh": self.refresh, "hidpi": self.hidpi
-        })
+    pBrightness = primary.add_parser("brightness", add_help=False)
+    pBrightness.add_argument("secondary", choices=["help", "show", "set"])
+    pBrightness.add_argument("brightness", type=float, nargs="?", default=1)
 
-    def __lt__(self, otherDM):
-        return self.width * self.height < otherDM.width * otherDM.height
+    pRotate = primary.add_parser("rotate", add_help=False)
+    pRotate.add_argument("secondary", choices=["help", "set", "show"], nargs="?", default="show")
+    pRotate.add_argument("rotation", type=int, nargs="?", default=0)
 
-    def __gt__(self, otherDM):
-        return self.width * self.height > otherDM.width * otherDM.height
+    pMirror = primary.add_parser("mirror", add_help=False)
+    pMirror.add_argument("secondary", choices=["help", "set", "disable"])
+    pMirror.add_argument("-m", "--mirror", type=int)
 
-    def __eq__(self, otherDM):
-        return self.width * self.height == otherDM.width * otherDM.height
+    pUnderscan = primary.add_parser("underscan", add_help=False)
+    pUnderscan.add_argument("secondary", choices=["help", "show", "set"])
+    pUnderscan.add_argument("underscan", type=float, nargs="?", default=1)
+
+    for p in [pSet, pShow, pBrightness, pRotate, pMirror, pUnderscan]:
+        p.add_argument("-d", "--display", type=int, default=dm.getMainDisplay().displayID)
+
+    pHelp = primary.add_parser("help", add_help=False)
+    pHelp.add_argument(
+        "secondary",
+        choices=["set", "show", "brightness", "rotate", "underscan", "mirror"],
+        nargs="?",
+        default=None
+    )
+
+    # argparse shows its own error message and exits when there's been a parsing error.
+    # We want to show our error, and not theirs. Hence:
+    try:
+        with open(os.devnull, "w") as nowhere:
+            sys.stderr = nowhere
+            sys.stdout = nowhere
+            args = parser.parse_args(parseList)
+            sys.stderr = sys.__stderr__
+            sys.stdout = sys.__stdout__
+    except SystemExit:
+        sys.stderr = sys.__stderr__
+        sys.stdout = sys.__stdout__
+        raise CommandSyntaxError
+    return args
 
 
-class Command(object):
+def getCommand(commandString):
     """
-    Represents a user-requested command to Display Manager.
+    Transforms input string into a Command.
+    :returns: The resulting Command.
     """
+    parseList = []
+    for element in commandString.split():
+        parseList.append(element)
+    args = parse(parseList)
 
-    def __init__(self, primary, secondary, width=None, height=None, depth=None, refresh=None,
-                 displayID=None, hidpi=None, brightness=None, angle=None, underscan=None,
-                 mirrorDisplayID=None):
-        getIOKit()
+    if args.primary == "help":  # run help (default)
+        showHelp(command=args.secondary)
+        sys.exit(0)
 
-        if primary in ["set", "show", "brightness", "rotate", "underscan", "mirror"]:
-            self.primary = primary
-        else:
-            print("Unrecognized command {}".format(primary))
-            sys.exit(1)
-        self.secondary = secondary
+    if args.secondary == "help" or hasattr(args, "help"):  # secondary-specific help
+        showHelp(command=args.primary)
+        sys.exit(0)
 
-        self.width = int(width) if width is not None else None
-        self.height = int(height) if height is not None else None
-        self.depth = float(depth) if depth is not None else None
-        self.refresh = float(refresh) if refresh is not None else None
-        self.displayID = int(displayID) if displayID is not None else None
-        self.hidpi = int(hidpi) if hidpi is not None else None
-        self.brightness = float(brightness) if brightness is not None else None
-        self.angle = int(angle) if angle is not None else None
-        self.underscan = float(underscan) if underscan is not None else None
-        self.mirrorDisplayID = int(mirrorDisplayID) if mirrorDisplayID is not None else None
+    def hidpi():
+        hidpiVal = 0  # show all modes (default)
+        if args.only_hidpi or args.no_hidpi:
+            if not (args.only_hidpi and args.no_hidpi):  # If they didn't give contrary instructions, proceed.
+                if args.no_hidpi:
+                    hidpiVal = 1  # do not show HiDPI modes
+                elif args.only_hidpi:
+                    hidpiVal = 2  # show only HiDPI modes
+        return hidpiVal
 
-    def __str__(self):
-        """
-        :return: A string which would result in this command via the command line
-        """
-        stringList = []
-
-        for positional in [self.primary, self.secondary, self.brightness, self.angle, self.underscan]:
-            if positional is not None:
-                stringList.append(str(positional))
-
-        if self.width is not None:
-            stringList.append("-w " + str(self.width))
-        if self.height is not None:
-            stringList.append("-h " + str(self.height))
-        if self.depth is not None:
-            stringList.append("-p " + str(self.depth))
-        if self.refresh is not None:
-            stringList.append("-r " + str(self.refresh))
-        if self.displayID is not None:
-            stringList.append("-d " + str(self.displayID))
-        if self.mirrorDisplayID is not None:
-            stringList.append("-m " + str(self.mirrorDisplayID))
-
-        if self.hidpi == 1:  # do not show HiDPI modes
-            stringList.append("--no-hidpi")
-        elif self.hidpi == 2:  # only show HiDPI modes
-            stringList.append("--only-hidpi")
-
-        return " ".join(stringList)
-
-    def run(self):
-        """
-        Runs the command this Command has stored.
-        """
-        if self.primary == "set":
-            self.__handleSet()
-        elif self.primary == "show":
-            self.__handleShow()
-        elif self.primary == "brightness":
-            self.__handleBrightness()
-        elif self.primary == "rotate":
-            self.__handleRotate()
-        elif self.primary == "underscan":
-            self.__handleUnderscan()
-        elif self.primary == "mirror":
-            self.__handleMirror()
-
-    def __printNotFound(self):
-        print("No matching display mode was found. {}".format(
-            "Try removing HiDPI flags to find a mode." if self.hidpi != 0 else ""))
-
-    def __handleSet(self):
-        """
-        Sets the display to the correct DisplayMode.
-        """
-        display = Display(self.displayID)
-
-        if self.secondary == "closest":
-            if self.width is None or self.height is None:
-                print("Must have both width and height for closest setting.")
-                sys.exit(1)
-
-            closest = display.closestMode(self.width, self.height, self.depth, self.refresh)
-            if closest:
-                display.setMode(closest)
-            else:
-                self.__printNotFound()
-                sys.exit(1)
-
-        elif self.secondary == "highest":
-            highest = display.highestMode(self.hidpi)
-            if highest:
-                display.setMode(highest)
-            else:
-                self.__printNotFound()
-                sys.exit(1)
-
-        elif self.secondary == "exact":
-            exact = display.exactMode(self.width, self.height, self.depth, self.refresh, self.hidpi)
-            if exact:
-                display.setMode(exact)
-            else:
-                self.__printNotFound()
-                sys.exit(1)
-
-    def __handleShow(self):
-        """
-        Shows the user information about connected displays.
-        """
-        if self.secondary == "all":
-            for display in getAllDisplays():
-                print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-
-                foundMatching = False  # whether we ended up printing a matching mode or not
-                for mode in sorted(display.allModes, reverse=True):
-                    print("    {}".format(mode))
-                    foundMatching = True
-
-                if not foundMatching:
-                    self.__printNotFound()
-
-        elif self.secondary == "closest":
-            if self.width is None or self.height is None:
-                print("Must have both width and height for closest matching.")
-                sys.exit(1)
-
-            display = Display(self.displayID)
-            closest = display.closestMode(self.width, self.height, self.depth, self.refresh)
-            if closest:
-                print("{}".format(closest))
-            else:
-                self.__printNotFound()
-
-        elif self.secondary == "highest":
-            display = Display(self.displayID)
-            highest = display.highestMode(self.hidpi)
-            if highest:
-                print("{}".format(highest))
-            else:
-                self.__printNotFound()
-
-        elif self.secondary == "current":
-            display = Display(self.displayID)
-            print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-
-            current = display.currentMode
-            if current:
-                print("{}".format(current))
-            else:
-                self.__printNotFound()
-
-        elif self.secondary == "displays":
-            for display in getAllDisplays():
-                print("Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-
-    def __handleBrightness(self):
-        """
-        Sets or shows a display's brightness.
-        """
-        if self.secondary == "show":
-            for display in getAllDisplays():
-                if display.brightness:
-                    print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
-                    print("    {:.2f}%".format(display.brightness * 100))
-                else:
-                    print("Failed to get brightness of display {}".format(display.displayID))
-
-        elif self.secondary == "set":
-            display = Display(self.displayID)
-            display.setBrightness(self.brightness)
-
-    def __handleRotate(self):
-        """
-        Sets or shows a display's rotation.
-        """
-        if self.secondary == "show":
-            for display in getAllDisplays():
-                print(
-                    "Display: {0} {1}".format(str(display.displayID), " (Main Display)" if display.isMain else ""))
-                print("    Rotation: {0} degrees".format(str(int(display.rotation))))
-
-        elif self.secondary == "set":
-            display = Display(self.displayID)
-            display.setRotate(self.angle)
-
-    def __handleUnderscan(self):
-        """
-        Sets or shows a display's underscan settings.
-        """
-        if self.secondary == "show":
-            for display in getAllDisplays():
-                if display.underscan is not None:
-                    print("Display: {}{}".format(display.displayID, " (Main Display)" if display.isMain else ""))
-                    print("    {:.2f}%".format(self.underscan * 100))
-                else:
-                    print("Failed to get underscan value of display {}".format(display.displayID))
-
-        elif self.secondary == "set":
-            display = Display(self.displayID)
-            display.setUnderscan(self.underscan)
-
-    def __handleMirror(self):
-        """
-        Enables or disables mirroring between two displays.
-        """
-        if self.secondary == "set":
-            display = Display(self.displayID)
-            mirrorDisplay = Display(self.mirrorDisplayID)
-
-            display.setMirrorOf(mirrorDisplay)
-
-        if self.secondary == "disable":
-            for display in getAllDisplays():
-                # If display is a mirror of another display, disable mirroring between them
-                if display.mirrorOf is not None:
-                    display.setMirrorOf(None)
-
-
-class CommandList(object):
-    """
-    Holds one or more "Command" instances.
-    """
-
-    def __init__(self):
-        # self.commandDict will consist of displayID keys corresponding to commands for that display
-        self.__commandDict = {}
-
-    def addCommand(self, command):
-        """
-        :param command: The Command to add to this CommandList
-        """
-        displayID = command.displayID
-        if displayID is None:
-            displayID = getMainDisplay().displayID
-
-        if displayID in self.__commandDict:
-            self.__commandDict[displayID].append(command)
-        else:
-            self.__commandDict[displayID] = [command]
-
-    def run(self):
-        """
-        Runs all stored Commands in a non-interfering fashion
-        """
-        for displayID in self.__commandDict:
-            # Commands for this particular display
-            displayCommands = self.__commandDict[displayID]
-
-            # Group commands by type. Must preserve ordering to avoid interfering commands
-            commandGroups = collections.OrderedDict([
-                ("set", []),
-                ("mirror", []),
-                ("rotate", []),
-                ("underscan", []),
-                ("brightness", []),
-                ("show", []),
-            ])
-            for command in displayCommands:
-                if command.primary in commandGroups:
-                    commandGroups[command.primary].append(command)
-                else:
-                    print("Unexpected command.primary \"{}\"".format(command.primary))
-                    sys.exit(1)
-
-            # Run commands by type
-            for commandType in commandGroups:
-                # Commands for this display, of this type
-                commands = commandGroups[commandType]
-
-                if len(commands) > 0:
-                    # Multiple commands of these types will undo each other.
-                    # As such, just run the most recently added command (the last in the list)
-                    if (
-                            commandType == "set" or
-                            commandType == "brightness" or
-                            commandType == "rotate" or
-                            commandType == "underscan"
-                    ):
-                        commands[-1].run()
-
-                    # "show" commands don't interfere with each other, so run all of them
-                    elif commandType == "show":
-                        for command in commands:
-                            command.run()
-
-                    # "mirror" commands are the most complicated to deal with
-                    elif commandType == "mirror":
-                        command = commands[-1]
-
-                        if command.secondary == "set":
-                            display = Display(displayID)
-                            # The current Display that the above "display" is mirroring
-                            currentMirror = display.mirrorOf
-                            # Become a mirror of most recently requested display
-                            mirrorDisplay = Display(command.mirrorDisplayID)
-
-                            # If display is not a mirror of any other display
-                            if currentMirror is None:
-                                display.setMirrorOf(mirrorDisplay)
-
-                            # The user requested that this display mirror itself, or that it mirror a display
-                            # which it is already mirroring. In either case, nothing should be done
-                            elif display == currentMirror or currentMirror == mirrorDisplay:
-                                pass
-
-                            # display is already a mirror, but not of the requested display
-                            else:
-                                # First disable mirroring, then enable it for new mirror
-                                display.setMirrorOf(None)
-                                display.setMirrorOf(mirrorDisplay)
-
-                        elif command.secondary == "disable":
-                            command.run()
-
-
-def getMainDisplay():
-    """
-    :return: The main Display.
-    """
-    return Display(Quartz.CGMainDisplayID())
-
-
-def getAllDisplays():
-    """
-    :return: A list containing all currently-online displays.
-    """
-    (error, displayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
-    if error:
-        print("Unable to get displays list.")
-        sys.exit(1)
-
-    displays = []
-    for displayID in displayIDs:
-        displays.append(Display(displayID))
-    return displays
-
-
-def getIOKit():
-    """
-    This handles the importing of specific functions and variables from the
-    IOKit framework. IOKit is not natively bridged in PyObjC, so the methods
-    must be found and encoded manually to gain their functionality in Python.
-
-    :return: A dictionary containing several IOKit functions and variables.
-    """
-    global iokit
-    if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
-        # The dictionary which will contain all of the necessary functions and variables from IOKit
-        iokit = {}
-
-        # Retrieve the IOKit framework
-        iokitBundle = objc.initFrameworkWrapper(
-            "IOKit",
-            frameworkIdentifier="com.apple.iokit",
-            frameworkPath=objc.pathForFramework("/System/Library/Frameworks/IOKit.framework"),
-            globals=globals()
+    command = None
+    if args.primary == "set":
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            width=args.width,
+            height=args.height,
+            depth=args.pixel_depth,
+            refresh=args.refresh,
+            displayID=args.display,
+            hidpi=hidpi()
+        )
+    elif args.primary == "show":
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            width=args.width,
+            height=args.height,
+            depth=args.pixel_depth,
+            refresh=args.refresh,
+            displayID=args.display,
+            hidpi=hidpi()
+        )
+    elif args.primary == "brightness":
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            brightness=args.brightness,
+            displayID=args.display
+        )
+    elif args.primary == "rotate":
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            angle=args.rotation,
+            displayID=args.display
+        )
+    elif args.primary == "mirror":
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            mirrorDisplayID=args.mirror,
+            displayID=args.display
+        )
+    elif args.primary == "underscan":
+        command = dm.Command(
+            args.primary,
+            args.secondary,
+            underscan=args.underscan,
+            displayID=args.display
         )
 
-        # The IOKit functions to be retrieved
-        functions = [
-            ("IOServiceGetMatchingServices", b"iI@o^I"),
-            ("IODisplayCreateInfoDictionary", b"@II"),
-            ("IODisplayGetFloatParameter", b"iII@o^f"),
-            ("IODisplaySetFloatParameter", b"iII@f"),
-            ("IOServiceRequestProbe", b"iII"),
-            ("IOIteratorNext", b"II")
-        ]
+    return command
 
-        # The IOKit variables to be retrieved
-        variables = [
-            ("kIODisplayNoProductName", b"I"),
-            ("kIOMasterPortDefault", b"I"),
-            ("kIODisplayBrightnessKey", b"*"),
-            ("kIODisplayOverscanKey", b"*"),
-            ("kDisplayVendorID", b"*"),
-            ("kDisplayProductID", b"*"),
-            ("kDisplaySerialNumber", b"*")
-        ]
 
-        # Load functions from IOKit into the global namespace
-        objc.loadBundleFunctions(iokitBundle, iokit, functions)
-        # Bridge won't put straight into iokit, so globals()
-        objc.loadBundleVariables(iokitBundle, globals(), variables)
-        # Move only the desired variables into iokit
-        for var in variables:
-            key = "{}".format(var[0])
-            if key in globals():
-                iokit[key] = globals()[key]
+def main():
+    """
+    Called on execution. Parses input and calls Display Manager.
+    """
+    args = sys.argv[1:]
 
-        iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
-        iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
+    # Exit if the user didn't provide any arguments
+    if len(args) < 1:
+        showHelp()
+        sys.exit(1)
 
-    return iokit
+    # Did the user try to open a config?
+    filename = args[0]
+    if len(args) == 1 and os.path.isfile(filename):
+        try:
+            with open(filename, "r") as f:
+                commands = pickle.load(f)
+            commands.run()
+        except:
+            print("Invalid file {}".format(filename))
+            sys.exit(1)
+        sys.exit(0)
+
+    try:
+        # Run the args as only one command
+        command = getCommand(" ".join(args))
+        command.run()
+    except CommandSyntaxError:
+        try:
+            # Run the args as multiple commands
+            commands = dm.CommandList()
+            for command in args:
+                commands.addCommand(getCommand(command))
+            commands.run()
+        except CommandSyntaxError:
+            # User entered invalid command(s)
+            showHelp()
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
