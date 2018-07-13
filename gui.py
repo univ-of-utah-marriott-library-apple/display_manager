@@ -168,20 +168,20 @@ class App(object):
         self.rotateSlider.grid(column=1, row=40, columnspan=7, sticky=tk.EW)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=49, columnspan=8, sticky=tk.EW)
 
+        # Underscan menu
+        ttk.Label(self.mainFrame, text="Underscan:").grid(column=0, row=50, sticky=tk.E)
+        self.underscanSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=100)
+        self.underscanSlider.grid(column=1, row=50, columnspan=7, sticky=tk.EW)
+        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=59, columnspan=8, sticky=tk.EW)
+
         # Mirroring menu
-        ttk.Label(self.mainFrame, text="Mirror Display:").grid(column=0, row=50, sticky=tk.E)
+        ttk.Label(self.mainFrame, text="Mirror Display:").grid(column=0, row=60, sticky=tk.E)
         self.mirrorEnabled = tk.BooleanVar()
         self.mirrorEnabled.set(False)
         self.mirrorDropdown = ttk.Combobox(self.mainFrame, width=32, state="readonly")
-        self.mirrorDropdown.grid(column=1, row=50, columnspan=6, sticky=tk.EW)
+        self.mirrorDropdown.grid(column=1, row=60, columnspan=6, sticky=tk.EW)
         enable = ttk.Checkbutton(self.mainFrame, text="Enable", variable=self.mirrorEnabled)
-        enable.grid(column=7, row=50, sticky=tk.E)
-        ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=59, columnspan=8, sticky=tk.EW)
-
-        # Underscan menu
-        ttk.Label(self.mainFrame, text="Underscan:").grid(column=0, row=60, sticky=tk.E)
-        self.underscanSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=100)
-        self.underscanSlider.grid(column=1, row=60, columnspan=7, sticky=tk.EW)
+        enable.grid(column=7, row=60, sticky=tk.E)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=69, columnspan=8, sticky=tk.EW)
 
         # Set/build script menu
@@ -248,19 +248,6 @@ class App(object):
             self.rotateSlider.set(0)
             self.rotateSlider.configure(state=tk.DISABLED)
 
-    def __mirrorSelectionInit(self):
-        """
-        Show the other available displays to mirror.
-        """
-        otherDisplayIDs = []
-        for display in self.displayDict.values():
-            displayID = str(display.displayID)
-            if displayID != str(self.display.displayID):
-                otherDisplayIDs.append(displayID + " (Main Display)" if display.isMain else displayID)
-
-        self.mirrorDropdown["values"] = otherDisplayIDs
-        self.mirrorDropdown.current(0)
-
     def __underscanSelectionInit(self):
         """
         Sets self.underscanSlider's value to that of the currently selected display, and
@@ -273,6 +260,19 @@ class App(object):
         else:
             self.underscanSlider.set(0.0)
             self.underscanSlider.configure(state=tk.DISABLED)
+
+    def __mirrorSelectionInit(self):
+        """
+        Show the other available displays to mirror.
+        """
+        otherDisplayIDs = []
+        for display in self.displayDict.values():
+            displayID = str(display.displayID)
+            if displayID != str(self.display.displayID):
+                otherDisplayIDs.append(displayID + " (Main Display)" if display.isMain else displayID)
+
+        self.mirrorDropdown["values"] = otherDisplayIDs
+        self.mirrorDropdown.current(0)
 
     @property
     def display(self):
@@ -311,14 +311,6 @@ class App(object):
             return 0
 
     @property
-    def mirror(self):
-        """
-        :return: The currently selected display to mirror.
-        """
-        mirrorID = re.search(r"^[0-9]*", self.mirrorDropdown.get()).group()
-        return self.displayDict[mirrorID]
-
-    @property
     def underscan(self):
         """
         :return: The currently selected underscan.
@@ -327,6 +319,14 @@ class App(object):
             return float(self.underscanSlider.get() / 100)
         else:
             return 0
+
+    @property
+    def mirror(self):
+        """
+        :return: The currently selected display to mirror.
+        """
+        mirrorID = re.search(r"^[0-9]*", self.mirrorDropdown.get()).group()
+        return self.displayDict[mirrorID]
 
     def setDisplay(self):
         """
@@ -381,15 +381,15 @@ class App(object):
                 displayID=self.display.displayID
             ),
             dm.Command(
-                "mirror",
-                "enable" if self.mirrorEnabled.get() else "disable",
-                mirrorDisplayID=self.mirror.displayID,
-                displayID=self.display.displayID
-            ),
-            dm.Command(
                 "underscan",
                 "set",
                 underscan=self.underscan,
+                displayID=self.display.displayID
+            ),
+            dm.Command(
+                "mirror",
+                "enable" if self.mirrorEnabled.get() else "disable",
+                mirrorDisplayID=self.mirror.displayID,
                 displayID=self.display.displayID
             ),
         ]

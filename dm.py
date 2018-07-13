@@ -93,6 +93,16 @@ def showHelp(command=None):
         "",
         "OPTIONS",
         "    -d display         Specify a particular display (default: main display).",
+    ]), "underscan": "\n".join([
+        "usage: dm.py underscan {{ help | show | set [val] }}",
+        "    [-d display]",
+        "",
+        "commands",
+        "    help       Print this help information.",
+        "    show       Show the current underscan setting(s).",
+        "    set [val]  Sets the underscan to the given value. Must be between 0 and 1.",
+        "OPTIONS",
+        "    -d display         Specify a particular display (default: main display).",
     ]), "mirror": "\n".join([
         "usage: dm.py mirror {{ help | set | disable }}",
         "    [-d display] [-m display]",
@@ -105,16 +115,6 @@ def showHelp(command=None):
         "OPTIONS",
         "    -d display         Change mirroring settings for \"display\" (default: main display).",
         "    -m display         Set the display to mirror \"display\".",
-    ]), "underscan": "\n".join([
-        "usage: dm.py underscan {{ help | show | set [val] }}",
-        "    [-d display]",
-        "",
-        "commands",
-        "    help       Print this help information.",
-        "    show       Show the current underscan setting(s).",
-        "    set [val]  Sets the underscan to the given value. Must be between 0 and 1.",
-        "OPTIONS",
-        "    -d display         Specify a particular display (default: main display).",
     ])}
 
     if command in usage:

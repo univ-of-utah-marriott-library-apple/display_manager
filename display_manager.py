@@ -68,6 +68,20 @@ class Display(object):
         return int(Quartz.CGDisplayRotation(self.displayID))
 
     @property
+    def underscan(self):
+        """
+        :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
+            (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
+        """
+        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], None)
+        if error:
+            return None
+        else:
+            # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
+            # e.g. 0 -> maximum (100%), 1 -> 0% (default)
+            return float(abs(underscan - 1))
+
+    @property
     def mirrorOf(self):
         """
         Checks whether self is mirroring another display
@@ -81,20 +95,6 @@ class Display(object):
             return None
         else:
             return Display(masterDisplayID)
-
-    @property
-    def underscan(self):
-        """
-        :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
-            (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
-        """
-        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], None)
-        if error:
-            return None
-        else:
-            # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
-            # e.g. 0 -> maximum (100%), 1 -> 0% (default)
-            return float(abs(underscan - 1))
 
     @property
     def currentMode(self):
@@ -252,6 +252,18 @@ class Display(object):
             print("Failed to rotate display {}; error {}".format(self.displayID, error))
             sys.exit(1)
 
+    def setUnderscan(self, underscan):
+        """
+        :param underscan: Underscan value, from 0 (no underscan) to 1 (maximum underscan).
+        """
+        # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
+        # e.g. 0 -> maximum (100%), 1 -> 0% (default)
+        underscan = float(abs(underscan - 1))
+
+        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
+        if error:
+            print("Failed to set underscan of display {}; error {}".format(self.displayID, error))
+
     def setMirrorOf(self, mirrorDisplay):
         """
         :param mirrorDisplay: The Display which this Display will mirror.
@@ -269,18 +281,6 @@ class Display(object):
             Quartz.CGConfigureDisplayMirrorOfDisplay(configRef, self.displayID, mirrorDisplay.displayID)
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
-
-    def setUnderscan(self, underscan):
-        """
-        :param underscan: Underscan value, from 0 (no underscan) to 1 (maximum underscan).
-        """
-        # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
-        # e.g. 0 -> maximum (100%), 1 -> 0% (default)
-        underscan = float(abs(underscan - 1))
-
-        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
-        if error:
-            print("Failed to set underscan of display {}; error {}".format(self.displayID, error))
 
 
 class DisplayMode(object):
@@ -518,22 +518,6 @@ class Command(object):
             display = Display(self.displayID)
             display.setRotate(self.angle)
 
-    def __handleMirror(self):
-        """
-        Enables or disables mirroring between two displays.
-        """
-        if self.secondary == "set":
-            display = Display(self.displayID)
-            mirrorDisplay = Display(self.mirrorDisplayID)
-
-            display.setMirrorOf(mirrorDisplay)
-
-        if self.secondary == "disable":
-            for display in getAllDisplays():
-                # If display is a mirror of another display, disable mirroring between them
-                if display.mirrorOf is not None:
-                    display.setMirrorOf(None)
-
     def __handleUnderscan(self):
         """
         Sets or shows a display's underscan settings.
@@ -549,6 +533,22 @@ class Command(object):
         elif self.secondary == "set":
             display = Display(self.displayID)
             display.setUnderscan(self.underscan)
+
+    def __handleMirror(self):
+        """
+        Enables or disables mirroring between two displays.
+        """
+        if self.secondary == "set":
+            display = Display(self.displayID)
+            mirrorDisplay = Display(self.mirrorDisplayID)
+
+            display.setMirrorOf(mirrorDisplay)
+
+        if self.secondary == "disable":
+            for display in getAllDisplays():
+                # If display is a mirror of another display, disable mirroring between them
+                if display.mirrorOf is not None:
+                    display.setMirrorOf(None)
 
 
 class CommandList(object):
