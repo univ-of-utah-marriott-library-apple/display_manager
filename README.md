@@ -272,6 +272,8 @@ $ display_manager.py rotate set 0 -d 478176723
 
 The `underscan` command can configure HDMI underscan settings.
 
+Note: HDMI underscan settings can fix displays that under-render images, causing the outer edge of the screen to be left empty. Displays default to underscan 0, and can be set anywhere between 0 and 1, with 1 stretching the display image to its maximum. For more details, see [here](https://support.apple.com/en-us/ht202763).
+
 | Secondary Commands    | Purpose                                               |
 |---------------|-------------------------------------------------------|
 | `help`        | Prints the help instructions.                         |

@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e00a852-db25-4348-9749-718051366107" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE.md" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev/installer/ROOT/usr/local/bin/dim.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev/installer/ROOT/usr/local/bin/dim.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager_lib.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -78,8 +71,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor relative-caret-position="585">
-                <caret line="409" column="15" selection-start-line="409" selection-end-line="409" selection-end-column="15" />
+              <first_editor relative-caret-position="368">
+                <caret line="274" column="284" lean-forward="true" selection-start-line="274" selection-start-column="284" selection-end-line="274" selection-end-column="284" />
               </first_editor>
               <second_editor>
                 <markdownNavigatorState />
@@ -846,8 +839,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor relative-caret-position="585">
-            <caret line="409" column="15" selection-start-line="409" selection-end-line="409" selection-end-column="15" />
+          <first_editor relative-caret-position="368">
+            <caret line="274" column="284" lean-forward="true" selection-start-line="274" selection-start-column="284" selection-end-line="274" selection-end-column="284" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />
