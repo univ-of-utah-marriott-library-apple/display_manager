@@ -86,19 +86,19 @@ The command-line API, accessed via dm.py, allows you to manually set [display re
 
 First, set the display you'd like to configure the settings for in the displays dropdown menu. Any time you select a display, all of the other menus automatically switch to that display's current settings, but you can refresh them manually by clicking the "refresh" button.
 
-![display dropdown](./resources/gui_1)
+![display dropdown](resources/gui_1)
 
 Next, select the display settings you'd like from the other menus. Note that the brightness, rotation, and underscan sliders default to 0 and cannot be changed if your display does not allow us to access them.
 
-![brightness, rotation, and underscan sliders](./resources/gui_2)
+![brightness, rotation, and underscan sliders](resources/gui_2)
 
 To configure screen mirroring, select the display you'd like to mirror, and choose whether to enable or disable it.
 
-![mirroring menu](./resources/gui_3)
+![mirroring menu](resources/gui_3)
 
 Finally, select either "Set Display" or "Build Script". If you click "Set Display", the display will be configured to the settings you've selected. If you pick "Build Script", you'll be given a choice to save a script which sets your display to these settings automatically whenever run (using the `dm.py [commands...]` [interface](#command-line-api)).
 
-![set and build buttons](./resources/gui_4)
+![set and build buttons](resources/gui_4)
 
 ## Command-Line Usage
 
