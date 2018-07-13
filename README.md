@@ -57,7 +57,7 @@ Currently, Display Manager has a few important limitations that are worth noting
 
 First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
 
-If you meet them, download the [installer](./installer.pkg). Follow the prompts on-screen to install Display Manager.
+If you meet them, download the [installer](./installer.pkg). Follow the prompts on-screen to install Display Manager. (The installer puts the [Display Manager library ("display_manager.py)](#library) in /Library/Python/2.7/site-packages/, and the [command-line interface ("dim.py")](#command-line-api) in /usr/local/bin.)
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 
