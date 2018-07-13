@@ -405,6 +405,9 @@ Suppose you'd like all computers in a particular Jamf Pro [scope](http://docs.ja
 and add a script containing the following to it
 
 ```
+#!/bin/bash
+# (or whichever shell you prefer)
+
 display_manager.py "set highest --only-hidpi" "brightness set 1"
 ```
 
