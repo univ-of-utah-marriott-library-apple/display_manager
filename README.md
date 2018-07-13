@@ -2,7 +2,7 @@ Display Manager
 ===============
 
 An open-source Python library which can modify your Mac's display settings.
-Includes the library itself, and a command-line API + GUI to use it in prespecified ways.
+Includes the library itself, and a command-line API + GUI to use it in pre-specified ways.
 
 ## Contents
 
@@ -86,19 +86,19 @@ The command-line API, accessed via display_manager.py, allows you to manually se
 
 First, set the display you'd like to configure the settings for in the displays dropdown menu. Any time you select a display, all of the other menus automatically switch to that display's current settings, but you can refresh them manually by clicking the "refresh" button.
 
-![display dropdown](resources/gui_1.png)
+![display dropdown](./resources/gui_1.png)
 
 Next, select the display settings you'd like from the other menus. Note that the brightness, rotation, and underscan sliders default to 0 and cannot be changed if your display does not allow us to access them.
 
-![brightness, rotation, and underscan sliders](resources/gui_2.png)
+![brightness, rotation, and underscan sliders](./resources/gui_2.png)
 
 To configure screen mirroring, select the display you'd like to mirror, and choose whether to enable or disable it.
 
-![mirroring menu](resources/gui_3.png)
+![mirroring menu](./resources/gui_3.png)
 
 Finally, select either "Set Display" or "Build Script". If you click "Set Display", the display will be configured to the settings you've selected. If you pick "Build Script", you'll be given a file dialog to save a script which sets your display to these settings automatically whenever run (using the commands seen in `display_manager.py` [interface](#command-line-api)).
 
-![set and build buttons](resources/gui_4.png)
+![set and build buttons](./resources/gui_4.png)
 
 ## Command-Line Usage
 
@@ -396,19 +396,34 @@ In this way, you may pass in as many commands as you like, and Display Manager w
 
 #### Jamf Pro
 
-Suppose you'd like all computers in a particular [Jamf Pro](https://www.jamf.com/products/jamf-pro/) scope to default to their highest retina-friendly resolution at maximum brightness at login. You could create such a policy, and add a script containing the following to it:
+"Jamf Pro, developed by Jamf, is a comprehensive management system for Apple macOS computers and iOS devices... \[including\] deploying and maintaining software, responding to security threats, distributing settings, and analyzing inventory data." <sup>[source](https://its.unl.edu/desktop/jamf-casper-suite-faqs/)</sup>
+
+Suppose you'd like all computers in a particular Jamf Pro [scope](http://docs.jamf.com/9.9/casper-suite/administrator-guide/Scope.html) to default to their highest ["retina-friendly" resolution](#set) at maximum brightness at login. You could create a policy
+
+![example Jamf policy](./resources/jamf_1.png)
+
+and add a script containing the following to it
 
 ```
 display_manager.py "set highest --only-hidpi" "brightness set 1"
 ```
 
+like so:
+
+![example Jamf script](./resources/jamf_2.png)
+
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
 
 #### Outset
 
-Perhaps you're managing several wall-mounted HDMI displays that are flipped upside-down via [Outset](https://github.com/chilcote/outset), and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
+"Outset is a script which automatically processes packages, profiles, and scripts during the boot sequence, user login, or on demand." <sup>[source](https://github.com/chilcote/outset)</sup>
+
+Perhaps you're managing several wall-mounted HDMI displays that are flipped upside-down via Outset, and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
 
 ```
+#!/bin/bash
+# (or whichever shell you prefer)
+
 display_manager.py "rotate set 180" "underscan set .5"
 ```
 
