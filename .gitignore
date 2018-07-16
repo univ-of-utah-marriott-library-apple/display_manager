@@ -65,3 +65,4 @@ original
 original/*
 installer/
 installer/*
+.DS_Store
