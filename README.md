@@ -60,9 +60,11 @@ Note: DisplayIDs are metadata descriptions of display capabilities. For more inf
 
 ## Get Started
 
-First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
+First, check that your system satisfies the requirements in [System Requirements](#system-requirements). If you haven't played around with `/usr/bin/python`, it should.
 
-If you meet them, download the latest installer [here](./versions/Display Manager v1.0.0.dmg), or view the archive of all version installers [here](./versions). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter. (The installer puts the [Display Manager library ("display_manager_lib.py")](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface ("display_manager.py")](#command-line-api) in `/usr/local/bin`.)
+Next, download the latest installer [here](./versions/Display Manager v1.0.0.dmg), or view the archive of all version installers [here](./versions). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter.
+
+For the curious: `Display Manager.pkg` puts the [Display Manager library ("display_manager_lib.py")](#library) in `/Library/Python/2.7/site-packages/`, the [command-line interface ("display_manager.py")](#command-line-api) in `/usr/local/bin`, and the [GUI](#gui) in `/Applications`; `Uninstall Display Manager.pkg` removes all three of these.
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 
