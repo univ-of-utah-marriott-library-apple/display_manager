@@ -2,7 +2,10 @@ Display Manager
 ===============
 
 An open-source Python library which can modify your Mac's display settings.
+
 Includes the library itself, and a command-line API + GUI to use it in pre-specified ways.
+
+You can download the installer [here](./Display Manager.pkg).
 
 ## Contents
 
@@ -52,6 +55,8 @@ Currently, Display Manager has a few important limitations that are worth noting
  * Recommended workaround: simply configure displays *during* login/logout, or while logged in. Settings persist after logout, so whichever configurations you set during logout will remain active at the login screen.
 * Displays are controlled via `DisplayID`, so any interactions with external displays via the command line must be performed by reference to that display's `DisplayID`. (However, any interactions with the main display don't need to specify its `DisplayID` -- it is implied, unless otherwise noted.)
  * Recommended workaround: try manipulating the external displays (e.g. brightness, rotation, resolution, etc.) by their `DisplayID` to see which physical screens they correspond to.
+
+Note: DisplayIDs are metadata descriptions of display capabilities. For more information, see [here](https://en.wikipedia.org/wiki/DisplayID).
 
 ## Get Started
 

@@ -63,3 +63,5 @@ cfg/
 bin/cfg/
 original
 original/*
+installer/
+installer/*
