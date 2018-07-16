@@ -20,7 +20,7 @@
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="330">
-              <caret line="325" selection-start-line="325" selection-end-line="325" />
+              <caret line="325" lean-forward="true" selection-start-line="325" selection-end-line="325" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#222#226#0" />
@@ -812,7 +812,7 @@
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
-          <caret line="325" selection-start-line="325" selection-end-line="325" />
+          <caret line="325" lean-forward="true" selection-start-line="325" selection-end-line="325" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#222#226#0" />

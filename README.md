@@ -62,7 +62,7 @@ Note: DisplayIDs are metadata descriptions of display capabilities. For more inf
 
 First, check that you meet all the requirements and have the prerequisites outlined in the [System Requirements](#system-requirements) section.
 
-If you meet them, download the [installer](./versions/Display Manager v1.0.0.dmg). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter. (The installer puts the [Display Manager library ("display_manager_lib.py")](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface ("display_manager.py")](#command-line-api) in `/usr/local/bin`.)
+If you meet them, download the latest installer [here](./versions/Display Manager v1.0.0.dmg), or view the archive of all version installers [here](./versions). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter. (The installer puts the [Display Manager library ("display_manager_lib.py")](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface ("display_manager.py")](#command-line-api) in `/usr/local/bin`.)
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 
