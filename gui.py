@@ -180,8 +180,8 @@ class App(object):
         self.mirrorEnabled.set(False)
         self.mirrorDropdown = ttk.Combobox(self.mainFrame, width=32, state="readonly")
         self.mirrorDropdown.grid(column=1, row=60, columnspan=6, sticky=tk.EW)
-        enable = ttk.Checkbutton(self.mainFrame, text="Enable", variable=self.mirrorEnabled)
-        enable.grid(column=7, row=60, sticky=tk.E)
+        self.mirrorCheckbox = ttk.Checkbutton(self.mainFrame, text="Enable", variable=self.mirrorEnabled)
+        self.mirrorCheckbox.grid(column=7, row=60, sticky=tk.E)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=69, columnspan=8, sticky=tk.EW)
 
         # Set/build script menu
@@ -277,7 +277,9 @@ class App(object):
         else:  # there is only one display
             self.mirrorDropdown["values"] = ["None"]
             self.mirrorDropdown.current(0)
+            self.mirrorEnabled.set(False)
             self.mirrorDropdown.configure(state=tk.DISABLED)
+            self.mirrorCheckbox.configure(state=tk.DISABLED)
 
     @property
     def display(self):
@@ -330,16 +332,17 @@ class App(object):
         """
         :return: The currently selected display to mirror.
         """
-        mirrorID = re.search(r"^[0-9]*", self.mirrorDropdown.get()).group()
-        return self.displayDict[mirrorID]
+        if "None" not in self.mirrorDropdown["values"]:
+            mirrorID = re.search(r"^[0-9]*", self.mirrorDropdown.get()).group()
+            return self.displayDict[mirrorID]
+        else:
+            return None
 
     def setDisplay(self):
         """
         Set the Display to the currently selected settings.
         """
-        commandList = self.__generateScriptText()
-        commandList.run()
-
+        self.__generateCommands().run()
         self.__reloadDisplay()
 
     def buildScript(self):
@@ -355,12 +358,14 @@ class App(object):
             initialfile="set",
         )
         if f is not None:  # if the user didn't cancel
-            f.write("#!/bin/bash\n\n" + self.__generateScriptText())
+            f.write("#!/bin/bash\n\ndisplay_manager.py")
+            for command in self.__generateCommands().commands:
+                f.write(' "' + command.__str__() + '"')
             f.close()
 
-    def __generateScriptText(self):
+    def __generateCommands(self):
         """
-        :return: A script which configures the display to the current settings
+        :return: A CommandList with all the currently selected commands
         """
         commands = [
             dm.Command(
@@ -394,16 +399,16 @@ class App(object):
             dm.Command(
                 "mirror",
                 "enable" if self.mirrorEnabled.get() else "disable",
-                mirrorDisplayID=self.mirror.displayID,
+                mirrorDisplayID=self.mirror.displayID if self.mirror is not None else 0,
                 displayID=self.display.displayID
             ),
         ]
 
-        commandStrings = []
+        commandList = dm.CommandList()
         for command in commands:
-            commandStrings.append('"' + command.__str__() + '"')
+            commandList.addCommand(command)
 
-        return "display_manager.py " + " ".join(commandStrings)
+        return commandList
 
     def __reloadDisplay(self):
         """

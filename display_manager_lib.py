@@ -560,6 +560,18 @@ class CommandList(object):
         # self.commandDict will consist of displayID keys corresponding to commands for that display
         self.__commandDict = {}
 
+    @property
+    def commands(self):
+        """
+        :return: All the Commands in this CommandList
+        """
+        commands = []
+        for displayID in self.__commandDict:
+            for command in self.__commandDict[displayID]:
+                commands.append(command)
+
+        return commands
+
     def addCommand(self, command):
         """
         :param command: The Command to add to this CommandList
