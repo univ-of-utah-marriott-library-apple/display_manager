@@ -271,8 +271,13 @@ class App(object):
             if displayID != str(self.display.displayID):
                 otherDisplayIDs.append(displayID + " (Main Display)" if display.isMain else displayID)
 
-        self.mirrorDropdown["values"] = otherDisplayIDs
-        self.mirrorDropdown.current(0)
+        if otherDisplayIDs:  # if there are other displays to mirror
+            self.mirrorDropdown["values"] = otherDisplayIDs
+            self.mirrorDropdown.current(0)
+        else:  # there is only one display
+            self.mirrorDropdown["values"] = ["None"]
+            self.mirrorDropdown.current(0)
+            self.mirrorDropdown.configure(state=tk.DISABLED)
 
     @property
     def display(self):
