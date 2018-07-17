@@ -413,9 +413,12 @@ and add a script containing the following to it
 
 ```
 #!/bin/bash
-# (or whichever shell you prefer)
 
-display_manager.py "set highest --only-hidpi" "brightness set 1"
+# Check to make sure the library and command-line API are both installed
+if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
+	-e /usr/local/bin/display_manager.py ]] ; then
+	
+	display_manager.py "set highest --only-hidpi" "brightness set 1"
 ```
 
 like so:
@@ -432,9 +435,12 @@ Perhaps you're managing several wall-mounted HDMI displays that are flipped upsi
 
 ```
 #!/bin/bash
-# (or whichever shell you prefer)
 
-display_manager.py "rotate set 180" "underscan set .5"
+# Check to make sure the library and command-line API are both installed
+if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
+	-e /usr/local/bin/display_manager.py ]] ; then
+	
+	display_manager.py "rotate set 180" "underscan set .5"
 ```
 
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
