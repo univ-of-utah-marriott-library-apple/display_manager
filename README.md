@@ -419,6 +419,11 @@ if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
 	-e /usr/local/bin/display_manager.py ]] ; then
 	
 	display_manager.py "set highest --only-hidpi" "brightness set 1"
+	exit 0
+
+else
+	exit 1
+fi
 ```
 
 like so:
@@ -441,6 +446,10 @@ if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
 	-e /usr/local/bin/display_manager.py ]] ; then
 	
 	display_manager.py "rotate set 180" "underscan set .5"
+	
+else
+	exit 1
+fi
 ```
 
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).

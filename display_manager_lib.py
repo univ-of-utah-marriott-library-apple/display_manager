@@ -710,7 +710,7 @@ def getIOKit():
             ("IODisplayGetFloatParameter", b"iII@o^f"),
             ("IODisplaySetFloatParameter", b"iII@f"),
             ("IOServiceRequestProbe", b"iII"),
-            ("IOIteratorNext", b"II")
+            ("IOIteratorNext", b"II"),
         ]
 
         # The IOKit variables to be retrieved
@@ -721,7 +721,7 @@ def getIOKit():
             ("kIODisplayOverscanKey", b"*"),
             ("kDisplayVendorID", b"*"),
             ("kDisplayProductID", b"*"),
-            ("kDisplaySerialNumber", b"*")
+            ("kDisplaySerialNumber", b"*"),
         ]
 
         # Load functions from IOKit into the global namespace
