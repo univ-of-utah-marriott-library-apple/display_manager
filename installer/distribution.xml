@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+	<welcome file="readme.html"/>
+	<title>Display Manager</title>
+    <pkg-ref id="edu.utah.scl.display_manager"/>
+    <options customize="never" require-scripts="false"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="edu.utah.scl.display_manager"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="edu.utah.scl.display_manager" visible="false">
+        <pkg-ref id="edu.utah.scl.display_manager"/>
+    </choice>
+    <pkg-ref id="edu.utah.scl.display_manager" version="1.0.0" onConclusion="none">prelim.pkg</pkg-ref>
+</installer-gui-script>
