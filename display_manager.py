@@ -203,6 +203,9 @@ def getCommand(commandString):
     Transforms input string into a Command.
     :returns: The resulting Command.
     """
+    if commandString == "":
+        return None
+
     parseList = []
     for element in commandString.split():
         parseList.append(element)
@@ -312,8 +315,10 @@ def main():
         try:
             # Run the args as multiple commands
             commands = dm.CommandList()
-            for command in args:
-                commands.addCommand(getCommand(command))
+            for commandString in args:
+                command = getCommand(commandString)
+                if command:
+                    commands.addCommand(command)
             commands.run()
         except CommandSyntaxError:
             # User entered invalid command(s)

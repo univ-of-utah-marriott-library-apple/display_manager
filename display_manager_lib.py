@@ -717,14 +717,13 @@ def getIOKit():
         variables = [
             ("kIODisplayNoProductName", b"I"),
             ("kIOMasterPortDefault", b"I"),
-            ("kIODisplayBrightnessKey", b"*"),
             ("kIODisplayOverscanKey", b"*"),
             ("kDisplayVendorID", b"*"),
             ("kDisplayProductID", b"*"),
             ("kDisplaySerialNumber", b"*"),
         ]
 
-        # Load functions from IOKit into the global namespace
+        # Load functions from IOKit.framework into our iokit
         objc.loadBundleFunctions(iokitBundle, iokit, functions)
         # Bridge won't put straight into iokit, so globals()
         objc.loadBundleVariables(iokitBundle, globals(), variables)
@@ -734,7 +733,7 @@ def getIOKit():
             if key in globals():
                 iokit[key] = globals()[key]
 
-        iokit["kDisplayBrightness"] = CoreFoundation.CFSTR(iokit["kIODisplayBrightnessKey"])
+        iokit["kDisplayBrightness"] = CoreFoundation.CFSTR("brightness")
         iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
 
     return iokit
