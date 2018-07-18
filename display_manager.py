@@ -295,18 +295,6 @@ def main():
         showHelp()
         sys.exit(1)
 
-    # Did the user try to open a config?
-    filename = args[0]
-    if len(args) == 1 and os.path.isfile(filename):
-        try:
-            with open(filename, "r") as f:
-                commands = pickle.load(f)
-            commands.run()
-        except:
-            print("Invalid file {}".format(filename))
-            sys.exit(1)
-        sys.exit(0)
-
     try:
         # Run the args as only one command
         command = getCommand(" ".join(args))
