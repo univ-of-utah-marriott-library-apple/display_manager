@@ -426,9 +426,6 @@ class App(object):
         """
         Open the GUI.
         """
-        # Make sure Display Manager has IOKit ready for future requests
-        dm.getIOKit()
-
         self.__displaySelectionInit()
         self.__reloadDisplay()
 

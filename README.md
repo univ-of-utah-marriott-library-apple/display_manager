@@ -11,8 +11,8 @@ You can download the installer [here](./versions/Display Manager v1.0.0.dmg).
 
 * [Contact](#contact) - how to reach us
 * [System Requirements](#system-requirements) - what you need
-* [Purpose](#purpose) - what can be done with Display manager?
-* [Limitations](#limitations) - what *can't* be done with Display manager?
+* [Purpose](#purpose) - what can be done with Display Manager?
+* [Limitations](#limitations) - what *can't* be done with Display Manager?
 * [Get Started](#get-started) - how to get started with Display Manager
 * [Overview](#overview) - what is included in this library?
  * [Library](#library)
