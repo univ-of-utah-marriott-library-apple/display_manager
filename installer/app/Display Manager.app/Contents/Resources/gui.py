@@ -8,8 +8,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-# import display_manager_lib as dm
-from display_manager_lib import *
+import display_manager_lib as dm
 
 
 class App(object):
@@ -195,7 +194,7 @@ class App(object):
         Add all connected displays to self.displayDropdown.
         """
         displayStrings = []
-        for display in getAllDisplays():
+        for display in dm.getAllDisplays():
             displayID = str(display.displayID)
             self.displayDict[displayID] = display
             displayStrings.append(displayID + " (Main Display)" if display.isMain else displayID)
@@ -369,7 +368,7 @@ class App(object):
         :return: A CommandList with all the currently selected commands
         """
         commands = [
-            Command(
+            dm.Command(
                 "set",
                 "exact",
                 width=self.mode.width,
@@ -379,25 +378,25 @@ class App(object):
                 displayID=self.display.displayID,
                 hidpi=0
             ),
-            Command(
+            dm.Command(
                 "brightness",
                 "set",
                 brightness=self.brightness,
                 displayID=self.display.displayID
             ),
-            Command(
+            dm.Command(
                 "rotate",
                 "set",
                 angle=self.rotation,
                 displayID=self.display.displayID
             ),
-            Command(
+            dm.Command(
                 "underscan",
                 "set",
                 underscan=self.underscan,
                 displayID=self.display.displayID
             ),
-            Command(
+            dm.Command(
                 "mirror",
                 "enable" if self.mirrorEnabled.get() else "disable",
                 mirrorDisplayID=self.mirror.displayID if self.mirror is not None else 0,
@@ -405,7 +404,7 @@ class App(object):
             ),
         ]
 
-        commandList = CommandList()
+        commandList = dm.CommandList()
         for command in commands:
             commandList.addCommand(command)
 

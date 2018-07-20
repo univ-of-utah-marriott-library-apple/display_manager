@@ -5,7 +5,6 @@
 import sys
 import os
 import argparse
-import pickle
 import display_manager_lib as dm
 
 
