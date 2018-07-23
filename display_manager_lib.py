@@ -41,6 +41,8 @@ class Display(object):
     def __eq__(self, display):
         return self.displayID == display.displayID
 
+    # General properties
+
     @property
     def isMain(self):
         """
@@ -49,74 +51,7 @@ class Display(object):
         return Quartz.CGDisplayIsMain(self.displayID)
 
     @property
-    def brightness(self):
-        """
-        :return: Brightness of this display, from 0 to 1.
-        """
-        service = self.servicePort
-        (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0, iokit["kDisplayBrightness"], None)
-        if error:
-            return None
-        else:
-            return brightness
-
-    @property
-    def rotation(self):
-        """
-        :return: Rotation of this display, in degrees.
-        """
-        return int(Quartz.CGDisplayRotation(self.displayID))
-
-    @property
-    def underscan(self):
-        """
-        :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
-            (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
-        """
-        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], None)
-        if error:
-            return None
-        else:
-            # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
-            # e.g. 0 -> maximum (100%), 1 -> 0% (default)
-            return float(abs(underscan - 1))
-
-    @property
-    def mirrorOf(self):
-        """
-        Checks whether self is mirroring another display
-        :return: The Display that self is mirroring; if self is not mirroring
-            any display, returns None
-        """
-        # The display which self is mirroring
-        masterDisplayID = Quartz.CGDisplayMirrorsDisplay(self.displayID)
-        if masterDisplayID == Quartz.kCGNullDirectDisplay:
-            # self is not mirroring any display
-            return None
-        else:
-            return Display(masterDisplayID)
-
-    @property
-    def currentMode(self):
-        """
-        :return: The current Quartz "DisplayMode" interface for this display.
-        """
-        return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
-
-    @property
-    def allModes(self):
-        """
-        :return: All possible Quartz "DisplayMode" interfaces for this display.
-        """
-        modes = []
-        # options forces Quartz to show HiDPI modes
-        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
-        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            modes.append(DisplayMode(mode))
-        return modes
-
-    @property
-    def servicePort(self):
+    def __servicePort(self):
         """
         :return: The integer representing this display's service port.
         """
@@ -139,6 +74,27 @@ class Display(object):
             return True
         else:
             return False
+
+    # Mode properties and methods
+
+    @property
+    def currentMode(self):
+        """
+        :return: The current Quartz "DisplayMode" interface for this display.
+        """
+        return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
+
+    @property
+    def allModes(self):
+        """
+        :return: All possible Quartz "DisplayMode" interfaces for this display.
+        """
+        modes = []
+        # options forces Quartz to show HiDPI modes
+        options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
+        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
+            modes.append(DisplayMode(mode))
+        return modes
 
     def highestMode(self, hidpi=0):
         """
@@ -222,16 +178,39 @@ class Display(object):
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
+    # Brightness properties and methods
+
+    @property
+    def brightness(self):
+        """
+        :return: Brightness of this display, from 0 to 1.
+        """
+        service = self.__servicePort
+        (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0, iokit["kDisplayBrightness"], None)
+        if error:
+            return None
+        else:
+            return brightness
+
     def setBrightness(self, brightness):
         """
         :param brightness: The desired brightness, from 0 to 1.
         """
-        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayBrightness"], brightness)
+        error = iokit["IODisplaySetFloatParameter"](self.__servicePort, 0, iokit["kDisplayBrightness"], brightness)
         if error:
             print("Failed to set brightness of display {}; error {}".format(self.displayID, error))
             # External display brightness probably can't be managed this way
             print("External displays may not be compatible with Display Manager. \n"
                   "If this is an external display, try setting manually on device hardware.")
+
+    # Rotation properties and methods
+
+    @property
+    def rotation(self):
+        """
+        :return: Rotation of this display, in degrees.
+        """
+        return int(Quartz.CGDisplayRotation(self.displayID))
 
     def setRotate(self, angle):
         """
@@ -246,11 +225,27 @@ class Display(object):
         options = rotateCode | (angleCodes[angle % 360] << 16)
 
         # Actually rotate the screen
-        error = iokit["IOServiceRequestProbe"](self.servicePort, options)
+        error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
 
         if error:
             print("Failed to rotate display {}; error {}".format(self.displayID, error))
             sys.exit(1)
+
+    # Underscan properties and methods
+
+    @property
+    def underscan(self):
+        """
+        :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
+            (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
+        """
+        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.__servicePort, 0, iokit["kDisplayUnderscan"], None)
+        if error:
+            return None
+        else:
+            # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
+            # e.g. 0 -> maximum (100%), 1 -> 0% (default)
+            return float(abs(underscan - 1))
 
     def setUnderscan(self, underscan):
         """
@@ -260,9 +255,26 @@ class Display(object):
         # e.g. 0 -> maximum (100%), 1 -> 0% (default)
         underscan = float(abs(underscan - 1))
 
-        error = iokit["IODisplaySetFloatParameter"](self.servicePort, 0, iokit["kDisplayUnderscan"], underscan)
+        error = iokit["IODisplaySetFloatParameter"](self.__servicePort, 0, iokit["kDisplayUnderscan"], underscan)
         if error:
             print("Failed to set underscan of display {}; error {}".format(self.displayID, error))
+
+    # Mirroring properties and methods
+
+    @property
+    def mirrorOf(self):
+        """
+        Checks whether self is mirroring another display
+        :return: The Display that self is mirroring; if self is not mirroring
+            any display, returns None
+        """
+        # The display which self is mirroring
+        masterDisplayID = Quartz.CGDisplayMirrorsDisplay(self.displayID)
+        if masterDisplayID == Quartz.kCGNullDirectDisplay:
+            # self is not mirroring any display
+            return None
+        else:
+            return Display(masterDisplayID)
 
     def setMirrorOf(self, mirrorDisplay):
         """

@@ -28,7 +28,8 @@ def showHelp(command=None):
     """
     print("Display Manager, version 1.0.0")
 
-    usage = {"help": "\n".join([
+    usage = {
+        "help": "\n".join([
         "usage: display_manager.py {{ help | show | res | brightness | rotate | underscan | mirror }}",
         "",
         "Type any of the commands after \"help\" to get command-specific usage information:",
@@ -177,7 +178,7 @@ def main():
     try:
         commands = parseCommands(sys.argv[1:])
     except CommandSyntaxError:
-        # todo: add "showHelp" or analogous function here
+        showHelp()
         sys.exit(1)
 
 
