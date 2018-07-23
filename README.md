@@ -41,6 +41,8 @@ Display Manager only runs on Mac computers. It depends on the Apple-supplied Pyt
 
 If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
 
+Note: Display Manager has only been tested on El Capitan, Sierra, and High Sierra. If you experience issues on other versions of macOS, please [let us know](#contact).
+
 ## Purpose
 
 Display Manager programmatically manages Mac displays, including [display resolution, pixel color depth, refresh rate](#set), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
