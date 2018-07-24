@@ -3,6 +3,7 @@
 # This script allows users to access Display Manager through the command line.
 
 import collections
+import re
 from display_manager_lib import *
 
 
@@ -59,7 +60,7 @@ class Command(object):
     #     self.angle = int(angle) if angle is not None else None
     #     self.underscan = float(underscan) if underscan is not None else None
 
-    def __init__(self, verb, scope, **kwargs):
+    def __init__(self, verb, **kwargs):
         # Determine verb
         if verb in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
             self.verb = verb
@@ -69,7 +70,7 @@ class Command(object):
 
         # Determine type, scope
         self.type = kwargs["type"] if "type" in kwargs else None
-        self.scope = scope
+        self.scope = kwargs["scope"] if "scope" in kwargs else None
 
         # Determine values, options
         self.width = int(kwargs["width"]) if "width" in kwargs else None
@@ -307,7 +308,10 @@ class Command(object):
                 "       For <disable>: all connected displays.",
             ])}
 
-        print(usage[self.type])
+        if self.type in usage:
+            print(usage[self.type])
+        else:
+            print(usage["help"])
 
     def __handleShow(self):
         """
@@ -516,9 +520,86 @@ class CommandList(object):
                             command.run()
 
 
-# todo: this
+# todo: finish this
 def getCommand(commandString):
-    return commandString
+    def getCommand(commandString):
+        if not commandString:
+            return None
+
+        # Individual words/values in the command
+        words = commandString.split()
+
+        # Determine verb, and remove it from words
+        verb = words.pop(0)
+
+        # Determine scope, and remove it from words
+        # Possible scope values
+        scopePattern = r"^(main|ext[0-9]+|all)$"
+        scope = []
+        # Iterate backwards through the indices of "words"
+        for i in range(len(words) - 1, -1, -1):
+            if re.match(scopePattern, words[i]):
+                # If this scope modifier is at the end of the list
+                if words[i] == words[-1]:
+                    scope.append(words.pop(i))
+                # This scope modifier is in the wrong place
+                else:
+                    raise CommandSyntaxError
+
+        # Determine positionals (all remaining words)
+        positionals = words
+
+        if verb == "list":
+            # Determine command range and type, and remove them from positionals
+            commandRange = None
+            commandType = None
+            for i in range(len(positionals)):
+                # arg is command range
+                if positionals[i] in ["current", "closest", "highest"]:
+                    # No command range arg found yet
+                    if not commandRange:
+                        commandRange = positionals.pop(i)
+                    # Cannot have two command range args
+                    else:
+                        raise CommandSyntaxError
+                # arg is command type
+                elif positionals[i] in ["all", "res", "brightness", "rotate", "underscan", "mirror", "displays",
+                                        "help"]:
+                    # No command type arg found yet
+                    if not commandType:
+                        commandType = positionals.pop(i)
+                    # Cannot have two command type args
+                    else:
+                        raise CommandSyntaxError
+                # arg is not a valid positional arg
+                else:
+                    raise CommandValueError
+            # Default command range is "current"
+            if not commandRange:
+                commandRange = "current"
+            # Default command type is "all"
+            if not commandType:
+                commandType = "all"
+            # Cannot have remaining positionals after range and type
+            if positionals:
+                raise CommandValueError
+
+            # todo: rework Command "primary" and "secondary" such that it better reflects this pattern (???)
+
+        elif verb == "res":
+            pass
+
+        elif verb == "brightness":
+            pass
+
+        elif verb == "rotate":
+            pass
+
+        elif verb == "underscan":
+            pass
+
+        elif verb == "mirror":
+            pass
 
 
 def parseCommands(string):
@@ -526,47 +607,73 @@ def parseCommands(string):
     :param string: The string to get Commands from
     :return: Commands contained within the string
     """
+    # todo: remove deprecated
+    # # The types of commands that can be issued
+    # verbs = ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]
+    #
+    # # The first command does not start with a valid verb
+    # if sys.argv[1] not in verbs:
+    #     # todo: add "showHelp" or analogous function here
+    #     sys.exit(1)
+    #
+    # # Find all of the indices in string that are verbs
+    # verbIndices = []
+    # for i in range(1, len(string)):
+    #     if string[i] in verbs:
+    #         verbIndices.append(i)
+    #
+    # # User entered only one command
+    # if len(verbIndices) == 0:
+    #     return getCommand(" ".join(string))
+    # # User entered multiple commands
+    # else:
+    #     # Split string along between verbs
+    #     commandStrings = [" ".join(string[0:verbIndices[0]])]
+    #     for j in range(1, len(verbIndices)):
+    #         commandStrings.append(" ".join(string[verbIndices[j - 1]:verbIndices[j]]))
+    #     commandStrings.append(" ".join(string[verbIndices[-1]:]))
+    #
+    #     commands = CommandList()
+    #     for commandString in commandStrings:
+    #         command = getCommand(commandString)
+    #         if command:
+    #             commands.addCommand(command)
+    #     return commands
+
     # The types of commands that can be issued
-    verbs = ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]
+    verbPattern = r"list|res|brightness|rotate|underscan|mirror"
+    # The individual words/values in the command string
+    words = string.split()
 
-    # The first command does not start with a valid verb
-    if sys.argv[1] not in verbs:
-        # todo: add "showHelp" or analogous function here
-        sys.exit(1)
+    # There is no command, or the first command does not start with a valid verb
+    if len(words) < 1 or not re.match(verbPattern, words[0]):
+        raise CommandSyntaxError
 
-    # Find all of the indices in string that are verbs
-    verbIndices = []
-    for i in range(1, len(string)):
-        if string[i] in verbs:
-            verbIndices.append(i)
+    commandStrings = re.split(verbPattern, string)
+    stringVerbs = re.findall(verbPattern, string)
 
-    # User entered only one command
-    if len(verbIndices) == 0:
-        return getCommand(" ".join(string))
-    # User entered multiple commands
-    else:
-        # Split string along between verbs
-        commandStrings = [" ".join(string[0:verbIndices[0]])]
-        for j in range(1, len(verbIndices)):
-            commandStrings.append(" ".join(string[verbIndices[j - 1]:verbIndices[j]]))
-        commandStrings.append(" ".join(string[verbIndices[-1]:]))
+    # Remove the beginning empty string
+    commandStrings.pop(0)
+    # Bring the verbs back in
+    for i in range(len(commandStrings)):
+        commandStrings[i] = stringVerbs[i] + commandStrings[i]
 
-        commands = CommandList()
-        for commandString in commandStrings:
-            command = getCommand(commandString)
-            if command:
-                commands.addCommand(command)
-        return commands
+    # Make the CommandList from the given commandStrings
+    commands = CommandList()
+    for commandString in commandStrings:
+        command = getCommand(commandString)
+        if command:
+            commands.addCommand(command)
+
+    return commands
 
 
 def main():
     # Attempt to parse the commands
     try:
-        commands = parseCommands(sys.argv[1:])
-        commands.run()
+        parseCommands(sys.argv[1:]).run()
     except CommandSyntaxError:
-        command = Command("help")
-        command.run()
+        Command("help").run()
         sys.exit(1)
 
 
