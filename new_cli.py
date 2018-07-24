@@ -3,7 +3,6 @@
 # This script allows users to access Display Manager through the command line.
 
 import collections
-import re
 from display_manager_lib import *
 
 
@@ -517,7 +516,7 @@ class CommandList(object):
                             command.run()
 
 
-# todo: this. see display_manager.py
+# todo: this
 def getCommand(commandString):
     return commandString
 
