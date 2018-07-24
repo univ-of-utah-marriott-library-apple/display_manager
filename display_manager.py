@@ -237,7 +237,7 @@ def getCommand(commandString):
             height=args.height,
             depth=args.pixel_depth,
             refresh=args.refresh,
-            displayID=args.display,
+            displayTags=args.display,
             hidpi=hidpi()
         )
     elif args.primary == "show":
@@ -248,7 +248,7 @@ def getCommand(commandString):
             height=args.height,
             depth=args.pixel_depth,
             refresh=args.refresh,
-            displayID=args.display,
+            displayTags=args.display,
             hidpi=hidpi()
         )
     elif args.primary == "brightness":
@@ -256,28 +256,28 @@ def getCommand(commandString):
             args.primary,
             args.secondary,
             brightness=args.brightness,
-            displayID=args.display
+            displayTags=args.display
         )
     elif args.primary == "rotate":
         command = dm.Command(
             args.primary,
             args.secondary,
             angle=args.rotation,
-            displayID=args.display
+            displayTags=args.display
         )
     elif args.primary == "mirror":
         command = dm.Command(
             args.primary,
             args.secondary,
-            mirrorDisplayID=args.mirror,
-            displayID=args.display
+            mirrorTargetTags=args.mirror,
+            displayTags=args.display
         )
     elif args.primary == "underscan":
         command = dm.Command(
             args.primary,
             args.secondary,
             underscan=args.underscan,
-            displayID=args.display
+            displayTags=args.display
         )
 
     return command

@@ -375,32 +375,32 @@ class App(object):
                 height=self.mode.height,
                 depth=self.mode.depth,
                 refresh=self.mode.refresh,
-                displayID=self.display.displayID,
+                displayTags=self.display.displayID,
                 hidpi=0
             ),
             dm.Command(
                 "brightness",
                 "set",
                 brightness=self.brightness,
-                displayID=self.display.displayID
+                displayTags=self.display.displayID
             ),
             dm.Command(
                 "rotate",
                 "set",
                 angle=self.rotation,
-                displayID=self.display.displayID
+                displayTags=self.display.displayID
             ),
             dm.Command(
                 "underscan",
                 "set",
                 underscan=self.underscan,
-                displayID=self.display.displayID
+                displayTags=self.display.displayID
             ),
             dm.Command(
                 "mirror",
                 "enable" if self.mirrorEnabled.get() else "disable",
-                mirrorDisplayID=self.mirror.displayID if self.mirror is not None else 0,
-                displayID=self.display.displayID
+                mirrorTargetTags=self.mirror.displayID if self.mirror is not None else 0,
+                displayTags=self.display.displayID
             ),
         ]
 

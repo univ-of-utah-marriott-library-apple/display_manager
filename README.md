@@ -80,12 +80,10 @@ The Display Manager library is housed in display_manager_lib.py, which contains 
 
 * The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
 * The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
-* The `Command` class is called whenever a request is is made of the DisplayManager library. It contains many parameters for display manipulation, and can be manually run as one sees fit.
-* The `CommandList` class is a smart container (for `command`s) that allows one to execute several commands at once without command interference
 
 * `getMainDisplay` returns the primary `Display`;
 * `getAllDisplays` returns a `Display` for each connected display
-* `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Command`s and `Display`s instead, if possible)
+* `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Display`s instead, if possible)
 
 ### Command-Line API
 
