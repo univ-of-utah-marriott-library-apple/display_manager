@@ -452,7 +452,7 @@ class CommandList(object):
 
             # Group commands by type. Must preserve ordering to avoid interfering commands
             commandGroups = collections.OrderedDict([
-                ("set", []),
+                ("res", []),
                 ("mirror", []),
                 ("rotate", []),
                 ("underscan", []),
@@ -460,10 +460,10 @@ class CommandList(object):
                 ("show", []),
             ])
             for command in displayCommands:
-                if command.primary in commandGroups:
-                    commandGroups[command.primary].append(command)
+                if command.verb in commandGroups:
+                    commandGroups[command.verb].append(command)
                 else:
-                    print("Unexpected command.verb \"{}\"".format(command.primary))
+                    print("Unexpected command.verb \"{}\"".format(command.verb))
                     sys.exit(1)
 
             # Run commands by type
@@ -491,7 +491,7 @@ class CommandList(object):
                     elif commandType == "mirror":
                         command = commands[-1]
 
-                        if command.secondary == "set":
+                        if command.type == "enable":
                             display = Display(displayID)
                             # The current Display that the above "display" is mirroring
                             currentMirror = display.mirrorOf
@@ -513,7 +513,7 @@ class CommandList(object):
                                 display.setMirrorOf(None)
                                 display.setMirrorOf(mirrorDisplay)
 
-                        elif command.secondary == "disable":
+                        elif command.type == "disable":
                             command.run()
 
 
