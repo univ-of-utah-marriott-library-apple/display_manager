@@ -3,7 +3,6 @@
 # This script allows users to access Display Manager through the command line.
 
 import collections
-import re
 from display_manager_lib import *
 
 
@@ -516,6 +515,17 @@ def getCommand(commandString):
     # Create new command with verb and scope
     command = Command(verb, scope=scope)
 
+    # if verb == "help":
+    #     if len(positionals) == 1:
+    #         if positionals[0] in ["show", "res", "brightness", "rotate", "underscan", "mirror"]:
+    #             command.type = positionals[0]
+    #         # Invalid type
+    #         else:
+    #             raise CommandValueError
+    #     # Too many arguments
+    #     else:
+    #         raise CommandSyntaxError
+
     # todo: decide whether to keep commented code? if so, change Command.__handleShow, etc.
     if verb == "show":
         # # Determine command type and type, and remove them from positionals
@@ -675,6 +685,14 @@ def parseCommands(string):
     # The individual words/values in the command string
     words = string.split()
 
+    # todo: something like this to try and take care of situations like "help res"
+    if words[0] == "help":
+        if len(words) == 1:
+            Command("help").run()
+        elif len(words) == 2:
+            if words[1] in ["show", "res", "brightness", "rotate", "underscan", "mirror"]:
+                Command("help", type=words[1]).run()
+
     # There is no command, or the first command does not start with a valid verb
     if len(words) < 1 or not re.match(verbPattern, words[0]):
         raise CommandSyntaxError
@@ -701,7 +719,7 @@ def parseCommands(string):
 def main():
     # Attempt to parse the commands
     try:
-        parseCommands(sys.argv[1:]).run()
+        parseCommands(" ".join(sys.argv[1:])).run()
     except CommandSyntaxError:
         Command("help").run()
         sys.exit(1)
