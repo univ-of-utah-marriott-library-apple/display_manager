@@ -681,18 +681,16 @@ def parseCommands(string):
     #     return commands
 
     # The types of commands that can be issued
-    verbPattern = r"help|show|res|brightness|rotate|underscan|mirror"
+    verbPattern = r"(help|show|res|brightness|rotate|underscan|mirror)"
+    helpPattern = r"(help(?: (?:" + verbPattern + "))?)"
+
+    helpCommands = re.findall(helpPattern, string)
+    string = re.sub(helpPattern, "", string)
+
+    # todo: debug remainder -- still buggy af
+
     # The individual words/values in the command string
     words = string.split()
-
-    # todo: something like this to try and take care of situations like "help res"
-    if words[0] == "help":
-        if len(words) == 1:
-            Command("help").run()
-        elif len(words) == 2:
-            if words[1] in ["show", "res", "brightness", "rotate", "underscan", "mirror"]:
-                Command("help", type=words[1]).run()
-
     # There is no command, or the first command does not start with a valid verb
     if len(words) < 1 or not re.match(verbPattern, words[0]):
         raise CommandSyntaxError
@@ -705,6 +703,8 @@ def parseCommands(string):
     # Bring the verbs back in
     for i in range(len(commandStrings)):
         commandStrings[i] = stringVerbs[i] + commandStrings[i]
+    for helpCommand in helpCommands:
+        commandStrings.append(helpCommand)
 
     # Make the CommandList from the given commandStrings
     commands = CommandList()
