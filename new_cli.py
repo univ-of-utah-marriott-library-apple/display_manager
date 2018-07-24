@@ -146,42 +146,6 @@ class Command(object):
 
         return " ".join(stringList)
 
-    # Helper methods
-
-    # todo: move this somewhere for the parser to access?
-    # def __getDisplayFromTag(displayTag):
-    #     """
-    #     Returns a Display for "displayTag"
-    #     :param displayTag: The display tag to find the Display of
-    #     :return: The Display which displayTag refers to
-    #     """
-    #     if displayTag == "main":
-    #         return getMainDisplay()
-    #     elif displayTag == "all":
-    #         return getAllDisplays()
-    #     elif re.match(r"^ext[0-9]+$", displayTag):
-    #         # Get all the external displays (in order)
-    #         externals = sorted(getAllDisplays())
-    #         for display in externals:
-    #             if display.isMain:
-    #                 externals.remove(display)
-    #                 break
-    #
-    #         # Get the number in displayTag
-    #         externalNum = int(displayTag[3:])
-    #         # invalid displayTag
-    #         if (
-    #                 externalNum < 1 or
-    #                 externalNum > len(externals) - 1
-    #         ):
-    #             print("Invalid display tag {}".format(displayTag))
-    #             sys.exit(1)
-    #         else:
-    #             return externals[externalNum]
-    #     else:
-    #         print("Invalid display tag {}".format(displayTag))
-    #         sys.exit(1)
-
     def __printNotFound(self):
         print("No matching display mode was found. {}".format(
             "Try removing HiDPI flags to find a mode." if self.hidpi != 0 else ""))
@@ -436,14 +400,11 @@ class CommandList(object):
         """
         :param command: The Command to add to this CommandList
         """
-        displayID = command.displayID
-        if displayID is None:
-            displayID = getMainDisplay().displayID
-
-        if displayID in self.__commandDict:
-            self.__commandDict[displayID].append(command)
-        else:
-            self.__commandDict[displayID] = [command]
+        for display in command.scope:
+            if display.displayID in self.__commandDict:
+                self.__commandDict[display.displayID].append(command)
+            else:
+                self.__commandDict[display.displayID] = [command]
 
     def run(self):
         """
@@ -522,84 +483,153 @@ class CommandList(object):
 
 # todo: finish this
 def getCommand(commandString):
-    def getCommand(commandString):
-        if not commandString:
-            return None
+    if not commandString:
+        return None
 
-        # Individual words/values in the command
-        words = commandString.split()
+    # Individual words/values in the command
+    words = commandString.split()
 
-        # Determine verb, and remove it from words
-        verb = words.pop(0)
+    # Determine verb, and remove it from words
+    verb = words.pop(0)
 
-        # Determine scope, and remove it from words
-        # Possible scope values
-        scopePattern = r"^(main|ext[0-9]+|all)$"
-        scope = []
-        # Iterate backwards through the indices of "words"
-        for i in range(len(words) - 1, -1, -1):
-            if re.match(scopePattern, words[i]):
-                # If this scope modifier is at the end of the list
-                if words[i] == words[-1]:
-                    scope.append(words.pop(i))
-                # This scope modifier is in the wrong place
-                else:
-                    raise CommandSyntaxError
+    # Determine scope, and remove it from words
+    scopePattern = r"^(main|ext[0-9]+|all)$"
+    scopeTags = []
+    # Iterate backwards through the indices of "words"
+    for i in range(len(words) - 1, -1, -1):
+        if re.match(scopePattern, words[i]):
+            # If this scope tag is at the end of the list
+            if words[i] == words[-1]:
+                scopeTags.append(words.pop(i))
+            # This scope tag is in the wrong place
+            else:
+                raise CommandSyntaxError
 
-        # Determine positionals (all remaining words)
-        positionals = words
+    # Get actual Displays for scope
+    scope = []
+    for scopeTag in scopeTags:
+        scope.append(Display.getDisplayFromTag(scopeTag))
 
-        if verb == "list":
-            # Determine command range and type, and remove them from positionals
-            commandRange = None
-            commandType = None
-            for i in range(len(positionals)):
-                # arg is command range
-                if positionals[i] in ["current", "closest", "highest"]:
-                    # No command range arg found yet
-                    if not commandRange:
-                        commandRange = positionals.pop(i)
-                    # Cannot have two command range args
-                    else:
-                        raise CommandSyntaxError
-                # arg is command type
-                elif positionals[i] in ["all", "res", "brightness", "rotate", "underscan", "mirror", "displays",
-                                        "help"]:
-                    # No command type arg found yet
-                    if not commandType:
-                        commandType = positionals.pop(i)
-                    # Cannot have two command type args
-                    else:
-                        raise CommandSyntaxError
-                # arg is not a valid positional arg
-                else:
-                    raise CommandValueError
-            # Default command range is "current"
-            if not commandRange:
-                commandRange = "current"
-            # Default command type is "all"
-            if not commandType:
-                commandType = "all"
-            # Cannot have remaining positionals after range and type
-            if positionals:
+    # Determine positionals (all remaining words)
+    positionals = words
+
+    # Create new command with verb and scope
+    command = Command(verb, scope=scope)
+
+    # todo: decide whether to keep commented code? if so, change Command.__handleShow, etc.
+    if verb == "show":
+        # # Determine command type and type, and remove them from positionals
+        # commandType = None
+        # commandWhoKnows = None
+        # for i in range(len(positionals)):
+        #     # arg is command range
+        #     if positionals[i] in ["current", "highest", "all"]:
+        #         # No command range arg found yet
+        #         if not commandType:
+        #             commandType = positionals.pop(i)
+        #         # Cannot have two command range args
+        #         else:
+        #             raise CommandSyntaxError
+        #     # arg is command type
+        #     elif positionals[i] in ["all", "res", "brightness", "rotate", "underscan", "mirror", "displays",
+        #                             "help"]:
+        #         # No command type arg found yet
+        #         if not commandWhoKnows:
+        #             commandWhoKnows = positionals.pop(i)
+        #         # Cannot have two command type args
+        #         else:
+        #             raise CommandSyntaxError
+        #     # arg is not a valid positional arg
+        #     else:
+        #         raise CommandValueError
+        # # Default command range is "current"
+        # if not commandType:
+        #     commandType = "current"
+        # # Default command type is "all"
+        # if not commandWhoKnows:
+        #     commandWhoKnows = "all"
+        # # Cannot have remaining positionals after range and type
+        # if positionals:
+        #     raise CommandValueError
+
+        if len(positionals) == 1:
+            if positionals[0] in ["current", "highest", "all"]:
+                command.type = positionals[0]
+            # Invalid type
+            else:
                 raise CommandValueError
+        # Too many arguments
+        else:
+            raise CommandSyntaxError
 
-            # todo: rework Command "primary" and "secondary" such that it better reflects this pattern (???)
+    # TODO: THIS
+    elif verb == "res":
+        pass
 
-        elif verb == "res":
-            pass
+    elif verb == "brightness":
+        if len(positionals) == 1:
+            try:
+                brightness = float(positionals[0])
+                # Brightness must be between 0 and 1
+                if brightness < 0 or brightness > 1:
+                    raise CommandValueError
+            # Couldn't convert to float
+            except ValueError:
+                raise CommandValueError
+        # Too many arguments
+        else:
+            raise CommandSyntaxError
 
-        elif verb == "brightness":
-            pass
+        command.brightness = brightness
 
-        elif verb == "rotate":
-            pass
+    elif verb == "rotate":
+        if len(positionals) == 1:
+            try:
+                angle = int(positionals[0])
+                # Rotation must be multiple of 90
+                if angle % 90 != 0:
+                    raise CommandValueError
+            # Couldn't convert to int
+            except ValueError:
+                raise CommandValueError
+        # Too many arguments
+        else:
+            raise CommandSyntaxError
 
-        elif verb == "underscan":
-            pass
+        command.angle = angle
 
-        elif verb == "mirror":
-            pass
+    elif verb == "underscan":
+        if len(positionals) == 1:
+            try:
+                underscan = float(positionals[0])
+                # Underscan must be between 0 and 1
+                if underscan < 0 or underscan > 1:
+                    raise CommandValueError
+            # Couldn't convert to float
+            except ValueError:
+                raise CommandValueError
+        # Too many arguments
+        else:
+            raise CommandSyntaxError
+
+        command.underscan = underscan
+
+    elif verb == "mirror":
+        if len(positionals) == 1:
+            # Determine type
+            if positionals[0] in ["enable", "disable"]:
+                command.type = positionals[0]
+            # Invalid type
+            else:
+                raise CommandValueError
+            # For "enable" type, first element in scope is source
+            if command.type == "enable":
+                command.source = command.scope.pop(0)
+        # Too many arguments
+        else:
+            raise CommandSyntaxError
+
+    return command
 
 
 def parseCommands(string):
@@ -641,7 +671,7 @@ def parseCommands(string):
     #     return commands
 
     # The types of commands that can be issued
-    verbPattern = r"list|res|brightness|rotate|underscan|mirror"
+    verbPattern = r"help|show|res|brightness|rotate|underscan|mirror"
     # The individual words/values in the command string
     words = string.split()
 
