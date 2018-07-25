@@ -57,4 +57,6 @@ target/
 
 # Custom
 .dev/examples
+copypasta.py
+experiment.py
 .DS_Store
