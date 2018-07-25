@@ -647,66 +647,31 @@ def parseCommands(string):
     :param string: The string to get Commands from
     :return: Commands contained within the string
     """
-    # todo: remove deprecated
-    # # The types of commands that can be issued
-    # verbs = ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]
-    #
-    # # The first command does not start with a valid verb
-    # if sys.argv[1] not in verbs:
-    #     # todo: add "showHelp" or analogous function here
-    #     sys.exit(1)
-    #
-    # # Find all of the indices in string that are verbs
-    # verbIndices = []
-    # for i in range(1, len(string)):
-    #     if string[i] in verbs:
-    #         verbIndices.append(i)
-    #
-    # # User entered only one command
-    # if len(verbIndices) == 0:
-    #     return getCommand(" ".join(string))
-    # # User entered multiple commands
-    # else:
-    #     # Split string along between verbs
-    #     commandStrings = [" ".join(string[0:verbIndices[0]])]
-    #     for j in range(1, len(verbIndices)):
-    #         commandStrings.append(" ".join(string[verbIndices[j - 1]:verbIndices[j]]))
-    #     commandStrings.append(" ".join(string[verbIndices[-1]:]))
-    #
-    #     commands = CommandList()
-    #     for commandString in commandStrings:
-    #         command = getCommand(commandString)
-    #         if command:
-    #             commands.addCommand(command)
-    #     return commands
-
     # The types of commands that can be issued
-    verbPattern = r"(help|show|res|brightness|rotate|underscan|mirror)"
-    helpPattern = r"(help(?: (?:" + verbPattern + "))?)"
+    verbPattern = r"help|show|res|brightness|rotate|underscan|mirror"
+    # Pattern for finding multiple commands
+    commandPattern = r"((?:{0}).*?)(?:(?: (?={0}))|\Z)".format(verbPattern)
 
-    helpCommands = re.findall(helpPattern, string)
-    string = re.sub(helpPattern, "", string)
+    # Make sure the command starts with a valid verb
+    try:
+        firstWord = re.match("^(" + verbPattern + ")$", string.split()[0]).group(0)
+    # If the first word wasn't a valid verb, re.match returned a None, which has no ".group"
+    except AttributeError:
+        raise CommandSyntaxError("\"{}\" is not a valid type of command".format(string.split()[0]))
 
-    # todo: debug remainder -- still buggy af
+    # Get all the individual commands
+    if "help" not in string:
+        commandStrings = re.findall(commandPattern, string)
+    # Cannot run more than one command if one of them is a "help" command
+    else:
+        # The whole command is a help command
+        if firstWord == "help":
+            commandStrings = [string]
+        # The help command is only one of multiple commands
+        else:
+            raise CommandSyntaxError("Cannot run multiple commands if one is \"help\"")
 
-    # The individual words/values in the command string
-    words = string.split()
-    # There is no command, or the first command does not start with a valid verb
-    if len(words) < 1 or not re.match(verbPattern, words[0]):
-        raise CommandSyntaxError
-
-    commandStrings = re.split(verbPattern, string)
-    stringVerbs = re.findall(verbPattern, string)
-
-    # Remove the beginning empty string
-    commandStrings.pop(0)
-    # Bring the verbs back in
-    for i in range(len(commandStrings)):
-        commandStrings[i] = stringVerbs[i] + commandStrings[i]
-    for helpCommand in helpCommands:
-        commandStrings.append(helpCommand)
-
-    # Make the CommandList from the given commandStrings
+    # Make the CommandList from the given command strings
     commands = CommandList()
     for commandString in commandStrings:
         command = getCommand(commandString)
@@ -720,8 +685,12 @@ def main():
     # Attempt to parse the commands
     try:
         parseCommands(" ".join(sys.argv[1:])).run()
-    except CommandSyntaxError:
-        Command("help").run()
+    except CommandSyntaxError as e:
+        print("ERROR: {}".format(e))
+
+        # todo: bring this back in
+        # Command("help").run()
+
         sys.exit(1)
 
 
