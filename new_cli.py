@@ -174,8 +174,8 @@ class Command(object):
         """
         Shows the user usage information (either for a specific verb, or general help)
         """
-        usage = {
-            "help": "\n".join([
+        helpTypes = {
+            "usage": "\n".join([
                 "usage: display_manager.py {{ help | show | res | brightness | rotate | underscan | mirror }}",
                 "",
                 "Type any of the commands after \"help\" to get command-specific usage information:",
@@ -186,10 +186,16 @@ class Command(object):
                 "   rotate      Control display rotation.",
                 "   underscan   Show or set the current display underscan.",
                 "   mirror      Enable or disable screen mirroring.",
-            ]), "show": "\n".join([
-                "usage: display_manager.py show [command] [options] [scope]",
+            ]), "help": "\n".join([
+                "usage: display_manager.py help [command]",
                 "",
-                "COMMANDS",
+                "COMMAND",
+                "   The command to get more detailed information about. Must be one of the following:",
+                "       {{ help | show | res | brightness | rotate | underscan | mirror }}",
+            ]), "show": "\n".join([
+                "usage: display_manager.py show [subcommand] [options] [scope]",
+                "",
+                "SUBCOMMANDS",
                 "   current (default)   Show current display settings.",
                 "   highest             Show the highest available resolution.",
                 "   all                 Show all available resolutions.",
@@ -223,7 +229,7 @@ class Command(object):
                 "usage: display_manager.py brightness [brightness] [scope]",
                 "",
                 "BRIGHTNESS",
-                "   A number between 0 and 1, where 0 is minimum brightness, and 1 is maximum brightness.",
+                "   A number between 0 and 1 (inclusive), where 0 is minimum brightness, and 1 is maximum brightness.",
                 "",
                 "SCOPE",
                 "   main (default)  Perform this command on the main display.",
@@ -243,18 +249,18 @@ class Command(object):
                 "usage: display_manager.py underscan [underscan] [scope]",
                 "",
                 "UNDERSCAN",
-                "   A number between 0 and 1, where 0 is minimum underscan, and 1 is maximum underscan.",
+                "   A number between 0 and 1 (inclusive), where 0 is minimum underscan, and 1 is maximum underscan.",
                 "",
                 "SCOPE",
                 "   main (default)  Perform this command on the main display.",
                 "   ext<N>          Perform this command on external display number <N>.",
                 "   all             Perform this command on all connected displays.",
             ]), "mirror": "\n".join([
-                "usage: display_manager.py mirror [command] [source] [target(s)]",
+                "usage: display_manager.py mirror [subcommand] [source] [target(s)]",
                 "",
-                "COMMANDS",
-                "   enable          Set <target> to mirror <source>.",
-                "   disable         Disable mirroring from <source> to <target>.",
+                "SUBCOMMANDS",
+                "   enable      Set <target> to mirror <source>.",
+                "   disable     Disable mirroring from <source> to <target>.",
                 "",
                 "SOURCE/TARGET(S)",
                 "   source (required for <enable>)",
@@ -271,10 +277,10 @@ class Command(object):
                 "       For <disable>: all connected displays.",
             ])}
 
-        if self.type in usage:
-            print(usage[self.type])
+        if self.type in helpTypes:
+            print(helpTypes[self.type])
         else:
-            print(usage["help"])
+            print(helpTypes["usage"])
 
     def __handleShow(self):
         """
@@ -480,7 +486,6 @@ class CommandList(object):
                             command.run()
 
 
-# todo: finish this
 def getCommand(commandString):
     if not commandString:
         return None
@@ -502,12 +507,45 @@ def getCommand(commandString):
                 scopeTags.append(words.pop(i))
             # This scope tag is in the wrong place
             else:
-                raise CommandSyntaxError
+                raise CommandSyntaxError("Invalid placement of {}".format(words[i]))
+
+    def getDisplayFromTag(displayTag):
+        """
+        Returns a Display for "displayTag"
+        :param displayTag: The display tag to find the Display of
+        :return: The Display which displayTag refers to
+        """
+        if displayTag == "main":
+            return getMainDisplay()
+        elif displayTag == "all":
+            return getAllDisplays()
+        elif re.match(r"^ext[0-9]+$", displayTag):
+            # Get all the external displays (in order)
+            externals = sorted(getAllDisplays())
+            for display in externals:
+                if display.isMain:
+                    externals.remove(display)
+                    break
+
+            # Get the number in displayTag
+            externalNum = int(displayTag[3:])
+            # invalid displayTag
+            if (
+                    externalNum < 1 or
+                    externalNum > len(externals) - 1
+            ):
+                print("Invalid display tag \"{}\".".format(displayTag))
+                sys.exit(1)
+            else:
+                return externals[externalNum]
+        else:
+            print("Invalid display tag \"{}\".".format(displayTag))
+            sys.exit(1)
 
     # Get actual Displays for scope
     scope = []
     for scopeTag in scopeTags:
-        scope.append(Display.getDisplayFromTag(scopeTag))
+        scope.append(getDisplayFromTag(scopeTag))
 
     # Determine positionals (all remaining words)
     positionals = words
@@ -515,19 +553,22 @@ def getCommand(commandString):
     # Create new command with verb and scope
     command = Command(verb, scope=scope)
 
-    # if verb == "help":
-    #     if len(positionals) == 1:
-    #         if positionals[0] in ["show", "res", "brightness", "rotate", "underscan", "mirror"]:
-    #             command.type = positionals[0]
-    #         # Invalid type
-    #         else:
-    #             raise CommandValueError
-    #     # Too many arguments
-    #     else:
-    #         raise CommandSyntaxError
+    if verb == "help":
+        if len(positionals) == 0:
+            # Default type
+            command.type = "help"
+        elif len(positionals) == 1:
+            if positionals[0] in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
+                command.type = positionals[0]
+            # Invalid type
+            else:
+                raise CommandValueError("{} is not a valid command".format(positionals[0]))
+        # Too many arguments
+        else:
+            raise CommandSyntaxError("\"help\" commands can only have one argument")
 
     # todo: decide whether to keep commented code? if so, change Command.__handleShow, etc.
-    if verb == "show":
+    elif verb == "show":
         # # Determine command type and type, and remove them from positionals
         # commandType = None
         # commandWhoKnows = None
@@ -562,15 +603,18 @@ def getCommand(commandString):
         # if positionals:
         #     raise CommandValueError
 
+        if len(positionals) == 0:
+            # Default type
+            command.type = "current"
         if len(positionals) == 1:
             if positionals[0] in ["current", "highest", "all"]:
                 command.type = positionals[0]
             # Invalid type
             else:
-                raise CommandValueError
+                raise CommandValueError("{} is not a valid subcommand".format(positionals[0]))
         # Too many arguments
         else:
-            raise CommandSyntaxError
+            raise CommandSyntaxError("\"show\" commands can only have one subcommand")
 
     # TODO: THIS
     elif verb == "res":
@@ -582,13 +626,13 @@ def getCommand(commandString):
                 brightness = float(positionals[0])
                 # Brightness must be between 0 and 1
                 if brightness < 0 or brightness > 1:
-                    raise CommandValueError
+                    raise CommandValueError("{} is not a number between 0 and 1 (inclusive)".format(positionals[0]))
             # Couldn't convert to float
             except ValueError:
-                raise CommandValueError
+                raise CommandValueError("{} is not a number between 0 and 1 (inclusive)".format(positionals[0]))
         # Too many arguments
         else:
-            raise CommandSyntaxError
+            raise CommandSyntaxError("\"brightness\" commands can only have one argument")
 
         command.brightness = brightness
 
@@ -598,13 +642,13 @@ def getCommand(commandString):
                 angle = int(positionals[0])
                 # Rotation must be multiple of 90
                 if angle % 90 != 0:
-                    raise CommandValueError
+                    raise CommandValueError("{} is not a multiple of 90".format(positionals[0]))
             # Couldn't convert to int
             except ValueError:
-                raise CommandValueError
+                raise CommandValueError("{} is not a multiple of 90".format(positionals[0]))
         # Too many arguments
         else:
-            raise CommandSyntaxError
+            raise CommandSyntaxError("\"rotate\" commands can only have one argument")
 
         command.angle = angle
 
@@ -614,16 +658,17 @@ def getCommand(commandString):
                 underscan = float(positionals[0])
                 # Underscan must be between 0 and 1
                 if underscan < 0 or underscan > 1:
-                    raise CommandValueError
+                    raise CommandValueError("{} is not a number between 0 and 1 (inclusive)".format(positionals[0]))
             # Couldn't convert to float
             except ValueError:
-                raise CommandValueError
+                raise CommandValueError("{} is not a number between 0 and 1 (inclusive)".format(positionals[0]))
         # Too many arguments
         else:
-            raise CommandSyntaxError
+            raise CommandSyntaxError("\"underscan\" commands can only have one argument")
 
         command.underscan = underscan
 
+    # todo: figure out how to handle mirroring scope (i.e. first <scope> --> source, others --> target)
     elif verb == "mirror":
         if len(positionals) == 1:
             # Determine type
@@ -631,13 +676,13 @@ def getCommand(commandString):
                 command.type = positionals[0]
             # Invalid type
             else:
-                raise CommandValueError
+                raise CommandValueError("{} is not a valid subcommand".format(positionals[0]))
             # For "enable" type, first element in scope is source
             if command.type == "enable":
                 command.source = command.scope.pop(0)
         # Too many arguments
         else:
-            raise CommandSyntaxError
+            raise CommandSyntaxError("\"mirror\" commands can only have one subcommand")
 
     return command
 
@@ -685,7 +730,7 @@ def main():
     # Attempt to parse the commands
     try:
         parseCommands(" ".join(sys.argv[1:])).run()
-    except CommandSyntaxError as e:
+    except (CommandSyntaxError, CommandValueError) as e:
         print("ERROR: {}".format(e))
 
         # todo: bring this back in

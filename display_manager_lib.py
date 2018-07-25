@@ -47,40 +47,6 @@ class Display(object):
     def __eq__(self, otherDisplay):
         return self.displayID == otherDisplay.displayID
 
-    @staticmethod
-    def getDisplayFromTag(displayTag):
-        """
-        Returns a Display for "displayTag"
-        :param displayTag: The display tag to find the Display of
-        :return: The Display which displayTag refers to
-        """
-        if displayTag == "main":
-            return getMainDisplay()
-        elif displayTag == "all":
-            return getAllDisplays()
-        elif re.match(r"^ext[0-9]+$", displayTag):
-            # Get all the external displays (in order)
-            externals = sorted(getAllDisplays())
-            for display in externals:
-                if display.isMain:
-                    externals.remove(display)
-                    break
-
-            # Get the number in displayTag
-            externalNum = int(displayTag[3:])
-            # invalid displayTag
-            if (
-                    externalNum < 1 or
-                    externalNum > len(externals) - 1
-            ):
-                print("Invalid display tag \"{}\".".format(displayTag))
-                sys.exit(1)
-            else:
-                return externals[externalNum]
-        else:
-            print("Invalid display tag \"{}\".".format(displayTag))
-            sys.exit(1)
-
     # General properties
 
     @property

@@ -17,6 +17,8 @@
       <w>rrrrrrrrggggggggbbbbbbbb</w>
       <w>rrrrrrrrrrggggggggggbbbbbbbbbb</w>
       <w>stdin</w>
+      <w>subcommand</w>
+      <w>subcommands</w>
       <w>subparser</w>
       <w>underscan</w>
       <w>whdr</w>
