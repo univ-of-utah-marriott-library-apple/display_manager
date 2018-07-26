@@ -6,101 +6,103 @@ import unittest
 from new_cli import *
 
 
-class ParseCommandsTests(unittest.TestCase):
+class CommandTests(unittest.TestCase):
 
-    ########
     # Designed to fail
 
-    ####
-    # Raise CommandSyntaxError
-    def test_emptyString(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands("")
+    def test_raiseCommandSyntaxError(self):
+        makeFail = [
+            # Empty string
+            "",
 
-    def test_noCommand(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands("there is no command here")
+            # Invalid verbs
+            "bad",
+            "there is no command here",
 
-    def test_specialCharacters1(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands(u"¬")
+            # Non-ASCII characters
+            u"\u00a7",  # section symbol
+            u"list \u00ac",  # negation symbol
 
-    def test_specialCharacters2(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands(u"list ¬")
+            # Too few arguments
+            "res",
+            "rotate",
+            "brightness",
+            "underscan",
+            "mirror",
+            "mirror enable",
+            "mirror enable main",
 
-    def test_notEnoughArgs(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands("res 1920")
+            # Too many arguments
+            "help show res",
+            "show current highest",
+            "res 1920 1080 0 0",
+            "rotate 0 0",
+            "brightness .35 .35",
+            "underscan .7 .7",
 
-    def test_tooManyArgs(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands("rotate 90 0")
+            # If help is a command, it must be the ONLY command
+            # Justification: given "help show", one might want either:
+            #   1: "help (usage)" and "show (current)"
+            #   2: "help show"
+            # There are many such scenarios, and all cannot be accounted for in a reasonable way.
+            "show help",
 
-    def test_badFlags(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands("list -a")
+            # Scope must be at end of command
+            "show main current",
+        ]
 
-    ####
-    # Raise CommandValueError
-    def test_invalidList1(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("list bad")
+        for fail in makeFail:
+            self.assertRaises(CommandSyntaxError, parseCommands, fail)
 
-    def test_invalidResolution1(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("res bad")
+    def test_raiseCommandValueError(self):
+        makeFail = [
+            "show bad",
 
-    # todo: more invalid resolutions
+            # Can't have it both ways
+            "show no-hidpi only-hidpi",
+            "show only-hidpi no-hidpi",
+            "res no-hidpi only-hidpi",
+            "res only-hidpi no-hidpi",
 
-    def test_invalidBrightness1(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("brightness bad")
+            "res bad",
+            "res highest bad",
+            "res highest -1",
+            "res bad bad",
+            "res 1920 bad",
+            "res bad 1080",
+            "res -1 -1",
+            "res 1920 -1",
+            "res -1 1080",
+            "res 1920 1080 bad",
+            "res 1920 bad 0",
+            "res bad 1080 0",
+            "res 1920 1080 -1",
+            "res 1920 -1 0",
+            "res -1 1080 0",
 
-    def test_invalidBrightness2(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("brightness -1")
+            "rotate 89",
+            "rotate bad",
 
-    def test_invalidBrightness3(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("brightness 1.1")
+            "brightness -1",
+            "brightness 1.1",
+            "brightness bad",
 
-    def test_invalidRotation1(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("rotate bad")
+            "underscan -1",
+            "underscan 1.1",
+            "underscan bad",
 
-    def test_invalidRotation2(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("rotate 89")
+            "mirror bad",
+            "mirror enable bad",
+            "mirror disable bad",
+            "mirror enable bad main",
 
-    def test_invalidUnderscan1(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("underscan bad")
+            "show current res 1 1 rotate 90 brightness .5 underscan 0 mirror bad",
 
-    def test_invalidUnderscan2(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("underscan -1")
+            "show ext" + str(len(getAllDisplays()) + 6),
+        ]
 
-    def test_invalidUnderscan3(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("underscan 1.1")
-
-    def test_invalidMirror1(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("mirror bad main")
-
-    def test_invalidMirror2(self):
-        with self.assertRaises(CommandValueError):
-            parseCommands("mirror main bad")
-
-    def test_invalidBig(self):
-        with self.assertRaises(CommandSyntaxError):
-            parseCommands("list current res 1 1 rotate 90 brightness .5 underscan 0 mirror bad")
-
-    ######
-    # Designed to succeed
-
-    # todo: these
+        for fail in makeFail:
+            self.assertRaises(CommandValueError, parseCommands, fail)
 
 
 if __name__ == "__main__":

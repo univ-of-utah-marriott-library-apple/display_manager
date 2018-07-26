@@ -23,7 +23,7 @@ class CommandSyntaxError(Exception):
 
 class CommandValueError(Exception):
     """
-    Raised if commands have unexpected values
+    Raised if a command's arguments have unexpected values
         (e.g. values are incorrect type, values are outside expected range, etc.)
     """
 
@@ -209,7 +209,7 @@ class Command(object):
                 "   highest             Show the highest available resolution",
                 "   available           Show all available resolutions",
                 "",
-                "PARAMETERS (never obligatory; not available to \"current\")",
+                "PARAMETERS (never obligatory; not used by \"current\")",
                 "   only-hidpi  Only show HiDPI resolutions",
                 "   no-hidpi    Don\'t show HiDPI resolutions",
                 "",
@@ -282,12 +282,11 @@ class Command(object):
                 "   enable      Set <target> to mirror <source>",
                 "   disable     Disable mirroring from <source> to <target>",
                 "",
-                "SOURCE/TARGET(S)",
-                "   source (required for <enable>)",
-                "       The display which will be mirrored by the target(s); "
+                "SOURCE/TARGET(S) (not used by \"disable\"",
+                "   source      The display which will be mirrored by the target(s); "
                 "must be a single element of <SCOPE> (see below); cannot be \"all\"",
-                "   target(s) (required for both <enable> and <disable>)",
-                "       The display(s) which will mirror the source; must be an element of <SCOPE> (see below)",
+                "   target(s)   The display(s) which will mirror the source; "
+                "must be an element of <SCOPE> (see below)",
                 "",
                 "SCOPE",
                 "   main    The main display",
@@ -505,6 +504,11 @@ class CommandList(object):
 
 
 def getCommand(commandString):
+    """
+    # todo: this
+    :param commandString:
+    :return:
+    """
     if not commandString:
         return None
 
@@ -547,21 +551,17 @@ def getCommand(commandString):
 
             # Get the number in displayTag
             externalNum = int(displayTag[3:])
-            # invalid displayTag
-            if (
-                    externalNum < 0 or
-                    externalNum > len(externals) - 1
-            ):
+            if externalNum > len(externals) - 1:
+                # There aren't enough displays for this externalNumber to be valid
                 raise CommandValueError("There is no display \"{}\"".format(displayTag), verb=verb)
             else:
+                # 0 < externalNum < len(externals) - 1 means valid tag
+                # ("0 < externalNum" known from re.match(r"^ext[0-9]+$") above)
                 return externals[externalNum]
-        else:
-            raise CommandSyntaxError("Invalid display tag \"{}\"".format(displayTag), verb=verb)
 
-    # Get actual Displays for scope
-    scope = []
-    for scopeTag in scopeTags:
-        scope.append(getDisplayFromTag(scopeTag))
+        # Note: no need for final "else" here, because getDisplayFromTag will only
+        # be passed regex matches for "main|all|ext[0-9]+", because these are the only
+        # arguments added to "scopeTags"
 
     # Determine positionals (all remaining words)
     positionals = words
@@ -597,31 +597,26 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"help\" commands can only have one argument", verb=verb)
 
-        # return Command(
-        #     verb=verb,
-        #     subcommand=subcommand,
-        # )
-
         attributesDict["subcommand"] = subcommand
 
     elif verb == "show":
         # Determine HiDPI settings
         hidpi = 0
-        for i in range(len(positionals)):
-            if positionals[i] == "no-hidpi":
+        for positional in positionals:
+            if positional == "no-hidpi":
                 # If HiDPI hasn't been set to the contrary setting
                 if hidpi != 2:
                     hidpi = 1  # doesn't match HiDPI
-                    positionals.pop(i)
+                    positionals.remove(positional)
                 else:
-                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
-            elif positionals[i] == "only-hidpi":
+                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+            elif positional == "only-hidpi":
                 # If HiDPI hasn't been set to the contrary setting
                 if hidpi != 1:
                     hidpi = 2  # only matches HiDPI
-                    positionals.pop(i)
+                    positionals.remove(positional)
                 else:
-                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
 
         if len(positionals) == 0:
             # Default subcommand
@@ -636,16 +631,13 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"show\" commands can only have one subcommand", verb=verb)
 
-        if len(scope) == 0:
+        if len(scopeTags) > 0:
+            scope = []
+            for scopeTag in scopeTags:
+                scope.append(getDisplayFromTag(scopeTag))
+        else:
             # Default scope
             scope = getAllDisplays()
-
-        # return Command(
-        #     verb=verb,
-        #     subcommand=subcommand,
-        #     hidpi=hidpi,
-        #     scope=scope,
-        # )
 
         attributesDict["subcommand"] = subcommand
         attributesDict["hidpi"] = hidpi
@@ -654,21 +646,30 @@ def getCommand(commandString):
     elif verb == "res":
         # Determine HiDPI settings
         hidpi = 0
-        for i in range(len(positionals)):
-            if positionals[i] == "no-hidpi":
+        for positional in positionals:
+            if positional == "no-hidpi":
                 # If HiDPI hasn't been set to the contrary setting
                 if hidpi != 2:
                     hidpi = 1  # doesn't match HiDPI
-                    positionals.pop(i)
+                    positionals.remove(positional)
                 else:
-                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
-            elif positionals[i] == "only-hidpi":
+                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+            elif positional == "only-hidpi":
                 # If HiDPI hasn't been set to the contrary setting
                 if hidpi != 1:
                     hidpi = 2  # only matches HiDPI
-                    positionals.pop(i)
+                    positionals.remove(positional)
                 else:
-                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+
+        # Determine scope
+        if len(scopeTags) > 0:
+            scope = []
+            for scopeTag in scopeTags:
+                scope.append(getDisplayFromTag(scopeTag))
+        else:
+            # Default scope
+            scope = [getMainDisplay()]
 
         if len(positionals) == 0:
             raise CommandSyntaxError("\"res\" commands must specify a resolution", verb=verb)
@@ -683,17 +684,6 @@ def getCommand(commandString):
                     verb=verb
                 )
 
-            if len(scope) == 0:
-                # Default scope
-                scope = getMainDisplay()
-
-            # return Command(
-            #     verb=verb,
-            #     subcommand=subcommand,
-            #     hidpi=hidpi,
-            #     scope=scope,
-            # )
-
             attributesDict["subcommand"] = subcommand
             attributesDict["hidpi"] = hidpi
             attributesDict["scope"] = scope
@@ -706,15 +696,9 @@ def getCommand(commandString):
                 try:
                     refresh = int(positionals[1])
                 except ValueError:
-                    raise CommandValueError("\"{}\" is not a valid refresh rate")
-
-                # return Command(
-                #     verb=verb,
-                #     subcommand=subcommand,
-                #     refresh=refresh,
-                #     hidpi=hidpi,
-                #     scope=scope,
-                # )
+                    raise CommandValueError("\"{}\" is not a valid refresh rate", verb=verb)
+                if refresh < 0:
+                    raise CommandValueError("Refresh rate must be positive", verb=verb)
 
                 attributesDict["subcommand"] = subcommand
                 attributesDict["refresh"] = refresh
@@ -729,35 +713,33 @@ def getCommand(commandString):
                     try:
                         wh.append(int(positionals[i]))
                     except ValueError:
-                        wh.append(-1)
+                        wh.append(None)
                 width, height = wh
                 # Neither width nor height were integers (and thus invalid pixel counts)
-                if width == -1 and height == -1:
+                if width is None and height is None:
                     raise CommandValueError(
                         "Neither \"{}\" nor \"{}\" are valid widths or heights".format(
                             positionals[0], positionals[1]),
                         verb=verb
                     )
                 # width was invalid
-                elif width == -1:
+                elif width is None:
                     raise CommandValueError(
                         "\"{}\" is not a valid width".format(positionals[0]),
                         verb=verb
                     )
                 # height was invalid
-                elif height == -1:
+                elif height is None:
                     raise CommandValueError(
                         "\"{}\" is not a valid height".format(positionals[1]),
                         verb=verb
                     )
-
-                # return Command(
-                #     verb=verb,
-                #     width=width,
-                #     height=height,
-                #     hidpi=hidpi,
-                #     scope=scope,
-                # )
+                # no negative dimensions
+                if width < 0 or height < 0:
+                    raise CommandValueError(
+                        "Width and height must be positive",
+                        verb=verb
+                    )
 
                 attributesDict["width"] = width
                 attributesDict["height"] = height
@@ -772,37 +754,34 @@ def getCommand(commandString):
                 try:
                     whr.append(int(positionals[i]))
                 except ValueError:
-                    whr.append(-1)
+                    whr.append(None)
             width, height, refresh = whr
             # Nothing was an integer
-            if width == -1 and height == -1 and refresh == -1:
+            if width is None and height is None and refresh is None:
                 raise CommandValueError(
-                    "\"{}\"x\"{}\" at \"{}\"Hz is not a valid resolution".format(
+                    "\"{}\"x\"{}\" is not a valid resolution, and \"{}\" is not a valid refresh rate".format(
                         positionals[0], positionals[1], positionals[2]),
                     verb=verb
                 )
             # Neither width nor height were integers
-            elif width == -1 or height == -1:
+            elif width is None or height is None:
                 raise CommandValueError(
                     "\"{}\"x\"{}\" is not a valid resolution".format(
                         positionals[0], positionals[1]),
                     verb=verb
                 )
             # refresh was not an integer
-            elif refresh == -1:
+            elif refresh is None:
                 raise CommandValueError(
                     "\"{}\" is not a valid refresh rate".format(positionals[2]),
                     verb=verb
                 )
-
-            # return Command(
-            #     verb=verb,
-            #     width=width,
-            #     height=height,
-            #     refresh=refresh,
-            #     hidpi=hidpi,
-            #     scope=scope,
-            # )
+            # no negative dimensions or rate
+            if width < 0 or height < 0 or refresh < 0:
+                raise CommandValueError(
+                    "Width, height, and refresh rate must be positive",
+                    verb=verb
+                )
 
             attributesDict["width"] = width
             attributesDict["height"] = height
@@ -832,15 +811,13 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"rotate\" commands can only have one argument", verb=verb)
 
-        if len(scope) == 0:
+        if len(scopeTags) > 0:
+            scope = []
+            for scopeTag in scopeTags:
+                scope.append(getDisplayFromTag(scopeTag))
+        else:
             # Default scope
-            scope = getMainDisplay()
-
-        # return Command(
-        #     verb=verb,
-        #     angle=angle,
-        #     scope=scope,
-        # )
+            scope = [getMainDisplay()]
 
         attributesDict["angle"] = angle
         attributesDict["scope"] = scope
@@ -867,15 +844,13 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"brightness\" commands can only have one argument", verb=verb)
 
-        if len(scope) == 0:
+        if len(scopeTags) > 0:
+            scope = []
+            for scopeTag in scopeTags:
+                scope.append(getDisplayFromTag(scopeTag))
+        else:
             # Default scope
-            scope = getMainDisplay()
-
-        # return Command(
-        #     verb=verb,
-        #     brightness=brightness,
-        #     scope=scope,
-        # )
+            scope = [getMainDisplay()]
 
         attributesDict["brightness"] = brightness
         attributesDict["scope"] = scope
@@ -902,15 +877,13 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"underscan\" commands can only have one argument", verb=verb)
 
-        if len(scope) == 0:
+        if len(scopeTags) > 0:
+            scope = []
+            for scopeTag in scopeTags:
+                scope.append(getDisplayFromTag(scopeTag))
+        else:
             # Default scope
-            scope = getMainDisplay()
-
-        # return Command(
-        #     verb=verb,
-        #     underscan=underscan,
-        #     scope=scope,
-        # )
+            scope = [getMainDisplay()]
 
         attributesDict["underscan"] = underscan
         attributesDict["scope"] = scope
@@ -918,10 +891,11 @@ def getCommand(commandString):
     elif verb == "mirror":
         if len(positionals) == 0:
             raise CommandSyntaxError("\"mirror\" commands must specify a subcommand", verb=verb)
-        elif len(positionals) == 1:
-            subcommand = positionals[0]
-            if subcommand == "enable":
-                if len(scope) < 2:
+        # elif len(positionals) == 1:
+        subcommand = positionals.pop(0)
+        if subcommand == "enable":
+            if len(positionals) == 0:
+                if len(scopeTags) < 2:
                     raise CommandSyntaxError(
                         "\"mirror enable\" commands require at least one source and one target display",
                         verb=verb
@@ -929,46 +903,46 @@ def getCommand(commandString):
                 else:
                     # For "enable" subcommand, first element in scope is source, and the rest are targets
                     # Since we parsed "scope" in reverse order, source will be last
-                    source = scope.pop(-1)
-
-                # return Command(
-                #     verb=verb,
-                #     subcommand=subcommand,
-                #     source=source,
-                #     # "scope" == "target"
-                #     scope=scope,
-                # )
+                    source = getDisplayFromTag(scopeTags.pop(-1))
+                    # Determine target(s)
+                    targets = []
+                    for scopeTag in scopeTags:
+                        targets.append(getDisplayFromTag(scopeTag))
 
                 attributesDict["subcommand"] = subcommand
                 attributesDict["source"] = source
-                # "scope" == "target"
-                attributesDict["scope"] = scope
+                attributesDict["scope"] = targets
+            else:
+                raise CommandValueError(
+                    "{} is not a valid source or target".format(positionals[0]),
+                    verb=verb
+                )
 
-            elif subcommand == "disable":
-                if len(scope) == 0:
+        elif subcommand == "disable":
+            if len(positionals) == 0:
+                # Determine scope
+                if len(scopeTags) > 0:
+                    scope = []
+                    for scopeTag in scopeTags:
+                        scope.append(getDisplayFromTag(scopeTag))
+                else:
                     # Default scope
                     scope = getAllDisplays()
 
-                # return Command(
-                #     verb=verb,
-                #     subcommand=subcommand,
-                #     scope=scope,
-                # )
-
                 attributesDict["subcommand"] = subcommand
                 attributesDict["scope"] = scope
-
-            # Invalid subcommand
             else:
-                raise CommandValueError("{} is not a valid subcommand".format(subcommand), verb=verb)
-        # Too many arguments
-        else:
-            raise CommandSyntaxError("\"mirror\" commands can only have one subcommand", verb=verb)
+                raise CommandValueError(
+                    "{} is not a valid scope".format(positionals[0]),
+                    verb=verb
+                )
 
-    for attribute in attributesDict:
-        # Attribute was not determined
-        if not attributesDict[attribute]:
-            attributesDict.pop(attribute)
+        else:
+            raise CommandValueError("{} is not a valid subcommand".format(subcommand), verb=verb)
+
+    emptyKeys = [key for key in attributesDict if attributesDict[key] is None]
+    for emptyKey in emptyKeys:
+        attributesDict.pop(emptyKey)
 
     return Command(**attributesDict)
 
@@ -978,6 +952,15 @@ def parseCommands(string):
     :param string: The string to get Commands from
     :return: Commands contained within the string
     """
+    # Simple edge cases
+
+    # Empty string
+    if not string:
+        raise CommandSyntaxError("An empty string is not a valid command")
+    # Make sure all of the commands are in ASCII
+    if not all(ord(c) < 128 for c in string):
+        raise CommandSyntaxError("Commands cannot include non-ASCII characters")
+
     # The types of commands that can be issued
     verbPattern = r"help|show|res|brightness|rotate|underscan|mirror"
     # Pattern for finding multiple commands
