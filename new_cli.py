@@ -55,40 +55,6 @@ class Command(object):
     Represents a user-requested command to Display Manager.
     """
 
-    # todo: remove deprecated
-    # def __init__(self, verb, secondary=None, displayTags=None, width=None, height=None, refresh=None, hidpi=None,
-    #              brightness=None, angle=None, underscan=None, mirrorTargetTags=None):
-    #     getIOKit()
-    #
-    #     if verb in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
-    #         self.primary = verb
-    #     else:
-    #         print("Unrecognized command {}".format(verb))
-    #         sys.exit(1)
-    #     self.secondary = secondary
-    #
-    #     if displayTags is not None:
-    #         self.displays = []
-    #         for displayTag in displayTags:
-    #             self.displays.append(self.__getDisplayFromTag(displayTag))
-    #     else:
-    #         self.displays = None
-    #
-    #     if mirrorTargetTags is not None:
-    #         self.mirrors = []
-    #         for displayTag in mirrorTargetTags:
-    #             self.mirrors.append(self.__getDisplayFromTag(displayTag))
-    #     else:
-    #         self.mirrors = None
-    #
-    #     self.width = int(width) if width is not None else None
-    #     self.height = int(height) if height is not None else None
-    #     self.refresh = float(refresh) if refresh is not None else None
-    #     self.hidpi = int(hidpi) if hidpi is not None else None
-    #     self.brightness = float(brightness) if brightness is not None else None
-    #     self.angle = int(angle) if angle is not None else None
-    #     self.underscan = float(underscan) if underscan is not None else None
-
     def __init__(self, **kwargs):
         """
         :param kwargs: Includes verb ("command type"), subcommand, scope, values, options, and rawInput
@@ -600,7 +566,6 @@ def getCommand(commandString):
     # Determine positionals (all remaining words)
     positionals = words
 
-    # todo: optional scopes per verb
     # todo: parse for only-hidpi and no-hidpi
 
     if verb == "help":
@@ -636,6 +601,10 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"show\" commands can only have one subcommand", verb=verb)
 
+        if len(scope) == 0:
+            # Default scope
+            scope = getAllDisplays()
+
         return Command(
             verb=verb,
             subcommand=subcommand,
@@ -654,6 +623,10 @@ def getCommand(commandString):
                     "\"res\" commands must either specify both width and height or use the \"highest\" keyword",
                     verb=verb
                 )
+
+            if len(scope) == 0:
+                # Default scope
+                scope = getMainDisplay()
 
             return Command(
                 verb=verb,
@@ -769,6 +742,10 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"rotate\" commands can only have one argument", verb=verb)
 
+        if len(scope) == 0:
+            # Default scope
+            scope = getMainDisplay()
+
         return Command(
             verb=verb,
             angle=angle,
@@ -797,6 +774,10 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"brightness\" commands can only have one argument", verb=verb)
 
+        if len(scope) == 0:
+            # Default scope
+            scope = getMainDisplay()
+
         return Command(
             verb=verb,
             brightness=brightness,
@@ -824,6 +805,10 @@ def getCommand(commandString):
         # Too many arguments
         else:
             raise CommandSyntaxError("\"underscan\" commands can only have one argument", verb=verb)
+
+        if len(scope) == 0:
+            # Default scope
+            scope = getMainDisplay()
 
         return Command(
             verb=verb,
@@ -855,8 +840,15 @@ def getCommand(commandString):
                     scope=scope,
                 )
             elif subcommand == "disable":
-                # todo: this!
-                pass
+                if len(scope) == 0:
+                    # Default scope
+                    scope = getAllDisplays()
+
+                return Command(
+                    verb=verb,
+                    subcommand=subcommand,
+                    scope=scope,
+                )
             # Invalid subcommand
             else:
                 raise CommandValueError("{} is not a valid subcommand".format(subcommand), verb=verb)
