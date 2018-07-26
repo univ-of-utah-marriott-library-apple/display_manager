@@ -189,7 +189,7 @@ class Display(object):
                 return match
 
         raise DisplayError(
-            "Display \"{}\" cannot be set to a sufficiently similar resolution".format(self.tag))
+            "Display \"{}\" cannot be set to {}x{}".format(self.tag, width, height))
 
     def setMode(self, mode):
         """
@@ -198,13 +198,15 @@ class Display(object):
         (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
         if error:
             raise DisplayError(
-                "Display \"{}\"\'s resolution cannot be set".format(self.tag))
+                "Display \"{}\"\'s resolution cannot be set to {}x{} at {} Hz".format(
+                    self.tag, mode.width, mode.height, mode.refresh))
 
         error = Quartz.CGConfigureDisplayWithDisplayMode(configRef, self.displayID, mode.raw, None)
         if error:
             Quartz.CGCancelDisplayConfiguration(configRef)
             raise DisplayError(
-                "Display \"{}\"\'s resolution cannot be set".format(self.tag))
+                "Display \"{}\"\'s resolution cannot be set to {}x{} at {} Hz".format(
+                    self.tag, mode.width, mode.height, mode.refresh))
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
@@ -339,8 +341,8 @@ class DisplayMode(object):
 
     def __init__(self, mode):
         # Low-hanging fruit
-        self.width = Quartz.CGDisplayModeGetWidth(mode)
-        self.height = Quartz.CGDisplayModeGetHeight(mode)
+        self.width = int(Quartz.CGDisplayModeGetWidth(mode))
+        self.height = int(Quartz.CGDisplayModeGetHeight(mode))
         self.refresh = float(Quartz.CGDisplayModeGetRefreshRate(mode))
         self.raw = mode
 
@@ -359,7 +361,7 @@ class DisplayMode(object):
         self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
 
     def __str__(self):
-        return "resolution: {width}x{height}, pixel depth: {depth}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
+        return "resolution: {width}x{height}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
             "width": self.width, "height": self.height, "depth": self.depth,
             "refresh": self.refresh, "hidpi": self.hidpi
         })
