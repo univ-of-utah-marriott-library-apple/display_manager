@@ -5,8 +5,6 @@
 # Programmatically manages Mac displays.
 # Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness.
 
-import sys              # exit script with the right codes
-import re               # parse Display Tags
 import objc             # access Objective-C functions and variables
 import CoreFoundation   # work with Objective-C data types
 import Quartz           # work with system graphics
@@ -45,14 +43,14 @@ class Display(object):
         else:
             self.displayID = displayID
 
-    def __lt__(self, otherDisplay):
-        return self.displayID < otherDisplay.displayID
+    def __lt__(self, other):
+        return self.displayID < other.displayID
 
-    def __gt__(self, otherDisplay):
-        return self.displayID > otherDisplay.displayID
+    def __gt__(self, other):
+        return self.displayID > other.displayID
 
-    def __eq__(self, otherDisplay):
-        return self.displayID == otherDisplay.displayID
+    def __eq__(self, other):
+        return self.displayID == other.displayID
 
     # General properties
 
@@ -366,14 +364,14 @@ class DisplayMode(object):
             "refresh": self.refresh, "hidpi": self.hidpi
         })
 
-    def __lt__(self, otherDM):
-        return self.width * self.height < otherDM.width * otherDM.height
+    def __lt__(self, other):
+        return self.width * self.height < other.width * other.height
 
-    def __gt__(self, otherDM):
-        return self.width * self.height > otherDM.width * otherDM.height
+    def __gt__(self, other):
+        return self.width * self.height > other.width * other.height
 
-    def __eq__(self, otherDM):
-        return self.width * self.height == otherDM.width * otherDM.height
+    def __eq__(self, other):
+        return self.width * self.height == other.width * other.height
 
 
 def getMainDisplay():

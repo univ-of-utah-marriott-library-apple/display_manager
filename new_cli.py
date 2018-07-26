@@ -2,6 +2,8 @@
 
 # This script allows users to access Display Manager through the command line.
 
+import sys
+import re
 import collections
 from display_manager_lib import *
 
@@ -68,7 +70,15 @@ class Command(object):
 
         # Determine subcommand, scope
         self.subcommand = kwargs["subcommand"] if "subcommand" in kwargs else None
-        self.scope = kwargs["scope"] if "scope" in kwargs else None
+        if kwargs["scope"]:
+            if type(kwargs["scope"]) == list:
+                self.scope = kwargs["scope"]
+            elif type(kwargs["scope"]) == Display:
+                self.scope = [kwargs["scope"]]
+            else:
+                self.scope = None
+        else:
+            self.scope = None
 
         # Determine values, options
         self.width = int(kwargs["width"]) if "width" in kwargs else None
@@ -87,11 +97,7 @@ class Command(object):
         getIOKit()
 
     def __str__(self):
-        """
-        :return: A string which would result in this command via the command line
-        """
         # A list to contain strings of all the arguments in the command
-        # Determine verb
         stringList = [self.verb]
 
         # Determine subcommand
@@ -148,6 +154,24 @@ class Command(object):
                 stringList.append("all")
 
         return " ".join(stringList)
+
+    def __eq__(self, other):
+        return all([
+            isinstance(other, self.__class__),
+
+            other.verb == self.verb,
+            other.subcommand == self.subcommand,
+            set(other.scope) == set(self.scope),
+
+            other.width == self.width,
+            other.height == self.height,
+            other.refresh == self.refresh,
+            other.hidpi == self.hidpi,
+            other.angle == self.angle,
+            other.brightness == self.brightness,
+            other.underscan == self.underscan,
+            other.source == self.source,
+        ])
 
     # Run (and its handlers)
 
@@ -578,15 +602,13 @@ def getCommand(commandString):
         "brightness": None,
         "underscan": None,
         "source": None,
-        "rawInput": None,
+        "rawInput": commandString,
     }
-
-    # todo: remove all commented out code in the rest of this function
 
     if verb == "help":
         if len(positionals) == 0:
             # Default (sub)command
-            subcommand = "help"
+            subcommand = "usage"
         elif len(positionals) == 1:
             if positionals[0] in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
                 subcommand = positionals[0]
@@ -669,7 +691,7 @@ def getCommand(commandString):
                 scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
-            scope = [getMainDisplay()]
+            scope = getMainDisplay()
 
         if len(positionals) == 0:
             raise CommandSyntaxError("\"res\" commands must specify a resolution", verb=verb)
@@ -817,7 +839,7 @@ def getCommand(commandString):
                 scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
-            scope = [getMainDisplay()]
+            scope = getMainDisplay()
 
         attributesDict["angle"] = angle
         attributesDict["scope"] = scope
@@ -850,7 +872,7 @@ def getCommand(commandString):
                 scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
-            scope = [getMainDisplay()]
+            scope = getMainDisplay()
 
         attributesDict["brightness"] = brightness
         attributesDict["scope"] = scope
@@ -883,7 +905,7 @@ def getCommand(commandString):
                 scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
-            scope = [getMainDisplay()]
+            scope = getMainDisplay()
 
         attributesDict["underscan"] = underscan
         attributesDict["scope"] = scope
@@ -947,18 +969,16 @@ def getCommand(commandString):
     return Command(**attributesDict)
 
 
-def parseCommands(string):
+def parseCommands(commandStrings):
     """
-    :param string: The string to get Commands from
+    :param commandStrings: The string to get Commands from
     :return: Commands contained within the string
     """
-    # Simple edge cases
-
     # Empty string
-    if not string:
+    if not commandStrings:
         raise CommandSyntaxError("An empty string is not a valid command")
     # Make sure all of the commands are in ASCII
-    if not all(ord(c) < 128 for c in string):
+    if not all(ord(c) < 128 for c in commandStrings):
         raise CommandSyntaxError("Commands cannot include non-ASCII characters")
 
     # The types of commands that can be issued
@@ -967,20 +987,20 @@ def parseCommands(string):
     commandPattern = r"((?:{0}).*?)(?:(?: (?={0}))|\Z)".format(verbPattern)
 
     # Make sure the command starts with a valid verb
-    firstWordMatch = re.match("^(" + verbPattern + ")$", string.split()[0])
+    firstWordMatch = re.match("^(" + verbPattern + ")$", commandStrings.split()[0])
     if firstWordMatch:
         firstWord = firstWordMatch.group(0)
     else:
-        raise CommandSyntaxError("\"{}\" is not a valid type of command".format(string.split()[0]))
+        raise CommandSyntaxError("\"{}\" is not a valid type of command".format(commandStrings.split()[0]))
 
     # Get all the individual commands
-    if "help" not in string:
-        commandStrings = re.findall(commandPattern, string)
+    if "help" not in commandStrings:
+        commandStrings = re.findall(commandPattern, commandStrings)
     # Cannot run more than one command if one of them is a "help" command
     else:
         # The whole command will be interpreted as a single help command
         if firstWord == "help":
-            commandStrings = [string]
+            commandStrings = [commandStrings]
         # The help command isn't even the first command
         else:
             raise CommandSyntaxError("Cannot run multiple commands if one of them is \"help\"", verb="help")

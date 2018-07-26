@@ -8,7 +8,35 @@ from new_cli import *
 
 class CommandTests(unittest.TestCase):
 
-    # Designed to fail
+    # Helper methods
+
+    # todo: this
+    # def parsesTo(self, string, command):
+    #     self.assertEqual(
+    #         command,
+    #         parseCommands(string).commands[0]
+    #     )
+
+    # todo: migrate both of these to "parsesTo"
+    # Success tests
+
+    def test_parseHelp(self):
+        self.assertEqual(
+            Command(verb="help", subcommand="usage"),
+            parseCommands("help").commands[0]
+        )
+        self.assertEqual(
+            Command(verb="help", subcommand="show"),
+            parseCommands("help show").commands[0]
+        )
+
+    def test_parseShow(self):
+        self.assertEqual(
+            Command(verb="show", subcommand="current"),
+            parseCommands("help").commands[0]
+        )
+
+    # Error tests
 
     def test_raiseCommandSyntaxError(self):
         makeFail = [

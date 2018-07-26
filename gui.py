@@ -2,14 +2,12 @@
 
 # A GUI that allows users to interface with Display Manager
 
-from __future__ import print_function
 import os
 import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-# import display_manager_lib as dm
-from display_manager_lib import *
+from new_cli import *
 
 
 class App(object):
@@ -339,6 +337,7 @@ class App(object):
         else:
             return None
 
+    # todo: revise?
     def setDisplay(self):
         """
         Set the Display to the currently selected settings.
@@ -346,6 +345,7 @@ class App(object):
         self.__generateCommands().run()
         self.__reloadDisplay()
 
+    # todo: revise
     def buildScript(self):
         """
         Build a script with the currently selected settings and save it where
@@ -364,44 +364,40 @@ class App(object):
                 f.write(' "' + command.__str__() + '"')
             f.close()
 
+    # todo: revise
     def __generateCommands(self):
         """
         :return: A CommandList with all the currently selected commands
         """
         commands = [
             Command(
-                "set",
-                "exact",
+                verb="set",
                 width=self.mode.width,
                 height=self.mode.height,
-                depth=self.mode.depth,
                 refresh=self.mode.refresh,
-                displayTags=self.display.displayID,
-                hidpi=0
+                scope=self.display,
             ),
             Command(
-                "brightness",
-                "set",
+                verb="brightness",
                 brightness=self.brightness,
-                displayTags=self.display.displayID
+                scope=self.display,
             ),
             Command(
-                "rotate",
-                "set",
+                verb="rotate",
                 angle=self.rotation,
-                displayTags=self.display.displayID
+                scope=self.display,
             ),
             Command(
-                "underscan",
-                "set",
+                verb="underscan",
                 underscan=self.underscan,
-                displayTags=self.display.displayID
+                scope=self.display,
             ),
             Command(
-                "mirror",
-                "enable" if self.mirrorEnabled.get() else "disable",
+                verb="mirror",
+                subcommand="enable" if self.mirrorEnabled.get() else "disable",
                 mirrorTargetTags=self.mirror.displayID if self.mirror is not None else 0,
-                displayTags=self.display.displayID
+                source=self.mirror,
+                scope=self.display,
             ),
         ]
 
