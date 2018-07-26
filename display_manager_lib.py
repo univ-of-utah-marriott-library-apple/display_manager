@@ -210,6 +210,33 @@ class Display(object):
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
+    # Rotation properties and methods
+
+    @property
+    def rotation(self):
+        """
+        :return: Rotation of this display, in degrees.
+        """
+        return int(Quartz.CGDisplayRotation(self.displayID))
+
+    def setRotate(self, angle):
+        """
+        :param angle: The angle of rotation.
+        """
+        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
+        rotateCode = 1024
+        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
+            raise ValueError("Can only rotate by multiples of 90 degrees.")
+        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
+        options = rotateCode | (angleCodes[angle % 360] << 16)
+
+        # Actually rotate the screen
+        error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
+
+        if error:
+            raise DisplayError(
+                "Display \"{}\"\'s rotation cannot be set".format(self.tag))
+
     # Brightness properties and methods
 
     @property
@@ -239,33 +266,6 @@ class Display(object):
                     "Display \"{}\"\'s brightness cannot be set.\n"
                     "External displays may not be compatible with Display Manager."
                     "Try setting manually on device hardware.\n".format(self.tag))
-
-    # Rotation properties and methods
-
-    @property
-    def rotation(self):
-        """
-        :return: Rotation of this display, in degrees.
-        """
-        return int(Quartz.CGDisplayRotation(self.displayID))
-
-    def setRotate(self, angle):
-        """
-        :param angle: The angle of rotation.
-        """
-        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
-        rotateCode = 1024
-        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
-            raise ValueError("Can only rotate by multiples of 90 degrees.")
-        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
-        options = rotateCode | (angleCodes[angle % 360] << 16)
-
-        # Actually rotate the screen
-        error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
-
-        if error:
-            raise DisplayError(
-                "Display \"{}\"\'s rotation cannot be set".format(self.tag))
 
     # Underscan properties and methods
 

@@ -157,16 +157,16 @@ class App(object):
         self.modeDropdown.grid(column=1, row=20, columnspan=7, sticky=tk.EW)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=29, columnspan=8, sticky=tk.EW)
 
-        # Brightness menu
-        ttk.Label(self.mainFrame, text="Brightness:").grid(column=0, row=30, sticky=tk.E)
-        self.brightnessSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=100)
-        self.brightnessSlider.grid(column=1, row=30, columnspan=7, sticky=tk.EW)
+        # Rotate menu
+        ttk.Label(self.mainFrame, text="Rotate:").grid(column=0, row=30, sticky=tk.E)
+        self.rotateSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=270, resolution=90)
+        self.rotateSlider.grid(column=1, row=30, columnspan=7, sticky=tk.EW)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=39, columnspan=8, sticky=tk.EW)
 
-        # Rotate menu
-        ttk.Label(self.mainFrame, text="Rotate:").grid(column=0, row=40, sticky=tk.E)
-        self.rotateSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=270, resolution=90)
-        self.rotateSlider.grid(column=1, row=40, columnspan=7, sticky=tk.EW)
+        # Brightness menu
+        ttk.Label(self.mainFrame, text="Brightness:").grid(column=0, row=40, sticky=tk.E)
+        self.brightnessSlider = tk.Scale(self.mainFrame, orient=tk.HORIZONTAL, width=32, from_=0, to=100)
+        self.brightnessSlider.grid(column=1, row=40, columnspan=7, sticky=tk.EW)
         ttk.Separator(self.mainFrame, orient=tk.HORIZONTAL).grid(row=49, columnspan=8, sticky=tk.EW)
 
         # Underscan menu
@@ -223,19 +223,6 @@ class App(object):
         else:
             self.modeDropdown.current(0)
 
-    def __brightnessSelectionInit(self):
-        """
-        Set self.brightnessSlider's value to that of the currently selected display, and
-        deactivates said slider if the brightness of this display can't be set.
-        """
-        if self.display.brightness is not None:
-            brightness = self.display.brightness * 100
-            self.brightnessSlider.set(brightness)
-            self.brightnessSlider.configure(state=tk.NORMAL)
-        else:
-            self.brightnessSlider.set(0.0)
-            self.brightnessSlider.configure(state=tk.DISABLED)
-
     def __rotateSelectionInit(self):
         """
         Set self.rotateSlider's value to that of the currently selected display, and
@@ -248,6 +235,19 @@ class App(object):
         else:
             self.rotateSlider.set(0)
             self.rotateSlider.configure(state=tk.DISABLED)
+
+    def __brightnessSelectionInit(self):
+        """
+        Set self.brightnessSlider's value to that of the currently selected display, and
+        deactivates said slider if the brightness of this display can't be set.
+        """
+        if self.display.brightness is not None:
+            brightness = self.display.brightness * 100
+            self.brightnessSlider.set(brightness)
+            self.brightnessSlider.configure(state=tk.NORMAL)
+        else:
+            self.brightnessSlider.set(0.0)
+            self.brightnessSlider.configure(state=tk.DISABLED)
 
     def __underscanSelectionInit(self):
         """
@@ -299,22 +299,22 @@ class App(object):
         return self.modeDict[modeString]
 
     @property
-    def brightness(self):
-        """
-        :return: The currently selected brightness.
-        """
-        if self.brightnessSlider.get():
-            return float(self.brightnessSlider.get()) / 100
-        else:
-            return 0
-
-    @property
     def rotation(self):
         """
         :return: The currently selected brightness.
         """
         if self.rotateSlider.get():
             return int(self.rotateSlider.get())
+        else:
+            return 0
+
+    @property
+    def brightness(self):
+        """
+        :return: The currently selected brightness.
+        """
+        if self.brightnessSlider.get():
+            return float(self.brightnessSlider.get()) / 100
         else:
             return 0
 
@@ -416,8 +416,8 @@ class App(object):
         Reloads data-containing elements.
         """
         self.__modeSelectionInit()
-        self.__brightnessSelectionInit()
         self.__rotateSelectionInit()
+        self.__brightnessSelectionInit()
         self.__mirrorSelectionInit()
         self.__underscanSelectionInit()
 

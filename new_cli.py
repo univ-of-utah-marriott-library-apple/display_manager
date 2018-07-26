@@ -107,12 +107,12 @@ class Command(object):
         # Determine values, options
         self.width = int(kwargs["width"]) if "width" in kwargs else None
         self.height = int(kwargs["height"]) if "height" in kwargs else None
-        self.refresh = float(kwargs["refresh"]) if "refresh" in kwargs else None
+        self.refresh = int(kwargs["refresh"]) if "refresh" in kwargs else None
         self.hidpi = int(kwargs["hidpi"]) if "hidpi" in kwargs else None
-        self.brightness = float(kwargs["brightness"]) if "brightness" in kwargs else None
         self.angle = int(kwargs["angle"]) if "angle" in kwargs else None
+        self.brightness = float(kwargs["brightness"]) if "brightness" in kwargs else None
         self.underscan = float(kwargs["underscan"]) if "underscan" in kwargs else None
-        self.source = kwargs["mirror"] if "mirror" in kwargs else None
+        self.source = kwargs["source"] if "source" in kwargs else None
 
         # Keep raw command text (for use in error messages)
         self.rawInput = kwargs["rawInput"] if "rawInput" in kwargs else None
@@ -139,10 +139,10 @@ class Command(object):
                 stringList.append(self.width)
                 stringList.append(self.height)
 
-        elif self.verb == "brightness":
-            stringList.append(self.brightness)
         elif self.verb == "rotate":
             stringList.append(self.angle)
+        elif self.verb == "brightness":
+            stringList.append(self.brightness)
         elif self.verb == "underscan":
             stringList.append(self.underscan)
         elif self.verb == "mirror":
@@ -196,10 +196,10 @@ class Command(object):
                 self.__handleShow()
             elif self.verb == "res":
                 self.__handleRes()
-            elif self.verb == "brightness":
-                self.__handleBrightness()
             elif self.verb == "rotate":
                 self.__handleRotate()
+            elif self.verb == "brightness":
+                self.__handleBrightness()
             elif self.verb == "underscan":
                 self.__handleUnderscan()
             elif self.verb == "mirror":
@@ -276,22 +276,22 @@ class Command(object):
                 "   main (default)  Perform this command on the main display",
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all             Perform this command on all connected displays",
+            ]), "rotate": "\n".join([
+                "usage: display_manager.py rotate [angle] (scope)",
+                "",
+                "ANGLE",
+                "   <angle>     Desired display rotation; must be a multiple of 90",
+                "",
+                "SCOPE (optional)",
+                "   main (default)  Perform this command on the main display",
+                "   ext<N>          Perform this command on external display number <N>",
+                "   all             Perform this command on all connected displays",
             ]), "brightness": "\n".join([
                 "usage: display_manager.py brightness [brightness] (scope)",
                 "",
                 "BRIGHTNESS",
                 "   <brightness>    Must be a number between 0 and 1 (inclusive); "
                 "0 is minimum brightness, and 1 is maximum brightness",
-                "",
-                "SCOPE (optional)",
-                "   main (default)  Perform this command on the main display",
-                "   ext<N>          Perform this command on external display number <N>",
-                "   all             Perform this command on all connected displays",
-            ]), "rotate": "\n".join([
-                "usage: display_manager.py rotate [angle] (scope)",
-                "",
-                "ANGLE",
-                "   <angle>     Desired display rotation; must be a multiple of 90",
                 "",
                 "SCOPE (optional)",
                 "   main (default)  Perform this command on the main display",
@@ -348,13 +348,13 @@ class Command(object):
                 current = display.currentMode
                 print("{}".format(current))
 
-                if display.brightness:
-                    print("Brightness: {}".format(display.brightness))
-                if display.rotation:
+                if display.rotation is not None:
                     print("Rotation: {}".format(display.rotation))
-                if display.underscan:
+                if display.brightness is not None:
+                    print("Brightness: {}".format(display.brightness))
+                if display.underscan is not None:
                     print("Underscan: {}".format(display.underscan))
-                if display.mirrorOf:
+                if display.mirrorOf is not None:
                     print("Mirror of: {}".format(display.mirrorOf))
 
             elif self.subcommand == "highest":
@@ -379,19 +379,19 @@ class Command(object):
                 closest = display.closestMode(self.width, self.height, 32, self.refresh)
                 display.setMode(closest)
 
-    def __handleBrightness(self):
-        """
-        Sets display brightness
-        """
-        for display in self.scope:
-            display.setBrightness(self.brightness)
-
     def __handleRotate(self):
         """
         Sets display rotation.
         """
         for display in self.scope:
             display.setRotate(self.angle)
+
+    def __handleBrightness(self):
+        """
+        Sets display brightness
+        """
+        for display in self.scope:
+            display.setBrightness(self.brightness)
 
     def __handleUnderscan(self):
         """
@@ -458,8 +458,8 @@ class CommandList(object):
             # Group commands by subcommand. Must preserve ordering to avoid interfering commands
             commandGroups = collections.OrderedDict([
                 ("res", []),
-                ("mirror", []),
                 ("rotate", []),
+                ("mirror", []),
                 ("underscan", []),
                 ("brightness", []),
                 ("show", []),
@@ -480,8 +480,8 @@ class CommandList(object):
                     # As such, just run the most recently added command (the last in the list)
                     if (
                             commandType == "set" or
-                            commandType == "brightness" or
                             commandType == "rotate" or
+                            commandType == "brightness" or
                             commandType == "underscan"
                     ):
                         try:
@@ -601,6 +601,7 @@ def getCommand(commandString):
     positionals = words
 
     # todo: optional scopes per verb
+    # todo: parse for only-hidpi and no-hidpi
 
     if verb == "help":
         if len(positionals) == 0:
@@ -641,7 +642,6 @@ def getCommand(commandString):
             scope=scope,
         )
 
-    # TODO: FINISH THIS
     elif verb == "res":
         if len(positionals) == 0:
             raise CommandSyntaxError("\"res\" commands must specify a resolution", verb=verb)
@@ -660,56 +660,120 @@ def getCommand(commandString):
                 subcommand=subcommand,
                 scope=scope,
             )
-        # todo: the second case (AKA "highest", refresh)
-        # cases: (width, height) | ("highest", refresh)
+        # cases: ("highest", refresh), (width, height)
         elif len(positionals) == 2:
-            width = -1
-            height = -1
-            # See if width is at least a valid integer
-            try:
-                width = int(positionals[0])
-            finally:
-                # See if height is at least a valid integer
+            # case: "highest", refresh
+            if positionals[0] == "highest":
+                subcommand = positionals[0]
                 try:
-                    height = int(positionals[1])
-                finally:
-                    # Neither width nor height were integers (and thus invalid pixel counts)
-                    if width == -1 and height == -1:
-                        raise CommandValueError(
-                            "Neither \"{}\" nor \"{}\" are valid widths or heights".format(
-                                positionals[0], positionals[1]),
-                            verb=verb
-                        )
-                    # width was invalid
-                    elif width == -1:
-                        raise CommandValueError(
-                            "\"{}\" is not a valid width".format(positionals[0]),
-                            verb=verb
-                        )
-                    # height was invalid
-                    elif height == -1:
-                        raise CommandValueError(
-                            "\"{}\" is not a valid height".format(positionals[1]),
-                            verb=verb
-                        )
-                    # width and height were valid integers; let's try them out
-                    else:
-                        return Command(
-                            verb=verb,
-                            width=width,
-                            height=height,
-                            scope=scope,
-                        )
-        # todo: this case!
+                    refresh = int(positionals[1])
+                except ValueError:
+                    raise CommandValueError("\"{}\" is not a valid refresh rate")
+
+                return Command(
+                    verb=verb,
+                    subcommand=subcommand,
+                    refresh=refresh,
+                    scope=scope,
+                )
+            # case: width, height
+            else:
+                # Try to parse positionals as integers
+                wh = []
+                for i in range(len(positionals)):
+                    try:
+                        wh.append(int(positionals[i]))
+                    except ValueError:
+                        wh.append(-1)
+                width, height = wh
+                # Neither width nor height were integers (and thus invalid pixel counts)
+                if width == -1 and height == -1:
+                    raise CommandValueError(
+                        "Neither \"{}\" nor \"{}\" are valid widths or heights".format(
+                            positionals[0], positionals[1]),
+                        verb=verb
+                    )
+                # width was invalid
+                elif width == -1:
+                    raise CommandValueError(
+                        "\"{}\" is not a valid width".format(positionals[0]),
+                        verb=verb
+                    )
+                # height was invalid
+                elif height == -1:
+                    raise CommandValueError(
+                        "\"{}\" is not a valid height".format(positionals[1]),
+                        verb=verb
+                    )
+
+                return Command(
+                    verb=verb,
+                    width=width,
+                    height=height,
+                    scope=scope,
+                )
         # case: (width, height, refresh)
         elif len(positionals) == 3:
-            pass
+            # Try to parse width, height, and refresh as integers
+            whr = []
+            for i in range(len(positionals)):
+                try:
+                    whr.append(int(positionals[i]))
+                except ValueError:
+                    whr.append(-1)
+            width, height, refresh = whr
+            # Nothing was an integer
+            if width == -1 and height == -1 and refresh == -1:
+                raise CommandValueError(
+                    "\"{}\"x\"{}\" at \"{}\"Hz is not a valid resolution".format(
+                        positionals[0], positionals[1], positionals[2]),
+                    verb=verb
+                )
+            # Neither width nor height were integers
+            elif width == -1 or height == -1:
+                raise CommandValueError(
+                    "\"{}\"x\"{}\" is not a valid resolution".format(
+                        positionals[0], positionals[1]),
+                    verb=verb
+                )
+            # refresh was not an integer
+            elif refresh == -1:
+                raise CommandValueError(
+                    "\"{}\" is not a valid refresh rate".format(positionals[2]),
+                    verb=verb
+                )
 
-            # do stuff
-
-            # return Command
+            return Command(
+                verb=verb,
+                width=width,
+                height=height,
+                refresh=refresh,
+                scope=scope,
+            )
         else:
             raise CommandSyntaxError("\"res\" commands cannot have more than three arguments", verb=verb)
+
+    elif verb == "rotate":
+        if len(positionals) == 0:
+            raise CommandSyntaxError("\"rotate\" commands must specify an angle", verb=verb)
+        if len(positionals) == 1:
+            try:
+                angle = int(positionals[0])
+                # Rotation must be multiple of 90
+                if angle % 90 != 0:
+                    raise CommandValueError("{} is not a multiple of 90".format(positionals[0]), verb=verb)
+            # Couldn't convert to int
+            except ValueError:
+                raise CommandValueError("{} is not a multiple of 90".format(positionals[0]), verb=verb)
+        # Too many arguments
+        else:
+            raise CommandSyntaxError("\"rotate\" commands can only have one argument", verb=verb)
+
+        return Command(
+            verb=verb,
+            angle=angle,
+            scope=scope,
+        )
 
     elif verb == "brightness":
         if len(positionals) == 0:
@@ -736,28 +800,6 @@ def getCommand(commandString):
         return Command(
             verb=verb,
             brightness=brightness,
-            scope=scope,
-        )
-
-    elif verb == "rotate":
-        if len(positionals) == 0:
-            raise CommandSyntaxError("\"rotate\" commands must specify an angle", verb=verb)
-        if len(positionals) == 1:
-            try:
-                angle = int(positionals[0])
-                # Rotation must be multiple of 90
-                if angle % 90 != 0:
-                    raise CommandValueError("{} is not a multiple of 90".format(positionals[0]), verb=verb)
-            # Couldn't convert to int
-            except ValueError:
-                raise CommandValueError("{} is not a multiple of 90".format(positionals[0]), verb=verb)
-        # Too many arguments
-        else:
-            raise CommandSyntaxError("\"rotate\" commands can only have one argument", verb=verb)
-
-        return Command(
-            verb=verb,
-            angle=angle,
             scope=scope,
         )
 
