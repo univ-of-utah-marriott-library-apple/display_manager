@@ -8,16 +8,32 @@ from display_manager_lib import *
 
 class CommandSyntaxError(Exception):
     """
-    Raised if commands have improper syntax (e.g.
+    Raised if commands have improper syntax
+        (e.g. wrong number of arguments, arguments in wrong place, invalid (sub)command(s), etc.)
     """
     pass
 
 
 class CommandValueError(Exception):
     """
-    Raised if commands have improper values
+    Raised if commands have unexpected values
+        (e.g. values are incorrect type, values are outside expected range, etc.)
     """
     pass
+
+
+class CommandExecutionError(Exception):
+    """
+    Raised if commands could not be executed (usually due to a DisplayError)
+    """
+
+    def __init__(self, command, message):
+        """
+        :param command: Command which raised this exception
+        :param message: Description of what went wrong
+        """
+        self.command = command
+        self.message = message
 
 
 class Command(object):
@@ -64,8 +80,7 @@ class Command(object):
         if verb in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
             self.verb = verb
         else:
-            print("Unrecognized command \"{}\".".format(verb))
-            sys.exit(1)
+            raise CommandSyntaxError("Unrecognized command \"{}\".".format(verb))
 
         # Determine type, scope
         self.type = kwargs["type"] if "type" in kwargs else None
@@ -145,30 +160,29 @@ class Command(object):
 
         return " ".join(stringList)
 
-    def __printNotFound(self):
-        print("No matching display mode was found. {}".format(
-            "Try removing HiDPI flags to find a mode." if self.hidpi != 0 else ""))
-
     # Run (and its handlers)
 
     def run(self):
         """
         Runs the command this Command has stored
         """
-        if self.verb == "help":
-            self.__handleHelp()
-        elif self.verb == "show":
-            self.__handleShow()
-        elif self.verb == "res":
-            self.__handleRes()
-        elif self.verb == "brightness":
-            self.__handleBrightness()
-        elif self.verb == "rotate":
-            self.__handleRotate()
-        elif self.verb == "underscan":
-            self.__handleUnderscan()
-        elif self.verb == "mirror":
-            self.__handleMirror()
+        try:
+            if self.verb == "help":
+                self.__handleHelp()
+            elif self.verb == "show":
+                self.__handleShow()
+            elif self.verb == "res":
+                self.__handleRes()
+            elif self.verb == "brightness":
+                self.__handleBrightness()
+            elif self.verb == "rotate":
+                self.__handleRotate()
+            elif self.verb == "underscan":
+                self.__handleUnderscan()
+            elif self.verb == "mirror":
+                self.__handleMirror()
+        except DisplayError as e:
+            raise CommandExecutionError(self, e.message)
 
     def __handleHelp(self):
         """
@@ -198,7 +212,7 @@ class Command(object):
                 "SUBCOMMANDS",
                 "   current (default)   Show current display settings.",
                 "   highest             Show the highest available resolution.",
-                "   all                 Show all available resolutions.",
+                "   available           Show all available resolutions.",
                 "",
                 "OPTIONS",
                 "   only-hidpi  Only show HiDPI resolutions.",
@@ -292,10 +306,7 @@ class Command(object):
 
             if self.type == "current":
                 current = display.currentMode
-                if current:
-                    print("{}".format(current))
-                else:
-                    self.__printNotFound()
+                print("{}".format(current))
 
                 if display.brightness:
                     print("Brightness: {}".format(display.brightness))
@@ -307,20 +318,13 @@ class Command(object):
                     print("Mirror of: {}".format(display.mirrorOf))
 
             elif self.type == "highest":
-                current = display.highestMode
+                current = display.highestMode(self.hidpi)
                 if current:
                     print("{}".format(current))
-                else:
-                    self.__printNotFound()
 
             elif self.type == "all":
-                foundMatching = False  # whether we ended up printing a matching mode or not
                 for mode in sorted(display.allModes, reverse=True):
                     print("    {}".format(mode))
-                    foundMatching = True
-
-                if not foundMatching:
-                    self.__printNotFound()
 
     def __handleRes(self):
         """
@@ -329,19 +333,11 @@ class Command(object):
         for display in self.scope:
             if self.type == "highest":
                 highest = display.highestMode(self.hidpi)
-                if highest:
-                    display.setMode(highest)
-                else:
-                    self.__printNotFound()
-                    sys.exit(1)
+                display.setMode(highest)
 
             else:
                 closest = display.closestMode(self.width, self.height, 32, self.refresh)
-                if closest:
-                    display.setMode(closest)
-                else:
-                    self.__printNotFound()
-                    sys.exit(1)
+                display.setMode(closest)
 
     def __handleBrightness(self):
         """
@@ -432,8 +428,7 @@ class CommandList(object):
                 if command.verb in commandGroups:
                     commandGroups[command.verb].append(command)
                 else:
-                    print("Unexpected command.verb \"{}\"".format(command.verb))
-                    sys.exit(1)
+                    raise CommandSyntaxError("\"{}\" is not a valid command".format(command.verb))
 
             # Run commands by type
             for commandType in commandGroups:
@@ -449,12 +444,18 @@ class CommandList(object):
                             commandType == "rotate" or
                             commandType == "underscan"
                     ):
-                        commands[-1].run()
+                        try:
+                            commands[-1].run()
+                        except DisplayError as e:
+                            raise CommandExecutionError(commands[-1], e.message)
 
                     # "show" commands don't interfere with each other, so run all of them
                     elif commandType == "show":
                         for command in commands:
-                            command.run()
+                            try:
+                                command.run()
+                            except DisplayError as e:
+                                raise CommandExecutionError(command, e.message)
 
                     # "mirror" commands are the most complicated to deal with
                     elif commandType == "mirror":
@@ -469,7 +470,10 @@ class CommandList(object):
 
                             # If display is not a mirror of any other display
                             if currentMirror is None:
-                                display.setMirrorOf(mirrorDisplay)
+                                try:
+                                    display.setMirrorOf(mirrorDisplay)
+                                except DisplayError as e:
+                                    raise CommandExecutionError(command, e.message)
 
                             # The user requested that this display mirror itself, or that it mirror a display
                             # which it is already mirroring. In either case, nothing should be done
@@ -481,9 +485,17 @@ class CommandList(object):
                                 # First disable mirroring, then enable it for new mirror
                                 display.setMirrorOf(None)
                                 display.setMirrorOf(mirrorDisplay)
+                                try:
+                                    display.setMirrorOf(None)
+                                    display.setMirrorOf(mirrorDisplay)
+                                except DisplayError as e:
+                                    raise CommandExecutionError(command, e.message)
 
                         elif command.type == "disable":
-                            command.run()
+                            try:
+                                command.run()
+                            except DisplayError as e:
+                                raise CommandExecutionError(command, e.message)
 
 
 def getCommand(commandString):
@@ -531,16 +543,14 @@ def getCommand(commandString):
             externalNum = int(displayTag[3:])
             # invalid displayTag
             if (
-                    externalNum < 1 or
+                    externalNum < 0 or
                     externalNum > len(externals) - 1
             ):
-                print("Invalid display tag \"{}\".".format(displayTag))
-                sys.exit(1)
+                raise CommandValueError("There is no display \"{}\"".format(displayTag))
             else:
                 return externals[externalNum]
         else:
-            print("Invalid display tag \"{}\".".format(displayTag))
-            sys.exit(1)
+            raise CommandSyntaxError("Invalid display tag \"{}\"".format(displayTag))
 
     # Get actual Displays for scope
     scope = []
@@ -567,47 +577,12 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"help\" commands can only have one argument")
 
-    # todo: decide whether to keep commented code? if so, change Command.__handleShow, etc.
     elif verb == "show":
-        # # Determine command type and type, and remove them from positionals
-        # commandType = None
-        # commandWhoKnows = None
-        # for i in range(len(positionals)):
-        #     # arg is command range
-        #     if positionals[i] in ["current", "highest", "all"]:
-        #         # No command range arg found yet
-        #         if not commandType:
-        #             commandType = positionals.pop(i)
-        #         # Cannot have two command range args
-        #         else:
-        #             raise CommandSyntaxError
-        #     # arg is command type
-        #     elif positionals[i] in ["all", "res", "brightness", "rotate", "underscan", "mirror", "displays",
-        #                             "help"]:
-        #         # No command type arg found yet
-        #         if not commandWhoKnows:
-        #             commandWhoKnows = positionals.pop(i)
-        #         # Cannot have two command type args
-        #         else:
-        #             raise CommandSyntaxError
-        #     # arg is not a valid positional arg
-        #     else:
-        #         raise CommandValueError
-        # # Default command range is "current"
-        # if not commandType:
-        #     commandType = "current"
-        # # Default command type is "all"
-        # if not commandWhoKnows:
-        #     commandWhoKnows = "all"
-        # # Cannot have remaining positionals after range and type
-        # if positionals:
-        #     raise CommandValueError
-
         if len(positionals) == 0:
             # Default type
             command.type = "current"
         if len(positionals) == 1:
-            if positionals[0] in ["current", "highest", "all"]:
+            if positionals[0] in ["current", "highest", "available"]:
                 command.type = positionals[0]
             # Invalid type
             else:
@@ -668,8 +643,9 @@ def getCommand(commandString):
 
         command.underscan = underscan
 
-    # todo: figure out how to handle mirroring scope (i.e. first <scope> --> source, others --> target)
     elif verb == "mirror":
+        if len(positionals) == 0:
+            raise CommandSyntaxError("\"mirror\" commands must have a subcommand")
         if len(positionals) == 1:
             # Determine type
             if positionals[0] in ["enable", "disable"]:
@@ -679,7 +655,7 @@ def getCommand(commandString):
                 raise CommandValueError("{} is not a valid subcommand".format(positionals[0]))
             # For "enable" type, first element in scope is source
             if command.type == "enable":
-                command.source = command.scope.pop(0)
+                command.source = command.scope.pop(-1)
         # Too many arguments
         else:
             raise CommandSyntaxError("\"mirror\" commands can only have one subcommand")
@@ -729,14 +705,21 @@ def parseCommands(string):
 def main():
     # Attempt to parse the commands
     try:
-        parseCommands(" ".join(sys.argv[1:])).run()
+        commands = parseCommands(" ".join(sys.argv[1:]))
+    except CommandSyntaxError:
+        # Show usage information
+        Command("help").run()
     except (CommandSyntaxError, CommandValueError) as e:
         print("ERROR: {}".format(e))
-
-        # todo: bring this back in
-        # Command("help").run()
-
-        sys.exit(1)
+        raise SystemExit()
+    # Command successfully parsed
+    else:
+        try:
+            commands.run()
+        except CommandExecutionError as e:
+            print("Could not execute \"{}\"".format(e.command.__str__()))
+            print("ERROR: {}".format(e.message))
+            raise SystemExit()
 
 
 if __name__ == "__main__":

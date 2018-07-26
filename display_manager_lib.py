@@ -16,6 +16,14 @@ import Quartz           # work with system graphics
 iokit = None
 
 
+class DisplayError(Exception):
+    """
+    Raised if a display cannot perform the requested operation (or access the requested property)
+        (e.g. does not have a matching display mode, display cannot modify this setting, etc.)
+    """
+    pass
+
+
 class Display(object):
     """
     Virtual representation of a physical display.
@@ -33,8 +41,7 @@ class Display(object):
         # Check whether displayID is actually a display
         (error, allDisplayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
         if displayID not in allDisplayIDs or error:
-            print("Display {} not found.".format(displayID))
-            sys.exit(1)
+            raise DisplayError("Display {} not found".format(displayID))
         else:
             self.displayID = displayID
 
@@ -135,7 +142,18 @@ class Display(object):
             else:  # highest hasn't been set yet, so anything is the highest
                 highest = mode
 
-        return highest
+        if highest:
+            return highest
+        else:
+            if hidpi == 1:
+                raise DisplayError(
+                    "Display \"{}\" cannot be set to any non-HiDPI resolutions".format(self.tag))
+            elif hidpi == 2:
+                raise DisplayError(
+                    "Display \"{}\" cannot be set to any HiDPI resolutions".format(self.tag))
+            else:
+                raise DisplayError(
+                    "Display \"{}\"\'s resolution cannot be set".format(self.tag))
 
     def closestMode(self, width, height, depth=32.0, refresh=0.0, hidpi=0):
         """
@@ -170,20 +188,23 @@ class Display(object):
             if match:
                 return match
 
+        raise DisplayError(
+            "Display \"{}\" cannot be set to a sufficiently similar resolution".format(self.tag))
+
     def setMode(self, mode):
         """
         :param mode: The Quartz "DisplayMode" interface to set this display to.
         """
         (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
         if error:
-            print("Could not begin display configuration.".format(error))
-            sys.exit(1)
+            raise DisplayError(
+                "Display \"{}\"\'s resolution cannot be set".format(self.tag))
 
         error = Quartz.CGConfigureDisplayWithDisplayMode(configRef, self.displayID, mode.raw, None)
         if error:
-            print("Failed to set display configuration.".format(error))
             Quartz.CGCancelDisplayConfiguration(configRef)
-            sys.exit(1)
+            raise DisplayError(
+                "Display \"{}\"\'s resolution cannot be set".format(self.tag))
 
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
@@ -197,7 +218,8 @@ class Display(object):
         service = self.__servicePort
         (error, brightness) = iokit["IODisplayGetFloatParameter"](service, 0, iokit["kDisplayBrightness"], None)
         if error:
-            return None
+            raise DisplayError(
+                "Display \"{}\"\'s brightness cannot be set".format(self.tag))
         else:
             return brightness
 
@@ -207,10 +229,14 @@ class Display(object):
         """
         error = iokit["IODisplaySetFloatParameter"](self.__servicePort, 0, iokit["kDisplayBrightness"], brightness)
         if error:
-            print("Failed to set brightness of display {}.".format(self.tag))
-            # External display brightness probably can't be managed this way
-            print("External displays may not be compatible with Display Manager. \n"
-                  "If this is an external display, try setting manually on device hardware.")
+            if self.isMain:
+                raise DisplayError(
+                    "Display \"{}\"\'s brightness cannot be set".format(self.tag))
+            else:
+                raise DisplayError(
+                    "Display \"{}\"\'s brightness cannot be set.\n"
+                    "External displays may not be compatible with Display Manager."
+                    "Try setting manually on device hardware.\n".format(self.tag))
 
     # Rotation properties and methods
 
@@ -228,8 +254,7 @@ class Display(object):
         angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
         rotateCode = 1024
         if angle % 90 != 0:  # user entered inappropriate angle, so we quit
-            print("Can only rotate by multiples of 90 degrees.")
-            sys.exit(1)
+            raise ValueError("Can only rotate by multiples of 90 degrees.")
         # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
         options = rotateCode | (angleCodes[angle % 360] << 16)
 
@@ -237,8 +262,8 @@ class Display(object):
         error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
 
         if error:
-            print("Failed to rotate display {}.".format(self.tag))
-            sys.exit(1)
+            raise DisplayError(
+                "Display \"{}\"\'s rotation cannot be set".format(self.tag))
 
     # Underscan properties and methods
 
@@ -248,10 +273,11 @@ class Display(object):
         :return: Display's active underscan setting, from 1 (0%) to 0 (100%).
             (Yes, it doesn't really make sense to have 1 -> 0 and 0 -> 100, but it's how IOKit reports it.)
         """
-        (error, underscan) = iokit["IODisplayGetFloatParameter"](self.__servicePort,
-                                                                 0, iokit["kDisplayUnderscan"], None)
+        (error, underscan) = iokit["IODisplayGetFloatParameter"](
+            self.__servicePort, 0, iokit["kDisplayUnderscan"], None)
         if error:
-            return None
+            raise DisplayError(
+                "Display \"{}\"\'s underscan cannot be set".format(self.tag))
         else:
             # IOKit handles underscan values as the opposite of what makes sense, so I switch it here.
             # e.g. 0 -> maximum (100%), 1 -> 0% (default)
@@ -267,7 +293,8 @@ class Display(object):
 
         error = iokit["IODisplaySetFloatParameter"](self.__servicePort, 0, iokit["kDisplayUnderscan"], underscan)
         if error:
-            print("Failed to set underscan of display {}".format(self.tag))
+            raise DisplayError(
+                "Display \"{}\"\'s underscan cannot be set".format(self.tag))
 
     # Mirroring properties and methods
 
@@ -293,8 +320,8 @@ class Display(object):
         """
         (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
         if error:
-            print("Could not begin display configuration.")
-            sys.exit(1)
+            raise DisplayError(
+                "Display \"{}\" cannot be set to mirror display \"{}\"".format(self.tag, mirrorDisplay.tag))
 
         # Will be passed a None mirrorDisplay to disable mirroring. Cannot mirror self.
         if mirrorDisplay is None or mirrorDisplay.displayID == self.displayID:
@@ -360,8 +387,7 @@ def getAllDisplays():
     """
     (error, displayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
     if error:
-        print("Unable to get displays list.")
-        sys.exit(1)
+        raise DisplayError("Could not retrieve displays list")
 
     displays = []
     for displayID in displayIDs:
