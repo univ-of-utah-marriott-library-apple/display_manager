@@ -626,7 +626,7 @@ def getCommand(commandString):
         if len(positionals) == 0:
             # Default subcommand
             subcommand = "current"
-        if len(positionals) == 1:
+        elif len(positionals) == 1:
             if positionals[0] in ["current", "highest", "available"]:
                 subcommand = positionals[0]
             # Invalid subcommand
@@ -756,7 +756,7 @@ def getCommand(commandString):
     elif verb == "rotate":
         if len(positionals) == 0:
             raise CommandSyntaxError("\"rotate\" commands must specify an angle", verb=verb)
-        if len(positionals) == 1:
+        elif len(positionals) == 1:
             try:
                 angle = int(positionals[0])
                 # Rotation must be multiple of 90
@@ -778,7 +778,7 @@ def getCommand(commandString):
     elif verb == "brightness":
         if len(positionals) == 0:
             raise CommandSyntaxError("\"brightness\" commands must specify a brightness value", verb=verb)
-        if len(positionals) == 1:
+        elif len(positionals) == 1:
             try:
                 brightness = float(positionals[0])
                 # Brightness must be between 0 and 1
@@ -806,7 +806,7 @@ def getCommand(commandString):
     elif verb == "underscan":
         if len(positionals) == 0:
             raise CommandSyntaxError("\"underscan\" commands must specify an underscan value", verb=verb)
-        if len(positionals) == 1:
+        elif len(positionals) == 1:
             try:
                 underscan = float(positionals[0])
                 # Underscan must be between 0 and 1
@@ -834,7 +834,7 @@ def getCommand(commandString):
     elif verb == "mirror":
         if len(positionals) == 0:
             raise CommandSyntaxError("\"mirror\" commands must specify a subcommand", verb=verb)
-        if len(positionals) == 1:
+        elif len(positionals) == 1:
             subcommand = positionals[0]
             if subcommand == "enable":
                 if len(scope) < 2:
