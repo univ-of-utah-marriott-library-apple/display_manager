@@ -566,8 +566,6 @@ def getCommand(commandString):
     # Determine positionals (all remaining words)
     positionals = words
 
-    # todo: parse for only-hidpi and no-hidpi
-
     if verb == "help":
         if len(positionals) == 0:
             # Default (sub)command
@@ -588,6 +586,24 @@ def getCommand(commandString):
         )
 
     elif verb == "show":
+        # Determine HiDPI settings
+        hidpi = 0
+        for i in range(len(positionals)):
+            if positionals[i] == "no-hidpi":
+                # If HiDPI hasn't been set to the contrary setting
+                if hidpi != 2:
+                    hidpi = 1  # doesn't match HiDPI
+                    positionals.pop(i)
+                else:
+                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+            elif positionals[i] == "only-hidpi":
+                # If HiDPI hasn't been set to the contrary setting
+                if hidpi != 1:
+                    hidpi = 2  # only matches HiDPI
+                    positionals.pop(i)
+                else:
+                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+
         if len(positionals) == 0:
             # Default subcommand
             subcommand = "current"
@@ -608,10 +624,29 @@ def getCommand(commandString):
         return Command(
             verb=verb,
             subcommand=subcommand,
+            hidpi=hidpi,
             scope=scope,
         )
 
     elif verb == "res":
+        # Determine HiDPI settings
+        hidpi = 0
+        for i in range(len(positionals)):
+            if positionals[i] == "no-hidpi":
+                # If HiDPI hasn't been set to the contrary setting
+                if hidpi != 2:
+                    hidpi = 1  # doesn't match HiDPI
+                    positionals.pop(i)
+                else:
+                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+            elif positionals[i] == "only-hidpi":
+                # If HiDPI hasn't been set to the contrary setting
+                if hidpi != 1:
+                    hidpi = 2  # only matches HiDPI
+                    positionals.pop(i)
+                else:
+                    raise CommandSyntaxError("Cannot specify \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+
         if len(positionals) == 0:
             raise CommandSyntaxError("\"res\" commands must specify a resolution", verb=verb)
         # case: "highest" (or error)
@@ -631,6 +666,7 @@ def getCommand(commandString):
             return Command(
                 verb=verb,
                 subcommand=subcommand,
+                hidpi=hidpi,
                 scope=scope,
             )
         # cases: ("highest", refresh), (width, height)
@@ -647,6 +683,7 @@ def getCommand(commandString):
                     verb=verb,
                     subcommand=subcommand,
                     refresh=refresh,
+                    hidpi=hidpi,
                     scope=scope,
                 )
             # case: width, height
@@ -683,6 +720,7 @@ def getCommand(commandString):
                     verb=verb,
                     width=width,
                     height=height,
+                    hidpi=hidpi,
                     scope=scope,
                 )
         # case: (width, height, refresh)
@@ -721,10 +759,14 @@ def getCommand(commandString):
                 width=width,
                 height=height,
                 refresh=refresh,
+                hidpi=hidpi,
                 scope=scope,
             )
         else:
-            raise CommandSyntaxError("\"res\" commands cannot have more than three arguments", verb=verb)
+            raise CommandSyntaxError(
+                "\"res\" commands cannot have more than three non-parametric arguments",
+                verb=verb
+            )
 
     elif verb == "rotate":
         if len(positionals) == 0:
