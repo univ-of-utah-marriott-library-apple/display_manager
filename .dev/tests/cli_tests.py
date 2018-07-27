@@ -24,12 +24,8 @@ class CommandTests(unittest.TestCase):
             self.assertIsInstance(commands, CommandList)
             self.assertIsInstance(string, str)
 
-            # todo: remove and uncomment next
-            temp = parseCommands(string)
-            self.assertEqual(commands, temp)
-
             # Do the actual checking
-            # self.assertEqual(commands, parseCommands(string))
+            self.assertEqual(commands, parseCommands(string))
 
     # Success tests
 

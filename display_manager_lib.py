@@ -375,7 +375,7 @@ class DisplayMode(object):
 
     def __eq__(self, other):
         return self.width * self.height == other.width * other.height
-    
+
     def __hash__(self):
         return hash(self.__str__())
 
