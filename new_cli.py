@@ -59,7 +59,7 @@ class Command(object):
 
     def __init__(self, **kwargs):
         """
-        :param kwargs: Includes verb ("command type"), subcommand, scope, values, options, and rawInput
+        :param kwargs: Includes verb ("command type"), subcommand, scope, values, and options
         """
         # Determine verb
         if kwargs["verb"]:
@@ -70,7 +70,7 @@ class Command(object):
 
         # Determine subcommand, scope
         self.subcommand = kwargs["subcommand"] if "subcommand" in kwargs else None
-        if kwargs["scope"]:
+        if "scope" in kwargs:
             if type(kwargs["scope"]) == list:
                 self.scope = kwargs["scope"]
             elif type(kwargs["scope"]) == Display:
@@ -84,14 +84,15 @@ class Command(object):
         self.width = int(kwargs["width"]) if "width" in kwargs else None
         self.height = int(kwargs["height"]) if "height" in kwargs else None
         self.refresh = int(kwargs["refresh"]) if "refresh" in kwargs else None
+        # For HiDPI:
+        #   0: fits HiDPI or non-HiDPI
+        #   1: fits only non-HiDPI
+        #   2: fits only HiDPI
         self.hidpi = int(kwargs["hidpi"]) if "hidpi" in kwargs else None
         self.angle = int(kwargs["angle"]) if "angle" in kwargs else None
         self.brightness = float(kwargs["brightness"]) if "brightness" in kwargs else None
         self.underscan = float(kwargs["underscan"]) if "underscan" in kwargs else None
         self.source = kwargs["source"] if "source" in kwargs else None
-
-        # Keep raw command text (for use in error messages)
-        self.rawInput = kwargs["rawInput"] if "rawInput" in kwargs else None
 
         # Make sure IOKit is ready for use in any/all commands
         getIOKit()
@@ -156,12 +157,24 @@ class Command(object):
         return " ".join(stringList)
 
     def __eq__(self, other):
+        def safeScopeCheckEquals(a, b):
+            """
+            Check whether two Commands' scopes are equal in a None-safe way
+            :param a: The first Command
+            :param b: The second Command
+            :return: Whether the two scopes are equal
+            """
+            if a.scope and b.scope:
+                return set(a.scope) == set(b.scope)
+            else:
+                return a.scope == b.scope
+
         return all([
             isinstance(other, self.__class__),
 
             other.verb == self.verb,
             other.subcommand == self.subcommand,
-            set(other.scope) == set(self.scope),
+            safeScopeCheckEquals(other, self),
 
             other.width == self.width,
             other.height == self.height,
@@ -172,6 +185,9 @@ class Command(object):
             other.underscan == self.underscan,
             other.source == self.source,
         ])
+
+    def __hash__(self):
+        return hash(self.__str__())
 
     # Run (and its handlers)
 
@@ -195,7 +211,7 @@ class Command(object):
             elif self.verb == "mirror":
                 self.__handleMirror()
         except DisplayError as e:
-            raise CommandExecutionError(self, e.message)
+            raise CommandExecutionError(e.message, command=self)
 
     def __handleHelp(self):
         """
@@ -410,9 +426,32 @@ class CommandList(object):
     Holds one or more "Command" instances.
     """
 
-    def __init__(self):
+    def __init__(self, commands=None):
+        """
+        :param commands: A single Command, a list of Commands, or a CommandList
+        """
         # self.commandDict will consist of displayID keys corresponding to commands for that display
-        self.__commandDict = {}
+        self.commandDict = {}
+
+        if commands:
+            if isinstance(commands, Command):
+                self.addCommand(commands)
+            elif isinstance(commands, list):
+                for command in commands:
+                    self.addCommand(command)
+            elif isinstance(commands, CommandList):
+                for command in commands.commands:
+                    self.addCommand(command)
+
+    def __eq__(self, other):
+        return set(other.commands) == set(self.commands)
+
+    def __hash__(self):
+        h = 0
+        for command in self.commands:
+            h = h | command.__str__()
+
+        return hash(h)
 
     @property
     def commands(self):
@@ -420,8 +459,8 @@ class CommandList(object):
         :return: All the Commands in this CommandList
         """
         commands = []
-        for displayID in self.__commandDict:
-            for command in self.__commandDict[displayID]:
+        for displayTag in self.commandDict:
+            for command in self.commandDict[displayTag]:
                 commands.append(command)
 
         return commands
@@ -430,19 +469,32 @@ class CommandList(object):
         """
         :param command: The Command to add to this CommandList
         """
-        for display in command.scope:
-            if display.displayID in self.__commandDict:
-                self.__commandDict[display.displayID].append(command)
+        # Break "command" into each individual action it will perform
+        # on each individual display in its scope, and add those actions
+        # to commandDict, according to their associated display
+        if command.scope:
+            for display in command.scope:
+                if display.tag in self.commandDict:
+                    self.commandDict[display.tag].append(command)
+                else:
+                    self.commandDict[display.tag] = [command]
+        # If there is no scope, there will be only one action.
+        # In this case, we simply add the command to key "None".
+        #   Note: this should only be possible with verb="help", since every
+        #   other verb has a default scope
+        else:
+            if None in self.commandDict:
+                self.commandDict[None].append(command)
             else:
-                self.__commandDict[display.displayID] = [command]
+                self.commandDict[None] = [command]
 
     def run(self):
         """
         Runs all stored Commands in a non-interfering fashion
         """
-        for displayID in self.__commandDict:
+        for displayID in self.commandDict:
             # Commands for this particular display
-            displayCommands = self.__commandDict[displayID]
+            displayCommands = self.commandDict[displayID]
 
             # Group commands by subcommand. Must preserve ordering to avoid interfering commands
             commandGroups = collections.OrderedDict([
@@ -457,7 +509,10 @@ class CommandList(object):
                 if command.verb in commandGroups:
                     commandGroups[command.verb].append(command)
                 else:
-                    raise CommandSyntaxError("\"{}\" is not a valid command".format(command.verb))
+                    raise CommandSyntaxError(
+                        "\"{}\" is not a valid command".format(command.verb),
+                        verb=command.verb
+                    )
 
             # Run commands by subcommand
             for commandType in commandGroups:
@@ -476,7 +531,7 @@ class CommandList(object):
                         try:
                             commands[-1].run()
                         except DisplayError as e:
-                            raise CommandExecutionError(commands[-1], e.message)
+                            raise CommandExecutionError(e.message, commands[-1])
 
                     # "show" commands don't interfere with each other, so run all of them
                     elif commandType == "show":
@@ -484,7 +539,7 @@ class CommandList(object):
                             try:
                                 command.run()
                             except DisplayError as e:
-                                raise CommandExecutionError(command, e.message)
+                                raise CommandExecutionError(e.message, command)
 
                     # "mirror" commands are the most complicated to deal with
                     elif commandType == "mirror":
@@ -502,7 +557,7 @@ class CommandList(object):
                                 try:
                                     display.setMirrorOf(mirrorDisplay)
                                 except DisplayError as e:
-                                    raise CommandExecutionError(command, e.message)
+                                    raise CommandExecutionError(e.message, command)
 
                             # The user requested that this display mirror itself, or that it mirror a display
                             # which it is already mirroring. In either case, nothing should be done
@@ -518,20 +573,53 @@ class CommandList(object):
                                     display.setMirrorOf(None)
                                     display.setMirrorOf(mirrorDisplay)
                                 except DisplayError as e:
-                                    raise CommandExecutionError(command, e.message)
+                                    raise CommandExecutionError(e.message, command)
 
                         elif command.type == "disable":
                             try:
                                 command.run()
                             except DisplayError as e:
-                                raise CommandExecutionError(command, e.message)
+                                raise CommandExecutionError(e.message, command)
+
+
+def getDisplayFromTag(displayTag):
+    """
+    Returns a Display for "displayTag"
+    :param displayTag: The display tag to find the Display of
+    :return: The Display which displayTag refers to
+    """
+    if displayTag == "main":
+        return getMainDisplay()
+    elif displayTag == "all":
+        return getAllDisplays()
+    elif re.match(r"^ext[0-9]+$", displayTag):
+        # Get all the external displays (in order)
+        externals = sorted(getAllDisplays())
+        for display in externals:
+            if display.isMain:
+                externals.remove(display)
+                break
+
+        # Get the number in displayTag
+        externalNum = int(displayTag[3:])
+        if externalNum > len(externals) - 1:
+            # There aren't enough displays for this externalNumber to be valid
+            raise CommandValueError("There is no display \"{}\"".format(displayTag))
+        else:
+            # 0 < externalNum < len(externals) - 1 means valid tag
+            # ("0 < externalNum" known from re.match(r"^ext[0-9]+$") above)
+            return externals[externalNum]
+
+    # Note: no need for final "else" here, because getDisplayFromTag will only
+    # be passed regex matches for "main|all|ext[0-9]+", because these are the only
+    # arguments added to "scopeTags"
 
 
 def getCommand(commandString):
     """
-    # todo: this
-    :param commandString:
-    :return:
+    Converts the commandString into a Command
+    :param commandString: the string to convert
+    :return: The Command represented by "commandString"
     """
     if not commandString:
         return None
@@ -555,38 +643,6 @@ def getCommand(commandString):
             else:
                 raise CommandSyntaxError("Invalid placement of {}".format(words[i]), verb=verb)
 
-    def getDisplayFromTag(displayTag):
-        """
-        Returns a Display for "displayTag"
-        :param displayTag: The display tag to find the Display of
-        :return: The Display which displayTag refers to
-        """
-        if displayTag == "main":
-            return getMainDisplay()
-        elif displayTag == "all":
-            return getAllDisplays()
-        elif re.match(r"^ext[0-9]+$", displayTag):
-            # Get all the external displays (in order)
-            externals = sorted(getAllDisplays())
-            for display in externals:
-                if display.isMain:
-                    externals.remove(display)
-                    break
-
-            # Get the number in displayTag
-            externalNum = int(displayTag[3:])
-            if externalNum > len(externals) - 1:
-                # There aren't enough displays for this externalNumber to be valid
-                raise CommandValueError("There is no display \"{}\"".format(displayTag), verb=verb)
-            else:
-                # 0 < externalNum < len(externals) - 1 means valid tag
-                # ("0 < externalNum" known from re.match(r"^ext[0-9]+$") above)
-                return externals[externalNum]
-
-        # Note: no need for final "else" here, because getDisplayFromTag will only
-        # be passed regex matches for "main|all|ext[0-9]+", because these are the only
-        # arguments added to "scopeTags"
-
     # Determine positionals (all remaining words)
     positionals = words
 
@@ -602,7 +658,6 @@ def getCommand(commandString):
         "brightness": None,
         "underscan": None,
         "source": None,
-        "rawInput": commandString,
     }
 
     if verb == "help":
@@ -987,11 +1042,10 @@ def parseCommands(commandStrings):
     commandPattern = r"((?:{0}).*?)(?:(?: (?={0}))|\Z)".format(verbPattern)
 
     # Make sure the command starts with a valid verb
-    firstWordMatch = re.match("^(" + verbPattern + ")$", commandStrings.split()[0])
-    if firstWordMatch:
-        firstWord = firstWordMatch.group(0)
-    else:
-        raise CommandSyntaxError("\"{}\" is not a valid type of command".format(commandStrings.split()[0]))
+    firstWord = commandStrings.split()[0]
+    firstWordMatch = re.match("^(" + verbPattern + ")$", firstWord)
+    if not firstWordMatch:
+        raise CommandSyntaxError("\"{}\" is not a valid type of command".format(firstWord), verb=firstWord)
 
     # Get all the individual commands
     if "help" not in commandStrings:
@@ -1034,11 +1088,7 @@ def main():
         try:
             commands.run()
         except CommandExecutionError as e:
-            if e.command.rawInput:
-                print("Error in \"{}\":".format(e.command.rawInput))
-                print("{}".format(e.message))
-            else:
-                print("Error: {}".format(e.message))
+            print("Error: {}".format(e.message))
             raise SystemExit()
 
 

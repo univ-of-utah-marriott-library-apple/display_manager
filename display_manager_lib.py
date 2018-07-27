@@ -52,6 +52,9 @@ class Display(object):
     def __eq__(self, other):
         return self.displayID == other.displayID
 
+    def __hash__(self):
+        return self.displayID
+
     # General properties
 
     @property
@@ -372,6 +375,9 @@ class DisplayMode(object):
 
     def __eq__(self, other):
         return self.width * self.height == other.width * other.height
+    
+    def __hash__(self):
+        return hash(self.__str__())
 
 
 def getMainDisplay():

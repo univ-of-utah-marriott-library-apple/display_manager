@@ -10,30 +10,101 @@ class CommandTests(unittest.TestCase):
 
     # Helper methods
 
-    # todo: this
-    # def parsesTo(self, string, command):
-    #     self.assertEqual(
-    #         command,
-    #         parseCommands(string).commands[0]
-    #     )
+    def assertParse(self, tuples):
+        """
+        Asserts that the string in each tuple parses to the Command or CommandList
+        :param tuples: A list of tuples of a single Command/CommandList and a string
+            [(CommandList1, string1), (CommandList2, string2), ...]
+        """
+        for t in tuples:
+            commands = t[0]
+            string = t[1]
 
-    # todo: migrate both of these to "parsesTo"
+            # Make sure everything is the right type to begin with
+            self.assertIsInstance(commands, CommandList)
+            self.assertIsInstance(string, str)
+
+            # todo: remove and uncomment next
+            temp = parseCommands(string)
+            self.assertEqual(commands, temp)
+
+            # Do the actual checking
+            # self.assertEqual(commands, parseCommands(string))
+
     # Success tests
 
     def test_parseHelp(self):
-        self.assertEqual(
-            Command(verb="help", subcommand="usage"),
-            parseCommands("help").commands[0]
-        )
-        self.assertEqual(
-            Command(verb="help", subcommand="show"),
-            parseCommands("help show").commands[0]
+        self.assertParse(
+            [
+                (
+                    CommandList([Command(verb="help", subcommand="usage")]),
+                    "help"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="help")]),
+                    "help help"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="show")]),
+                    "help show"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="res")]),
+                    "help res"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="rotate")]),
+                    "help rotate"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="brightness")]),
+                    "help brightness"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="underscan")]),
+                    "help underscan"
+                ),
+                (
+                    CommandList([Command(verb="help", subcommand="mirror")]),
+                    "help mirror"
+                ),
+            ]
         )
 
     def test_parseShow(self):
-        self.assertEqual(
-            Command(verb="show", subcommand="current"),
-            parseCommands("help").commands[0]
+        self.assertParse(
+            [
+                # Subcommands
+                (
+                    CommandList([
+                        Command(verb="show", subcommand="current"),  # default
+                        Command(verb="show", subcommand="current"),
+                        Command(verb="show", subcommand="highest"),
+                        Command(verb="show", subcommand="available"),
+                    ]),
+                    "show show current show highest show available"
+                ),
+                # Parameters (HiDPI)
+                (
+                    CommandList([
+                        Command(verb="show", hidpi=0),  # match all (default)
+                        Command(verb="show", hidpi=1),  # mach only non-HiDPI
+                        Command(verb="show", hidpi=2),  # match only HiDPI
+                    ]),
+                    "show show no-hidpi show only-hidpi"
+                ),
+                # Scopes
+                (
+                    CommandList([
+                        Command(verb="show", scope=getMainDisplay()),  # default
+                        Command(verb="show", scope=getMainDisplay()),
+                        # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                        Command(verb="show", scope=getDisplayFromTag("ext0")),
+                        Command(verb="show", scope=getAllDisplays()),
+                    ]),
+                    "show show main show ext0 show all"
+                ),
+            ]
         )
 
     # Error tests
