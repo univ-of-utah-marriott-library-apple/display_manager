@@ -30,78 +30,234 @@ class CommandTests(unittest.TestCase):
     # Success tests
 
     def test_parseHelp(self):
-        self.assertParse(
-            [
-                (
-                    CommandList([Command(verb="help", subcommand="usage")]),
-                    "help"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="help")]),
-                    "help help"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="show")]),
-                    "help show"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="res")]),
-                    "help res"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="rotate")]),
-                    "help rotate"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="brightness")]),
-                    "help brightness"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="underscan")]),
-                    "help underscan"
-                ),
-                (
-                    CommandList([Command(verb="help", subcommand="mirror")]),
-                    "help mirror"
-                ),
-            ]
-        )
+        self.assertParse([
+            (
+                CommandList([Command(verb="help", subcommand="usage")]),
+                "help"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="help")]),
+                "help help"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="show")]),
+                "help show"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="res")]),
+                "help res"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="rotate")]),
+                "help rotate"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="brightness")]),
+                "help brightness"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="underscan")]),
+                "help underscan"
+            ),
+            (
+                CommandList([Command(verb="help", subcommand="mirror")]),
+                "help mirror"
+            ),
+        ])
 
     def test_parseShow(self):
-        self.assertParse(
-            [
-                # Subcommands
-                (
-                    CommandList([
-                        Command(verb="show", subcommand="current"),  # default
-                        Command(verb="show", subcommand="current"),
-                        Command(verb="show", subcommand="highest"),
-                        Command(verb="show", subcommand="available"),
-                    ]),
-                    "show show current show highest show available"
-                ),
-                # Parameters (HiDPI)
-                (
-                    CommandList([
-                        Command(verb="show", hidpi=0),  # match all (default)
-                        Command(verb="show", hidpi=1),  # mach only non-HiDPI
-                        Command(verb="show", hidpi=2),  # match only HiDPI
-                    ]),
-                    "show show no-hidpi show only-hidpi"
-                ),
-                # Scopes
-                (
-                    CommandList([
-                        Command(verb="show", scope=getMainDisplay()),  # default
-                        Command(verb="show", scope=getMainDisplay()),
-                        # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
-                        Command(verb="show", scope=getDisplayFromTag("ext0")),
-                        Command(verb="show", scope=getAllDisplays()),
-                    ]),
-                    "show show main show ext0 show all"
-                ),
-            ]
-        )
+        self.assertParse([
+            # Subcommands
+            (
+                CommandList([
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),  # default
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),
+                    Command(verb="show", subcommand="highest", hidpi=0, scope=getAllDisplays()),
+                    Command(verb="show", subcommand="available", hidpi=0, scope=getAllDisplays()),
+                ]),
+                "show show current show highest show available"
+            ),
+            # Options (HiDPI)
+            (
+                CommandList([
+                    # match all (default)
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),
+                    # mach only non-HiDPI
+                    Command(verb="show", subcommand="current", hidpi=1, scope=getAllDisplays()),
+                    # match only HiDPI
+                    Command(verb="show", subcommand="current", hidpi=2, scope=getAllDisplays()),
+                ]),
+                "show show no-hidpi show only-hidpi"
+            ),
+            # Scopes
+            (
+                CommandList([
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),  # default
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="show", subcommand="current", hidpi=0, scope=getDisplayFromTag("ext0")),
+                ]),
+                "show show all show main show ext0"
+            ),
+        ])
+
+    def test_parseRes(self):
+        self.assertParse([
+            # case "highest"
+            (
+                CommandList([
+                    # Scopes
+                    Command(verb="res", subcommand="highest", hidpi=0, scope=getMainDisplay()),
+                    Command(verb="res", subcommand="highest", hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="res", subcommand="highest", hidpi=0, scope=getDisplayFromTag("ext0")),
+                    Command(verb="res", subcommand="highest", hidpi=0, scope=getAllDisplays()),
+
+                    # HiDPI options
+                    Command(verb="res", subcommand="highest", hidpi=1, scope=getMainDisplay()),
+                    Command(verb="res", subcommand="highest", hidpi=2, scope=getMainDisplay()),
+                ]),
+                "res highest res highest main res highest ext0 res highest all "    # scopes
+                "res highest no-hidpi res highest only-hidpi"                       # HiDPI options
+            ),
+            # case ("highest", refresh)
+            (
+                CommandList([
+                    # Scopes
+                    Command(verb="res", subcommand="highest", refresh=1, hidpi=0, scope=getMainDisplay()),
+                    Command(verb="res", subcommand="highest", refresh=2, hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="res", subcommand="highest", refresh=3, hidpi=0, scope=getDisplayFromTag("ext0")),
+                    Command(verb="res", subcommand="highest", refresh=4, hidpi=0, scope=getAllDisplays()),
+
+                    # HiDPI options
+                    Command(verb="res", subcommand="highest", refresh=5, hidpi=1, scope=getMainDisplay()),
+                    Command(verb="res", subcommand="highest", refresh=6, hidpi=2, scope=getMainDisplay()),
+                ]),
+                "res highest 1 res highest 2 main res highest 3 ext0 res highest 4 all "    # scopes
+                "res highest 5 no-hidpi res highest 6 only-hidpi"                           # HiDPI options
+            ),
+            # case (width, height)
+            (
+                CommandList([
+                    # Scopes
+                    Command(verb="res", width=1, height=2, hidpi=0, scope=getMainDisplay()),
+                    Command(verb="res", width=3, height=4, hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="res", width=5, height=6, hidpi=0, scope=getDisplayFromTag("ext0")),
+                    Command(verb="res", width=7, height=8, hidpi=0, scope=getAllDisplays()),
+
+                    # HiDPI options
+                    Command(verb="res", width=10, height=11, hidpi=1, scope=getMainDisplay()),
+                    Command(verb="res", width=12, height=13, hidpi=2, scope=getMainDisplay()),
+                ]),
+                "res 1 2 res 3 4 main res 5 6 ext0 res 7 8 all "    # scopes
+                "res 10 11 no-hidpi res 12 13 only-hidpi"           # HiDPI options
+            ),
+            # case (width, height, refresh)
+            (
+                CommandList([
+                    # Scopes
+                    Command(verb="res", width=1, height=2, refresh=3, hidpi=0, scope=getMainDisplay()),
+                    Command(verb="res", width=4, height=5, refresh=6, hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="res", width=7, height=8, refresh=9, hidpi=0, scope=getDisplayFromTag("ext0")),
+                    Command(verb="res", width=10, height=11, refresh=12, hidpi=0, scope=getAllDisplays()),
+
+                    # HiDPI options
+                    Command(verb="res", width=13, height=14, refresh=15, hidpi=1, scope=getMainDisplay()),
+                    Command(verb="res", width=16, height=17, refresh=18, hidpi=2, scope=getMainDisplay()),
+                ]),
+                "res 1 2 3 res 4 5 6 main res 7 8 9 ext0 res 10 11 12 all "     # scopes
+                "res 13 14 15 no-hidpi res 16 17 18 only-hidpi"                 # HiDPI options
+            ),
+        ])
+
+    def test_parseRotate(self):
+        self.assertParse([
+            # Scopes
+            (
+                CommandList([
+                    Command(verb="rotate", angle=0, scope=getMainDisplay()),
+                    Command(verb="rotate", angle=90, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="rotate", angle=180, scope=getDisplayFromTag("ext0")),
+                    Command(verb="rotate", angle=270, scope=getAllDisplays())
+                ]),
+                "rotate 0 rotate 90 main rotate 180 ext0 rotate 270 all"
+            ),
+        ])
+
+    def test_parseBrightness(self):
+        self.assertParse([
+            # Scopes
+            (
+                CommandList([
+                    Command(verb="brightness", brightness=0, scope=getMainDisplay()),
+                    Command(verb="brightness", brightness=.33, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="brightness", brightness=.67, scope=getDisplayFromTag("ext0")),
+                    Command(verb="brightness", brightness=1, scope=getAllDisplays())
+                ]),
+                "brightness 0 brightness .33 main brightness .67 ext0 brightness 1 all"
+            ),
+        ])
+
+    def test_parseUnderscan(self):
+        self.assertParse([
+            # Scopes
+            (
+                CommandList([
+                    Command(verb="underscan", underscan=0, scope=getMainDisplay()),
+                    Command(verb="underscan", underscan=.33, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="underscan", underscan=.67, scope=getDisplayFromTag("ext0")),
+                    Command(verb="underscan", underscan=1, scope=getAllDisplays())
+                ]),
+                "underscan 0 underscan .33 main underscan .67 ext0 underscan 1 all"
+            ),
+        ])
+
+    def test_parseMirror(self):
+        # NOTE: THESE COMMANDS WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+        self.assertParse([
+            # Enable
+            (
+                CommandList([
+                    # Single target
+                    Command(verb="mirror", subcommand="enable", source=getMainDisplay(),
+                            scope=getDisplayFromTag("ext0")),
+                    Command(verb="mirror", subcommand="enable", source=getDisplayFromTag("ext0"),
+                            scope=getMainDisplay()),
+
+                    # Multiple targets
+                    Command(verb="mirror", subcommand="enable", source=getMainDisplay(),
+                            scope=[getDisplayFromTag("ext0"), getDisplayFromTag("ext1")]),
+                    Command(verb="mirror", subcommand="enable", source=getDisplayFromTag("ext0"),
+                            scope=[getMainDisplay(), getDisplayFromTag("ext1")]),
+
+                    # Target "all"
+                    Command(verb="mirror", subcommand="enable", source=getMainDisplay(),
+                            scope=getAllDisplays()),
+                    Command(verb="mirror", subcommand="enable", source=getDisplayFromTag("ext0"),
+                            scope=getAllDisplays()),
+                ]),
+                "mirror enable main ext0 mirror enable ext0 main "
+                "mirror enable main ext0 ext1 mirror enable ext0 main ext1 "
+                "mirror enable main all mirror enable ext0 all"
+            ),
+            # Disable
+            (
+                CommandList([
+                    Command(verb="mirror", subcommand="disable", scope=getAllDisplays()),  # default
+                    Command(verb="mirror", subcommand="disable", scope=getAllDisplays()),
+                    Command(verb="mirror", subcommand="disable", scope=getMainDisplay()),
+                    Command(verb="mirror", subcommand="disable", scope=getDisplayFromTag("ext0")),
+                ]),
+                "mirror disable mirror disable all mirror disable main mirror disable ext0"
+            ),
+        ])
 
     # Error tests
 
@@ -190,6 +346,7 @@ class CommandTests(unittest.TestCase):
             "mirror enable bad",
             "mirror disable bad",
             "mirror enable bad main",
+            "mirror enable all main",
 
             "show current res 1 1 rotate 90 brightness .5 underscan 0 mirror bad",
 

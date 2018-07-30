@@ -59,7 +59,18 @@ class Command(object):
 
     def __init__(self, **kwargs):
         """
-        :param kwargs: Includes verb ("command type"), subcommand, scope, values, and options
+        :param kwargs: Includes verb ("command type"), subcommand, scope, and misc. Command values
+            verb: string in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]
+            subcommand: string
+            scope: Display(s)
+            width: int
+            height: int
+            refresh: int
+            hidpi: int (0 -> all; 1 -> no HiDPI; 2 -> only HiDPI)
+            angle: int
+            brightness: float
+            underscan: float
+            source: Display
         """
         # Determine verb
         if kwargs["verb"]:
@@ -80,7 +91,7 @@ class Command(object):
         else:
             self.scope = None
 
-        # Determine values, options
+        # Determine values
         self.width = int(kwargs["width"]) if "width" in kwargs else None
         self.height = int(kwargs["height"]) if "height" in kwargs else None
         self.refresh = int(kwargs["refresh"]) if "refresh" in kwargs else None
@@ -111,15 +122,14 @@ class Command(object):
             if self.width and self.height:  # can also be set by subcommand=highest
                 stringList.append(self.width)
                 stringList.append(self.height)
-
         elif self.verb == "rotate":
             stringList.append(self.angle)
         elif self.verb == "brightness":
             stringList.append(self.brightness)
         elif self.verb == "underscan":
             stringList.append(self.underscan)
-        elif self.verb == "mirror":
-            stringList.append(self.source)
+        elif self.verb == "mirror" and self.subcommand == "enable":
+            stringList.append(self.source.tag)
 
         # Determine options
 
@@ -136,8 +146,11 @@ class Command(object):
         # Determine scope
 
         if self.scope:
-            for display in self.scope:
-                stringList.append(display.tag)
+            if len(self.scope) == len(getAllDisplays()):
+                stringList.append("all")
+            else:
+                for display in sorted(self.scope):
+                    stringList.append(display.tag)
         # Default scope
         else:
             if (
@@ -153,6 +166,10 @@ class Command(object):
                 (self.verb == "mirror" and self.subcommand == "disable")
             ):
                 stringList.append("all")
+
+        # Convert everything to a string so it can be joined
+        for i in range(len(stringList)):
+            stringList[i] = str(stringList[i])
 
         return " ".join(stringList)
 
@@ -172,19 +189,31 @@ class Command(object):
         return all([
             isinstance(other, self.__class__),
 
-            other.verb == self.verb,
-            other.subcommand == self.subcommand,
-            safeScopeCheckEquals(other, self),
+            self.verb == other.verb,
+            self.subcommand == other.subcommand,
+            safeScopeCheckEquals(self, other),
 
-            other.width == self.width,
-            other.height == self.height,
-            other.refresh == self.refresh,
-            other.hidpi == self.hidpi,
-            other.angle == self.angle,
-            other.brightness == self.brightness,
-            other.underscan == self.underscan,
-            other.source == self.source,
+            self.width == other.width,
+            self.height == other.height,
+            self.refresh == other.refresh,
+            self.hidpi == other.hidpi,
+            self.angle == other.angle,
+            self.brightness == other.brightness,
+            self.underscan == other.underscan,
+            self.source == other.source,
         ])
+
+    def __lt__(self, other):
+        if self.__eq__(other):
+            return False
+        else:
+            return self.__str__().lower() < self.__str__().lower()
+
+    def __gt__(self, other):
+        if self.__eq__(other):
+            return False
+        else:
+            return self.__str__().lower() > self.__str__().lower()
 
     def __hash__(self):
         return hash(self.__str__())
@@ -242,14 +271,14 @@ class Command(object):
                 "       underscan   Show or set the current display underscan",
                 "       mirror      Enable or disable screen mirroring",
             ]), "show": "\n".join([
-                "usage: display_manager.py show [subcommand] (parameters) (scope)",
+                "usage: display_manager.py show [subcommand] (options) (scope)",
                 "",
                 "SUBCOMMANDS",
                 "   current (default)   Show current display settings",
                 "   highest             Show the highest available resolution",
                 "   available           Show all available resolutions",
                 "",
-                "PARAMETERS (never obligatory; not used by \"current\")",
+                "OPTIONS (never obligatory; not used by \"current\")",
                 "   only-hidpi  Only show HiDPI resolutions",
                 "   no-hidpi    Don\'t show HiDPI resolutions",
                 "",
@@ -260,7 +289,7 @@ class Command(object):
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all (default)   Perform this command on all connected displays",
             ]), "res": "\n".join([
-                "usage: display_manager.py res [resolution] (refresh) (parameters) (scope)",
+                "usage: display_manager.py res [resolution] (refresh) (options) (scope)",
                 "",
                 "RESOLUTION",
                 "   highest             Set the display to the highest available resolution",
@@ -272,7 +301,7 @@ class Command(object):
                 "       (Note: if refresh rate is not specified, it will default to whichever rate is "
                 "available at the desired resolution; if 0 is one of the options, it will be selected)",
                 "",
-                "PARAMETERS (optional)",
+                "OPTIONS (optional)",
                 "   only-hidpi  Only show HiDPI resolutions",
                 "   no-hidpi    Don\'t show HiDPI resolutions",
                 "",
@@ -322,7 +351,7 @@ class Command(object):
                 "   enable      Set <target> to mirror <source>",
                 "   disable     Disable mirroring from <source> to <target>",
                 "",
-                "SOURCE/TARGET(S) (not used by \"disable\"",
+                "SOURCE/TARGET(S) (not used by \"disable\")",
                 "   source      The display which will be mirrored by the target(s); "
                 "must be a single element of <SCOPE> (see below); cannot be \"all\"",
                 "   target(s)   The display(s) which will mirror the source; "
@@ -444,7 +473,7 @@ class CommandList(object):
                     self.addCommand(command)
 
     def __eq__(self, other):
-        return set(other.commands) == set(self.commands)
+        return set(self.commands) == set(other.commands)
 
     def __hash__(self):
         h = 0
@@ -473,11 +502,17 @@ class CommandList(object):
         # on each individual display in its scope, and add those actions
         # to commandDict, according to their associated display
         if command.scope:
-            for display in command.scope:
-                if display.tag in self.commandDict:
-                    self.commandDict[display.tag].append(command)
+            if len(command.scope) == len(getAllDisplays()):
+                if "all" in self.commandDict:
+                    self.commandDict["all"].append(command)
                 else:
-                    self.commandDict[display.tag] = [command]
+                    self.commandDict["all"] = [command]
+            else:
+                for display in command.scope:
+                    if display.tag in self.commandDict:
+                        self.commandDict[display.tag].append(command)
+                    else:
+                        self.commandDict[display.tag] = [command]
         # If there is no scope, there will be only one action.
         # In this case, we simply add the command to key "None".
         #   Note: this should only be possible with verb="help", since every
@@ -708,10 +743,14 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"show\" commands can only have one subcommand", verb=verb)
 
+        # Determine scope
         if len(scopeTags) > 0:
-            scope = []
-            for scopeTag in scopeTags:
-                scope.append(getDisplayFromTag(scopeTag))
+            if "all" in scopeTags:
+                scope = getAllDisplays()
+            else:
+                scope = []
+                for scopeTag in scopeTags:
+                    scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
             scope = getAllDisplays()
@@ -741,9 +780,12 @@ def getCommand(commandString):
 
         # Determine scope
         if len(scopeTags) > 0:
-            scope = []
-            for scopeTag in scopeTags:
-                scope.append(getDisplayFromTag(scopeTag))
+            if "all" in scopeTags:
+                scope = getAllDisplays()
+            else:
+                scope = []
+                for scopeTag in scopeTags:
+                    scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
             scope = getMainDisplay()
@@ -751,7 +793,7 @@ def getCommand(commandString):
         if len(positionals) == 0:
             raise CommandSyntaxError("\"res\" commands must specify a resolution", verb=verb)
 
-        # case: "highest" (or error)
+        # case: "highest"
         elif len(positionals) == 1:
             if positionals[0] == "highest":
                 subcommand = positionals[0]
@@ -765,9 +807,9 @@ def getCommand(commandString):
             attributesDict["hidpi"] = hidpi
             attributesDict["scope"] = scope
 
-        # cases: ("highest", refresh), (width, height)
+        # cases: ("highest", refresh) or (width, height)
         elif len(positionals) == 2:
-            # case: "highest", refresh
+            # case: ("highest", refresh)
             if positionals[0] == "highest":
                 subcommand = positionals[0]
                 try:
@@ -782,7 +824,7 @@ def getCommand(commandString):
                 attributesDict["hidpi"] = hidpi
                 attributesDict["scope"] = scope
 
-            # case: width, height
+            # case: (width, height)
             else:
                 # Try to parse positionals as integers
                 wh = []
@@ -888,10 +930,14 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"rotate\" commands can only have one argument", verb=verb)
 
+        # Determine scope
         if len(scopeTags) > 0:
-            scope = []
-            for scopeTag in scopeTags:
-                scope.append(getDisplayFromTag(scopeTag))
+            if "all" in scopeTags:
+                scope = getAllDisplays()
+            else:
+                scope = []
+                for scopeTag in scopeTags:
+                    scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
             scope = getMainDisplay()
@@ -921,10 +967,14 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"brightness\" commands can only have one argument", verb=verb)
 
+        # Determine scope
         if len(scopeTags) > 0:
-            scope = []
-            for scopeTag in scopeTags:
-                scope.append(getDisplayFromTag(scopeTag))
+            if "all" in scopeTags:
+                scope = getAllDisplays()
+            else:
+                scope = []
+                for scopeTag in scopeTags:
+                    scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
             scope = getMainDisplay()
@@ -954,10 +1004,14 @@ def getCommand(commandString):
         else:
             raise CommandSyntaxError("\"underscan\" commands can only have one argument", verb=verb)
 
+        # Determine scope
         if len(scopeTags) > 0:
-            scope = []
-            for scopeTag in scopeTags:
-                scope.append(getDisplayFromTag(scopeTag))
+            if "all" in scopeTags:
+                scope = getAllDisplays()
+            else:
+                scope = []
+                for scopeTag in scopeTags:
+                    scope.append(getDisplayFromTag(scopeTag))
         else:
             # Default scope
             scope = getMainDisplay()
@@ -981,10 +1035,20 @@ def getCommand(commandString):
                     # For "enable" subcommand, first element in scope is source, and the rest are targets
                     # Since we parsed "scope" in reverse order, source will be last
                     source = getDisplayFromTag(scopeTags.pop(-1))
+                    # Cannot mirror from more than one display
+                    if type(source) == list:
+                        if len(source) > 1:
+                            raise CommandValueError(
+                                "\"mirror enable\" command's source cannot be \"all\"",
+                                verb=verb
+                            )
                     # Determine target(s)
-                    targets = []
-                    for scopeTag in scopeTags:
-                        targets.append(getDisplayFromTag(scopeTag))
+                    if "all" in scopeTags:
+                        targets = getAllDisplays()
+                    else:
+                        targets = []
+                        for scopeTag in scopeTags:
+                            targets.append(getDisplayFromTag(scopeTag))
 
                 attributesDict["subcommand"] = subcommand
                 attributesDict["source"] = source
@@ -999,9 +1063,12 @@ def getCommand(commandString):
             if len(positionals) == 0:
                 # Determine scope
                 if len(scopeTags) > 0:
-                    scope = []
-                    for scopeTag in scopeTags:
-                        scope.append(getDisplayFromTag(scopeTag))
+                    if "all" in scopeTags:
+                        scope = getAllDisplays()
+                    else:
+                        scope = []
+                        for scopeTag in scopeTags:
+                            scope.append(getDisplayFromTag(scopeTag))
                 else:
                     # Default scope
                     scope = getAllDisplays()
