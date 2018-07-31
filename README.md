@@ -317,8 +317,10 @@ Note: HDMI underscan settings can fix displays that under-render images, causing
 
 Use `mirror` to enable or disable display mirroring.
 
-usage: `manage_displays.py mirror enable [source] [target(s)]`
-   or: `manage_displays.py mirror disable (scope)`
+usage:
+
+* `manage_displays.py mirror enable [source] [target(s)]`
+* `manage_displays.py mirror disable (scope)`
 
 | Subcommands | Description |
 |---|---|
