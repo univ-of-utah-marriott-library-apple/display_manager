@@ -47,14 +47,6 @@
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dev/experiment.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/experiment.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dev/old/old_cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/old/old_cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dev/tests/cli_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/tests/cli_tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager_lib.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/installer/app/Display Manager.app/Contents/Resources/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/installer/app/Display Manager.app/Contents/Resources/gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manage_displays.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -196,8 +188,8 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="267">
-              <caret line="250" column="16" lean-forward="true" selection-start-line="250" selection-start-column="16" selection-end-line="250" selection-end-column="16" />
+            <state relative-caret-position="105">
+              <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#212#661#0" />
@@ -212,6 +204,7 @@
                 <element signature="e#1199#1287#1" />
                 <element signature="e#1344#1588#0" />
                 <element signature="e#1344#1478#1" />
+                <element signature="e#1618#17877#0" />
                 <element signature="e#1618#1689#1" />
                 <element signature="e#1733#3866#0" />
                 <element signature="e#1733#2255#1" />
@@ -939,6 +932,7 @@
             <element signature="e#1199#1287#1" />
             <element signature="e#1344#1588#0" />
             <element signature="e#1344#1478#1" />
+            <element signature="e#1618#17877#0" />
             <element signature="e#1618#1689#1" />
             <element signature="e#1733#3866#0" />
             <element signature="e#1733#2255#1" />
@@ -1496,8 +1490,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="267">
-          <caret line="250" column="16" lean-forward="true" selection-start-line="250" selection-start-column="16" selection-end-line="250" selection-end-column="16" />
+        <state relative-caret-position="105">
+          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#212#661#0" />
@@ -1512,6 +1506,7 @@
             <element signature="e#1199#1287#1" />
             <element signature="e#1344#1588#0" />
             <element signature="e#1344#1478#1" />
+            <element signature="e#1618#17877#0" />
             <element signature="e#1618#1689#1" />
             <element signature="e#1733#3866#0" />
             <element signature="e#1733#2255#1" />
