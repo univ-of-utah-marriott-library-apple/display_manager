@@ -47,8 +47,6 @@
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager_lib.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager_lib.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -194,9 +192,10 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="68" selection-start-line="8" selection-start-column="68" selection-end-line="8" selection-end-column="68" />
+            <state relative-caret-position="75">
+              <caret line="5" column="37" selection-start-line="5" selection-start-column="37" selection-end-line="5" selection-end-column="37" />
               <folding>
+                <element signature="e#218#286#0" expanded="true" />
                 <element signature="e#212#661#0" />
                 <element signature="e#212#365#1" />
                 <element signature="e#419#661#0" />
@@ -922,6 +921,7 @@
         <state relative-caret-position="8580">
           <caret line="572" lean-forward="true" selection-start-line="572" selection-end-line="572" />
           <folding>
+            <element signature="e#218#286#0" expanded="true" />
             <element signature="e#212#661#0" />
             <element signature="e#212#365#1" />
             <element signature="e#419#661#0" />
@@ -1494,9 +1494,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="68" selection-start-line="8" selection-start-column="68" selection-end-line="8" selection-end-column="68" />
+        <state relative-caret-position="75">
+          <caret line="5" column="37" selection-start-line="5" selection-start-column="37" selection-end-line="5" selection-end-column="37" />
           <folding>
+            <element signature="e#218#286#0" expanded="true" />
             <element signature="e#212#661#0" />
             <element signature="e#212#365#1" />
             <element signature="e#419#661#0" />

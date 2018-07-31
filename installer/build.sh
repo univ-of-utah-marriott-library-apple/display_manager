@@ -26,9 +26,10 @@ cp ../display_manager.py ROOT/usr/local/bin
 # mkdir -p ROOT/Applications
 # mv "app/dist/Display Manager.app" ROOT/Applications
 
-# NOTE: NO LONGER BUILDING APP ON THE FLY! GUI MUST BE MANUALLY UPDATED
-mkdir -p ROOT/Applications
-cp -r "app/Display Manager.app" "ROOT/Applications/Display Manager.app"
+# TODO: UNCOMMENT FOLLOWING LINES AND MAKE NEW APP
+# # NOTE: NO LONGER BUILDING APP ON THE FLY! GUI MUST BE MANUALLY UPDATED
+# mkdir -p ROOT/Applications
+# cp -r "app/Display Manager.app" "ROOT/Applications/Display Manager.app"
 	
 # Builds a preliminary package which is referenced in "distribution.xml"
 pkgbuild --identifier edu.utah.scl.display_manager --version $1 --root ./ROOT prelim.pkg
