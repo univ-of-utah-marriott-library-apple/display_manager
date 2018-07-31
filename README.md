@@ -411,14 +411,13 @@ Suppose you'd like all computers in a particular Jamf Pro [scope](http://docs.ja
 and add a script containing the following to it
 
 ```
-#!/bin/bash
+#!/bin/sh
 
 # Check to make sure the library and command-line API are both installed
 if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
 	-e /usr/local/bin/display_manager.py ]] ; then
 	
 	display_manager.py res highest only-hidpi brightness 1
-	exit 0
 
 else
 	exit 1
@@ -438,7 +437,7 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 Perhaps you're managing several sideways-rotated wall-mounted HDMI displays via Outset, and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
 
 ```
-#!/bin/bash
+#!/bin/sh
 
 # Check to make sure the library and command-line API are both installed
 if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
