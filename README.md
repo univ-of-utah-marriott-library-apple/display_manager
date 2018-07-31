@@ -112,9 +112,7 @@ Finally, select either "Set Display" or "Build Script". If you click "Set Displa
 
 The Display Manager command-line API supports the following commands:
 
-`
-$ manage_displays.py [command]
-`
+`$ manage_displays.py [command]`
 
 For more information on each command, see its section below:
 
@@ -162,19 +160,13 @@ Note: by default, both HiDPI and non-HiDPI resolutions are shown.
 #### Examples
 
 * Show all displays' current configurations:
-`
-$ manage_displays.py show
-`
+`$ manage_displays.py show`
 
 * Show the highest available HiDPI resolution for the main display:
-`
-$ manage_displays.py highest only-hidpi main
-`
+`$ manage_displays.py highest only-hidpi main`
 
 * Show all available resolutions for the first external display:
-`
-$ manage_displays.py show available ext0
-`
+`$ manage_displays.py show available ext0`
 
 Notes:
 * "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
@@ -214,19 +206,13 @@ Note: by default, both HiDPI and non-HiDPI resolutions are shown
 #### Examples
 
 * Set the main display to 1920x1080:
-`
-$ manage_displays.py res 1920 1080
-`
+`$ manage_displays.py res 1920 1080`
 
 * Set all displays to their highest available resolution:
-`
-$ manage_displays.py res highest all
-`
+`$ manage_displays.py res highest all`
 
 * Set the first external display to 1024x768 at 60Hz:
-`
-$ manage_displays.py res 1024 768 ext0
-`
+`$ manage_displays.py res 1024 768 ext0`
 
 Notes:
 * "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
@@ -250,14 +236,10 @@ usage: `manage_displays.py rotate [angle] (scope)`
 #### Examples
 
 * Rotate the main display by 90 degrees (counter-clockwise):
-`
-$ manage_displays.py rotate 90
-`
+`$ manage_displays.py rotate 90`
 
 * Return all displays to default orientation:
-`
-$ manage_displays.py rotate 0 all
-`
+`$ manage_displays.py rotate 0 all`
 
 ### Brightness
 
@@ -278,14 +260,10 @@ usage: `manage_displays.py brightness [brightness] (scope)`
 #### Examples
 
 * Set the brightness of the main display to half of its maximum brightness:
-`
-$ manage_displays.py brightness .4
-`
+`$ manage_displays.py brightness .4`
 
 * Set the brightness of all displays to their maximum:
-`
-$ manage_displays.py brightness 1 all
-`
+`$ manage_displays.py brightness 1 all`
 
 Note: many displays do not support setting brightness automatically; this is most often the case with external monitors.
 
@@ -310,14 +288,10 @@ Note: HDMI underscan settings can fix displays that under-render images, causing
 #### Examples
 
 * Set main display to 0% underscan:
-`
-$ manage_displays.py underscan 0
-`
+`$ manage_displays.py underscan 0`
 
 * Set all displays to 42% underscan:
-`
-$ manage_displays.py underscan .42 all
-`
+`$ manage_displays.py underscan .42 all`
 
 ### Mirror
 
@@ -345,24 +319,16 @@ usage: `manage_displays.py mirror enable [source] [target(s)]`
 #### Examples
 
 * Set all external displays to mirror the main display:
-`
-$ manage_displays.py mirror enable main all
-`
+`$ manage_displays.py mirror enable main all`
 
 * Set the main display and the first external display to mirror the second external display:
-`
-$ manage_displays.py mirror enable ext1 main ext0
-`
+`$ manage_displays.py mirror enable ext1 main ext0`
 
 * Stop mirroring on all displays:
-`
-$ manage_displays.py mirror disable
-`
+`$ manage_displays.py mirror disable`
 
 * Stop mirroring on the main display:
-`
-$ manage_displays.py mirror disable main
-`
+`$ manage_displays.py mirror disable main`
 
 ## Usage Examples
 
@@ -372,64 +338,33 @@ Display Manager allows you to manipulate displays in a variety of ways. You can 
 
 First, import the Display Manager library, like so:
 
-`
-from DisplayManager import *
-`
+`from DisplayManager import *`
 
 Next, say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
 
-`
+```
 for display in getAllDisplays():
     display.setMode(display.highestMode())
-`
+```
 
 Perhaps you'd like your main display to rotate to 90 degrees. The following would work:
 
-`
+```
 display = getMainDisplay()
 display.setRotate(90)
-`
+```
 
-You can use any of the properties and methods of `Display` objects to configure their settings, which is exactly how the [command-line API](#command-line-api) works. You can also configure displays through `Command`s, like this:
-
-`
-command = Command("brightness", "set", brightness=.4)
-command.run()
-`
-
-This would perform the same `Command` as entering the following into the command line:
-
-`
-$ manage_displays.py brightness set .4
-`
-
-For more complex usage, initialize a `CommandList`, which runs several commands simultaneously in a non-interfering pattern. To do so, pass it `Commands` through the `.addCommand(command)` method. An example:
-
-`
-commandA = Command("underscan", "set", underscan=.4)
-commandB = Command("rotate", "set", angle=180)
-commandC = Command("brightness", "set", brightness=1)
-
-commands = CommandList()
-commands.append(commandA)
-commands.append(commandB)
-commands.append(commandC)
-commands.run()
-`
+You can use any of the properties and methods of `Display` objects to configure their settings, which is exactly how the [command-line API](#command-line-api) works.
 
 ### Command-Line Examples
 
 In some cases, it may be desirable to configure displays from the command line, whether manually or via a script. Say you'd like a script to automatically set a display to its highest available resolution. The following would do just that:
 
-`
-$ manage_displays.py set highest
-`
+`$ manage_displays.py res highest`
 
 But, in many cases, you might want to call several such commands at the same time. Of course, you may write them out line-by-line, but this takes a little longer, and more importantly, running several commands in this way may lead to undesired interference between commands. As such, it is recommended that multiple commands be run like so:
 
-`
-$ manage_displays.py "set -w 1920 -h 1080" "rotate set 90" "brightness set .5" ...
-`
+`$ manage_displays.py res 1920 1080 rotate 90 brightness .5 ...`
 
 In this way, you may pass in as many commands as you like, and Display Manager will find a way to run them simultaneously without encountering configuration errors.
 

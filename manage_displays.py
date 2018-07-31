@@ -254,29 +254,29 @@ class Command(object):
         """
         helpTypes = {
             "usage": "\n".join([
-                "usage: display_manager.py [command]",
+                "usage: manage_displays.py [command]",
                 "",
                 "COMMANDS",
                 "   help        Show help information about a command",
-                "   res         Manage display resolution",
                 "   show        Show current/available display configurations",
+                "   res         Manage display resolution",
                 "   brightness  Manage display brightness",
                 "   rotate      Manage display rotation",
                 "   underscan   Manage display underscan",
-                "   mirror      Enable or disable screen mirroring",
+                "   mirror      Manage screen mirroring",
             ]), "help": "\n".join([
-                "usage: display_manager.py help [command]",
+                "usage: manage_displays.py help [command]",
                 "",
                 "COMMANDS",
-                "   help        Show this help information",
-                "   res         Set the display resolution",
+                "   help        Show help information about a command",
                 "   show        Show current/available display configurations",
-                "   brightness  Control display brightness",
-                "   rotate      Control display rotation",
-                "   underscan   Show or set the current display underscan",
-                "   mirror      Enable or disable screen mirroring",
+                "   res         Manage display resolution",
+                "   brightness  Manage display brightness",
+                "   rotate      Manage display rotation",
+                "   underscan   Manage display underscan",
+                "   mirror      Manage screen mirroring",
             ]), "show": "\n".join([
-                "usage: display_manager.py show (subcommand) (options) (scope)",
+                "usage: manage_displays.py show (subcommand) (options) (scope)",
                 "",
                 "SUBCOMMANDS",
                 "   current (default)   Show current display settings",
@@ -294,7 +294,7 @@ class Command(object):
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all (default)   Perform this command on all connected displays",
             ]), "res": "\n".join([
-                "usage: display_manager.py res [resolution] (refresh) (options) (scope)",
+                "usage: manage_displays.py res [resolution] (refresh) (options) (scope)",
                 "",
                 "RESOLUTION",
                 "   highest             Set the display to the highest available resolution",
@@ -317,7 +317,7 @@ class Command(object):
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all             Perform this command on all connected displays",
             ]), "rotate": "\n".join([
-                "usage: display_manager.py rotate [angle] (scope)",
+                "usage: manage_displays.py rotate [angle] (scope)",
                 "",
                 "ANGLE",
                 "   <angle>     Desired display rotation; must be a multiple of 90",
@@ -327,7 +327,7 @@ class Command(object):
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all             Perform this command on all connected displays",
             ]), "brightness": "\n".join([
-                "usage: display_manager.py brightness [brightness] (scope)",
+                "usage: manage_displays.py brightness [brightness] (scope)",
                 "",
                 "BRIGHTNESS",
                 "   <brightness>    A number between 0 and 1 (inclusive); "
@@ -338,7 +338,7 @@ class Command(object):
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all             Perform this command on all connected displays",
             ]), "underscan": "\n".join([
-                "usage: display_manager.py underscan [underscan] (scope)",
+                "usage: manage_displays.py underscan [underscan] (scope)",
                 "",
                 "UNDERSCAN",
                 "   <underscan>     A number between 0 and 1 (inclusive); "
@@ -349,8 +349,8 @@ class Command(object):
                 "   ext<N>          Perform this command on external display number <N>",
                 "   all             Perform this command on all connected displays",
             ]), "mirror": "\n".join([
-                "usage: display_manager.py mirror enable [source] [target(s)]",
-                "   or: display_manager.py mirror disable (scope)"
+                "usage: manage_displays.py mirror enable [source] [target(s)]",
+                "   or: manage_displays.py mirror disable (scope)"
                 "",
                 "SUBCOMMANDS",
                 "   enable      Set <target> to mirror <source>",
