@@ -8,7 +8,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-import display_manager_lib as dm
+import display_manager as dm
 
 
 class App(object):

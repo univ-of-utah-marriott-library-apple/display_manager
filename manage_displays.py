@@ -5,7 +5,7 @@
 import sys
 import re
 import collections
-from display_manager_lib import *
+from display_manager import *
 
 
 class CommandSyntaxError(Exception):
@@ -22,6 +22,8 @@ class CommandSyntaxError(Exception):
         self.message = message
         self.verb = verb
 
+        Exception.__init__(self, self.message)
+
 
 class CommandValueError(Exception):
     """
@@ -37,6 +39,8 @@ class CommandValueError(Exception):
         self.message = message
         self.verb = verb
 
+        Exception.__init__(self, self.message)
+
 
 class CommandExecutionError(Exception):
     """
@@ -50,6 +54,8 @@ class CommandExecutionError(Exception):
         """
         self.message = message
         self.command = command
+
+        Exception.__init__(self, self.message)
 
 
 class Command(object):
@@ -251,6 +257,17 @@ class Command(object):
                 "usage: display_manager.py [command]",
                 "",
                 "COMMANDS",
+                "   help        Show help information about a command",
+                "   res         Manage display resolution",
+                "   show        Show current/available display configurations",
+                "   brightness  Manage display brightness",
+                "   rotate      Manage display rotation",
+                "   underscan   Manage display underscan",
+                "   mirror      Enable or disable screen mirroring",
+            ]), "help": "\n".join([
+                "usage: display_manager.py help [command]",
+                "",
+                "COMMANDS",
                 "   help        Show this help information",
                 "   res         Set the display resolution",
                 "   show        Show current/available display configurations",
@@ -258,29 +275,17 @@ class Command(object):
                 "   rotate      Control display rotation",
                 "   underscan   Show or set the current display underscan",
                 "   mirror      Enable or disable screen mirroring",
-            ]), "help": "\n".join([
-                "usage: display_manager.py help [command]",
-                "",
-                "COMMANDS",
-                "   The command to get more detailed information about; must be one of the following:",
-                "       help        Show this help information",
-                "       res         Set the display resolution",
-                "       show        Show current/available display configurations",
-                "       brightness  Control display brightness",
-                "       rotate      Control display rotation",
-                "       underscan   Show or set the current display underscan",
-                "       mirror      Enable or disable screen mirroring",
             ]), "show": "\n".join([
-                "usage: display_manager.py show [subcommand] (options) (scope)",
+                "usage: display_manager.py show (subcommand) (options) (scope)",
                 "",
                 "SUBCOMMANDS",
                 "   current (default)   Show current display settings",
                 "   highest             Show the highest available resolution",
                 "   available           Show all available resolutions",
                 "",
-                "OPTIONS (never obligatory; not used by \"current\")",
-                "   only-hidpi  Only show HiDPI resolutions",
+                "OPTIONS (optional)",
                 "   no-hidpi    Don\'t show HiDPI resolutions",
+                "   only-hidpi  Only show HiDPI resolutions",
                 "",
                 "   (Note: by default, both HiDPI and non-HiDPI resolutions are shown)",
                 "",
@@ -302,8 +307,8 @@ class Command(object):
                 "available at the desired resolution; if 0 is one of the options, it will be selected)",
                 "",
                 "OPTIONS (optional)",
-                "   only-hidpi  Only show HiDPI resolutions",
-                "   no-hidpi    Don\'t show HiDPI resolutions",
+                "   no-hidpi    Don\'t set to HiDPI resolutions",
+                "   only-hidpi  Only set to HiDPI resolutions",
                 "",
                 "   (Note: by default, both HiDPI and non-HiDPI resolutions are shown)",
                 "",
@@ -325,7 +330,7 @@ class Command(object):
                 "usage: display_manager.py brightness [brightness] (scope)",
                 "",
                 "BRIGHTNESS",
-                "   <brightness>    Must be a number between 0 and 1 (inclusive); "
+                "   <brightness>    A number between 0 and 1 (inclusive); "
                 "0 is minimum brightness, and 1 is maximum brightness",
                 "",
                 "SCOPE (optional)",
@@ -345,11 +350,11 @@ class Command(object):
                 "   all             Perform this command on all connected displays",
             ]), "mirror": "\n".join([
                 "usage: display_manager.py mirror enable [source] [target(s)]",
-                "   or: display_manager.py mirror disable [scope]"
+                "   or: display_manager.py mirror disable (scope)"
                 "",
                 "SUBCOMMANDS",
                 "   enable      Set <target> to mirror <source>",
-                "   disable     Disable mirroring from <source> to <target>",
+                "   disable     Disable mirroring on <scope>",
                 "",
                 "SOURCE/TARGET(S) (not used by \"disable\")",
                 "   source      The display which will be mirrored by the target(s); "
@@ -376,20 +381,22 @@ class Command(object):
         """
         for display in self.scope:
             # Always print display identifier
-            print("{0}".format(display.tag))
+            print("Display: {0}".format(display.tag))
 
             if self.subcommand == "current":
                 current = display.currentMode
                 print("{}".format(current))
 
                 if display.rotation is not None:
-                    print("Rotation: {}".format(display.rotation))
+                    print("rotation: {}".format(display.rotation))
                 if display.brightness is not None:
-                    print("Brightness: {}".format(display.brightness))
+                    print("brightness: {}".format(display.brightness))
                 if display.underscan is not None:
-                    print("Underscan: {}".format(display.underscan))
+                    print("underscan: {}".format(display.underscan))
                 if display.mirrorOf is not None:
-                    print("Mirror of: {}".format(display.mirrorOf))
+                    print("mirror of: {}".format(display.mirrorOf))
+
+                print  # empty newline between displays
 
             elif self.subcommand == "highest":
                 current = display.highestMode(self.hidpi)
@@ -533,6 +540,7 @@ class CommandList(object):
 
             # Group commands by subcommand. Must preserve ordering to avoid interfering commands
             commandGroups = collections.OrderedDict([
+                ("help", []),
                 ("res", []),
                 ("rotate", []),
                 ("mirror", []),
@@ -541,13 +549,7 @@ class CommandList(object):
                 ("show", []),
             ])
             for command in displayCommands:
-                if command.verb in commandGroups:
-                    commandGroups[command.verb].append(command)
-                else:
-                    raise CommandSyntaxError(
-                        "\"{}\" is not a valid command".format(command.verb),
-                        verb=command.verb
-                    )
+                commandGroups[command.verb].append(command)
 
             # Run commands by subcommand
             for commandType in commandGroups:
@@ -558,6 +560,7 @@ class CommandList(object):
                     # Multiple commands of these types will undo each other.
                     # As such, just run the most recently added command (the last in the list)
                     if (
+                            commandType == "help" or
                             commandType == "set" or
                             commandType == "rotate" or
                             commandType == "brightness" or
@@ -704,10 +707,10 @@ def getCommand(commandString):
                 subcommand = positionals[0]
             # Invalid (sub)command
             else:
-                raise CommandValueError("{} is not a valid command".format(positionals[0]), verb=verb)
+                raise CommandValueError("\"{}\" is not a valid command".format(positionals[0]), verb=verb)
         # Too many arguments
         else:
-            raise CommandSyntaxError("\"help\" commands can only have one argument", verb=verb)
+            raise CommandSyntaxError("Help commands can only have one argument", verb=verb)
 
         attributesDict["subcommand"] = subcommand
 
@@ -721,14 +724,14 @@ def getCommand(commandString):
                     hidpi = 1  # doesn't match HiDPI
                     positionals.remove(positional)
                 else:
-                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \"only-hidpi\"", verb=verb)
             elif positional == "only-hidpi":
                 # If HiDPI hasn't been set to the contrary setting
                 if hidpi != 1:
                     hidpi = 2  # only matches HiDPI
                     positionals.remove(positional)
                 else:
-                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
+                    raise CommandValueError("Cannot specify both \"no-hidpi\" and \"only-hidpi\"", verb=verb)
 
         if len(positionals) == 0:
             # Default subcommand
@@ -738,10 +741,10 @@ def getCommand(commandString):
                 subcommand = positionals[0]
             # Invalid subcommand
             else:
-                raise CommandValueError("{} is not a valid subcommand".format(positionals[0]), verb=verb)
+                raise CommandValueError("\"{}\" is not a valid subcommand".format(positionals[0]), verb=verb)
         # Too many arguments
         else:
-            raise CommandSyntaxError("\"show\" commands can only have one subcommand", verb=verb)
+            raise CommandSyntaxError("Show commands can only have one subcommand", verb=verb)
 
         # Determine scope
         if len(scopeTags) > 0:
@@ -791,7 +794,7 @@ def getCommand(commandString):
             scope = getMainDisplay()
 
         if len(positionals) == 0:
-            raise CommandSyntaxError("\"res\" commands must specify a resolution", verb=verb)
+            raise CommandSyntaxError("Res commands must specify a resolution", verb=verb)
 
         # case: "highest"
         elif len(positionals) == 1:
@@ -799,7 +802,7 @@ def getCommand(commandString):
                 subcommand = positionals[0]
             else:
                 raise CommandValueError(
-                    "\"res\" commands must either specify both width and height or use the \"highest\" keyword",
+                    "Res commands must either specify both width and height or use the \"highest\" keyword",
                     verb=verb
                 )
 
@@ -910,25 +913,25 @@ def getCommand(commandString):
 
         else:
             raise CommandSyntaxError(
-                "\"res\" commands cannot have more than three non-parametric arguments",
+                "Too many arguments supplied for the res command",
                 verb=verb
             )
 
     elif verb == "rotate":
         if len(positionals) == 0:
-            raise CommandSyntaxError("\"rotate\" commands must specify an angle", verb=verb)
+            raise CommandSyntaxError("Rotate commands must specify an angle", verb=verb)
         elif len(positionals) == 1:
             try:
                 angle = int(positionals[0])
                 # Rotation must be multiple of 90
                 if angle % 90 != 0:
-                    raise CommandValueError("{} is not a multiple of 90".format(positionals[0]), verb=verb)
+                    raise CommandValueError("\"{}\" is not a multiple of 90".format(positionals[0]), verb=verb)
             # Couldn't convert to int
             except ValueError:
-                raise CommandValueError("{} is not a multiple of 90".format(positionals[0]), verb=verb)
+                raise CommandValueError("\"{}\" is not a multiple of 90".format(positionals[0]), verb=verb)
         # Too many arguments
         else:
-            raise CommandSyntaxError("\"rotate\" commands can only have one argument", verb=verb)
+            raise CommandSyntaxError("Rotate commands can only have one argument", verb=verb)
 
         # Determine scope
         if len(scopeTags) > 0:
@@ -947,25 +950,25 @@ def getCommand(commandString):
 
     elif verb == "brightness":
         if len(positionals) == 0:
-            raise CommandSyntaxError("\"brightness\" commands must specify a brightness value", verb=verb)
+            raise CommandSyntaxError("Brightness commands must specify a brightness value", verb=verb)
         elif len(positionals) == 1:
             try:
                 brightness = float(positionals[0])
                 # Brightness must be between 0 and 1
                 if brightness < 0 or brightness > 1:
                     raise CommandValueError(
-                        "{} is not a number between 0 and 1 (inclusive)".format(positionals[0]),
+                        "\"{}\" is not a number between 0 and 1 (inclusive)".format(positionals[0]),
                         verb=verb
                     )
             # Couldn't convert to float
             except ValueError:
                 raise CommandValueError(
-                    "{} is not a number between 0 and 1 (inclusive)".format(positionals[0]),
+                    "\"{}\" is not a number between 0 and 1 (inclusive)".format(positionals[0]),
                     verb=verb
                 )
         # Too many arguments
         else:
-            raise CommandSyntaxError("\"brightness\" commands can only have one argument", verb=verb)
+            raise CommandSyntaxError("Brightness commands can only have one argument", verb=verb)
 
         # Determine scope
         if len(scopeTags) > 0:
@@ -984,25 +987,25 @@ def getCommand(commandString):
 
     elif verb == "underscan":
         if len(positionals) == 0:
-            raise CommandSyntaxError("\"underscan\" commands must specify an underscan value", verb=verb)
+            raise CommandSyntaxError("Underscan commands must specify an underscan value", verb=verb)
         elif len(positionals) == 1:
             try:
                 underscan = float(positionals[0])
                 # Underscan must be between 0 and 1
                 if underscan < 0 or underscan > 1:
                     raise CommandValueError(
-                        "{} is not a number between 0 and 1 (inclusive)".format(positionals[0]),
+                        "\"{}\" is not a number between 0 and 1 (inclusive)".format(positionals[0]),
                         verb=verb
                     )
             # Couldn't convert to float
             except ValueError:
                 raise CommandValueError(
-                    "{} is not a number between 0 and 1 (inclusive)".format(positionals[0]),
+                    "\"{}\" is not a number between 0 and 1 (inclusive)".format(positionals[0]),
                     verb=verb
                 )
         # Too many arguments
         else:
-            raise CommandSyntaxError("\"underscan\" commands can only have one argument", verb=verb)
+            raise CommandSyntaxError("underscan commands can only have one argument", verb=verb)
 
         # Determine scope
         if len(scopeTags) > 0:
@@ -1021,14 +1024,14 @@ def getCommand(commandString):
 
     elif verb == "mirror":
         if len(positionals) == 0:
-            raise CommandSyntaxError("\"mirror\" commands must specify a subcommand", verb=verb)
+            raise CommandSyntaxError("Mirror commands must specify a subcommand", verb=verb)
         # elif len(positionals) == 1:
         subcommand = positionals.pop(0)
         if subcommand == "enable":
             if len(positionals) == 0:
                 if len(scopeTags) < 2:
                     raise CommandSyntaxError(
-                        "\"mirror enable\" commands require at least one source and one target display",
+                        "Mirror enable commands require at least one source and one target display",
                         verb=verb
                     )
                 else:
@@ -1039,7 +1042,7 @@ def getCommand(commandString):
                     if type(source) == list:
                         if len(source) > 1:
                             raise CommandValueError(
-                                "\"mirror enable\" command's source cannot be \"all\"",
+                                "The source for mirror enable cannot be \"all\"",
                                 verb=verb
                             )
                     # Determine target(s)
@@ -1055,7 +1058,7 @@ def getCommand(commandString):
                 attributesDict["scope"] = targets
             else:
                 raise CommandValueError(
-                    "{} is not a valid source or target".format(positionals[0]),
+                    "\"{}\" is not a valid source or target".format(positionals[0]),
                     verb=verb
                 )
 
@@ -1077,12 +1080,12 @@ def getCommand(commandString):
                 attributesDict["scope"] = scope
             else:
                 raise CommandValueError(
-                    "{} is not a valid scope".format(positionals[0]),
+                    "\"{}\" is not a valid scope".format(positionals[0]),
                     verb=verb
                 )
 
         else:
-            raise CommandValueError("{} is not a valid subcommand".format(subcommand), verb=verb)
+            raise CommandValueError("\"{}\" is not a valid subcommand".format(subcommand), verb=verb)
 
     emptyKeys = [key for key in attributesDict if attributesDict[key] is None]
     for emptyKey in emptyKeys:
@@ -1144,8 +1147,9 @@ def main():
         if e.verb:
             if e.verb in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
                 # Show proper usage information for the attempted command
-                Command(verb=e.verb).run()
-            print("Error in \"{}\":".format(e.verb))
+                Command(verb="help", subcommand=e.verb).run()
+            print("")
+            print("Error in {} command:".format(e.verb))
             print(e.message)
         else:
             print("Error: {}".format(e.message))
