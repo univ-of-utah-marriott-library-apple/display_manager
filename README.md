@@ -417,7 +417,7 @@ and add a script containing the following to it
 if [[ -e /Library/Python/2.7/site-packages/display_manager.py && \
 	-e /usr/local/bin/manage_displays.py ]] ; then
 	
-	manage_displays.py "set highest --only-hidpi" "brightness set 1"
+	manage_displays.py res highest only-hidpi brightness 1
 	exit 0
 
 else
@@ -444,7 +444,7 @@ Perhaps you're managing several sideways-rotated wall-mounted HDMI displays via 
 if [[ -e /Library/Python/2.7/site-packages/display_manager.py && \
 	-e /usr/local/bin/manage_displays.py ]] ; then
 	
-	manage_displays.py "rotate set 90" "underscan set .5"
+	manage_displays.py rotate 90 underscan .5
 	
 else
 	exit 1
