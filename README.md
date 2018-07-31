@@ -334,7 +334,7 @@ usage: `manage_displays.py mirror enable [source] [target(s)]`
 |---|---|
 | `main` | The main display |
 | `ext<N>` | External display number `N` (starting at 0) |
-| `all` (default scope for `disable`) | For `enable`: all connected displays besides [source]; only available to [target(s)]; for `disable`: all connected displays |
+| `all` (default scope for `disable`) | For `enable`: all connected displays besides `source` (only available to `target`); for `disable`: all connected displays |
 
 #### Examples
 

@@ -366,7 +366,7 @@ class Command(object):
                 "   main    The main display",
                 "   ext<N>  External display number <N>",
                 "   all (default scope for <disable>)",
-                "       For <enable>: all connected displays besides [source]; only available to [target(s)]",
+                "       For <enable>: all connected displays besides [source]; only available to [target]",
                 "       For <disable>: all connected displays",
             ])}
 

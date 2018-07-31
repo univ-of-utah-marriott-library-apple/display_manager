@@ -47,7 +47,6 @@
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/manage_displays.py" beforeDir="false" afterPath="$PROJECT_DIR$/manage_displays.py" afterDir="false" />
     </list>
@@ -197,8 +196,8 @@
       <file leaf-file-name="manage_displays.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/manage_displays.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1667">
-              <caret line="352" column="42" selection-start-line="352" selection-start-column="42" selection-end-line="352" selection-end-column="42" />
+            <state relative-caret-position="593">
+              <caret line="368" column="104" selection-start-line="368" selection-start-column="104" selection-end-line="368" selection-end-column="104" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#212#661#0" />
@@ -487,21 +486,20 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>subcommand</find>
       <find>commandString</find>
       <find>todo:</find>
-      <find />
-      <find />
+      <find>= scope</find>
+      <find>scope =</find>
       <find>raise</find>
       <find>&quot;.*&quot;[^,]</find>
       <find>attributesDict[&quot;scope&quot;]</find>
       <find>[getall</find>
-      <find />
+      <find>if len(scope)</find>
       <find>scope</find>
       <find>__fut</find>
       <find>print</find>
       <find>[get</find>
-      <find />
+      <find>raise Command</find>
       <find>self</find>
       <find>CommandList</find>
       <find>righthi</find>
@@ -517,6 +515,7 @@
       <find>probe</find>
       <find>closestmode</find>
       <find>closest</find>
+      <find>display_manager.py</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -531,18 +530,19 @@
       <replace>-d</replace>
       <replace>[val]</replace>
       <replace>commandLine.py</replace>
-      <replace />
+      <replace>, add_help=False</replace>
       <replace>'</replace>
       <replace>self.secondary</replace>
       <replace>self.underscan</replace>
       <replace>dim.py</replace>
       <replace>dm.py</replace>
-      <replace />
-      <replace />
+      <replace>secondary command</replace>
+      <replace>| Options</replace>
       <replace>display_manager.py</replace>
       <replace>arg</replace>
       <replace>positionals[i]</replace>
       <replace>b</replace>
+      <replace>manage_displays.py</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -1468,8 +1468,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/manage_displays.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1667">
-          <caret line="352" column="42" selection-start-line="352" selection-start-column="42" selection-end-line="352" selection-end-column="42" />
+        <state relative-caret-position="593">
+          <caret line="368" column="104" selection-start-line="368" selection-start-column="104" selection-end-line="368" selection-end-column="104" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#212#661#0" />
