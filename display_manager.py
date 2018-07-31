@@ -166,22 +166,21 @@ class Display(object):
         :return: The closest Quartz "DisplayMode" interface possible for this display.
         """
         # Which criteria does it match (in addition to width and height)?
-        hr = []     # HiDPI, refresh
-        h = []      # HiDPI
-        r = []      # refresh
+        both = []           # matches HiDPI and refresh
+        onlyHidpi = []      # matches HiDPI
+        onlyRefresh = []    # matches refresh
 
         for mode in self.allModes():
-            closeness = 0
             if mode.width == width and mode.height == height:
                 if self.__rightHidpi(mode, hidpi) and mode.refresh == refresh:
-                    hr.append(mode)
+                    both.append(mode)
                 elif self.__rightHidpi(mode, hidpi):
-                    h.append(mode)
+                    onlyHidpi.append(mode)
                 elif mode.refresh == refresh:
-                    r.append(mode)
+                    onlyRefresh.append(mode)
 
         # Return the nearest match, with HiDPI matches preferred over refresh matches
-        for modes in [hr, h, r]:
+        for modes in [both, onlyHidpi, onlyRefresh]:
             if modes:
                 return modes[0]
 
@@ -228,28 +227,10 @@ class Display(object):
         # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
         options = rotateCode | (angleCodes[angle % 360] << 16)
 
-        # Record old mode and rotation for future restore
-        oldMode = self.currentMode
-        oldRotation = self.rotation
-
-        # Can often only rotate highest resolution(s)
-        self.setMode(self.highestMode())
         # Actually rotate the screen
         error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
         if error:
             raise DisplayError("Cannot manage rotation on display \"{}\"".format(self.tag))
-
-        # Reset mode to old resolution
-        try:
-            closest = self.closestMode(oldMode.width, oldMode.height)
-            self.setMode(closest)
-        # This angle not supported at this resolution
-        except DisplayError:
-            self.setRotate(oldRotation)
-            self.setMode(oldMode)
-            raise DisplayError(
-                "Cannot rotate display \"{}\" at resolution {}x{}".format(self.tag, oldMode.width, oldMode.height)
-            )
 
     # Brightness properties and methods
 
