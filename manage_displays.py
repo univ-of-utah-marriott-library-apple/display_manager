@@ -379,9 +379,9 @@ class Command(object):
         """
         Shows the user information about connected displays
         """
-        for display in self.scope:
+        for i, display in enumerate(self.scope):
             # Always print display identifier
-            print("Display: {0}".format(display.tag))
+            print("display: {0}".format(display.tag))
 
             if self.subcommand == "current":
                 current = display.currentMode
@@ -396,15 +396,17 @@ class Command(object):
                 if display.mirrorOf is not None:
                     print("mirror of: {}".format(display.mirrorOf))
 
-                print  # empty newline between displays
+                # Leave an empty line between displays
+                if i < len(self.scope) - 1:
+                    print("")
 
             elif self.subcommand == "highest":
                 current = display.highestMode(self.hidpi)
                 if current:
                     print("{}".format(current))
 
-            elif self.subcommand == "all":
-                for mode in sorted(display.allModes, reverse=True):
+            elif self.subcommand == "available":
+                for mode in sorted(display.allModes(self.hidpi), reverse=True):
                     print("    {}".format(mode))
 
     def __handleRes(self):
@@ -417,7 +419,7 @@ class Command(object):
                 display.setMode(highest)
 
             else:
-                closest = display.closestMode(self.width, self.height, 32, self.refresh)
+                closest = display.closestMode(self.width, self.height, self.refresh, self.hidpi)
                 display.setMode(closest)
 
     def __handleRotate(self):
@@ -561,7 +563,7 @@ class CommandList(object):
                     # As such, just run the most recently added command (the last in the list)
                     if (
                             commandType == "help" or
-                            commandType == "set" or
+                            commandType == "res" or
                             commandType == "rotate" or
                             commandType == "brightness" or
                             commandType == "underscan"

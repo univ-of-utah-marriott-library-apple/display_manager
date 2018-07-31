@@ -118,16 +118,17 @@ class Display(object):
         """
         return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
 
-    @property
-    def allModes(self):
+    def allModes(self, hidpi=0):
         """
         :return: All possible Quartz "DisplayMode" interfaces for this display.
         """
         modes = []
         # options forces Quartz to show HiDPI modes
         options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
-        for mode in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            modes.append(DisplayMode(mode))
+        for modeRef in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
+            mode = DisplayMode(modeRef)
+            if self.__rightHidpi(mode, hidpi):
+                modes.append(mode)
         return modes
 
     def highestMode(self, hidpi=0):
@@ -136,7 +137,7 @@ class Display(object):
         :return: The Quartz "DisplayMode" interface with the highest display resolution for this display.
         """
         highest = None
-        for mode in self.allModes:
+        for mode in self.allModes():
             if highest:
                 if mode > highest and self.__rightHidpi(mode, hidpi):
                     highest = mode
@@ -156,41 +157,37 @@ class Display(object):
                 raise DisplayError(
                     "Display \"{}\"\'s resolution cannot be set".format(self.tag))
 
-    def closestMode(self, width, height, depth=32.0, refresh=0.0, hidpi=0):
+    def closestMode(self, width, height, refresh=0, hidpi=0):
         """
         :param width: Desired width
         :param height: Desired height
-        :param depth: Desired pixel depth
         :param refresh: Desired refresh rate
         :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI
         :return: The closest Quartz "DisplayMode" interface possible for this display.
         """
-        whdr = None  # matches width, height, depth, and refresh
-        whd = None   # matches width, height, and depth
-        wh = None    # matches width and height
+        # Which criteria does it match (in addition to width and height)?
+        hr = []     # HiDPI, refresh
+        h = []      # HiDPI
+        r = []      # refresh
 
-        for mode in self.allModes:
-            widthMatch = mode.width == width
-            heightMatch = mode.height == height
-            depthMatch = mode.depth == depth
-            refreshMatch = mode.refresh == refresh
-            hidpiMatch = self.__rightHidpi(mode, hidpi)
+        for mode in self.allModes():
+            closeness = 0
+            if mode.width == width and mode.height == height:
+                if self.__rightHidpi(mode, hidpi) and mode.refresh == refresh:
+                    hr.append(mode)
+                elif self.__rightHidpi(mode, hidpi):
+                    h.append(mode)
+                elif mode.refresh == refresh:
+                    r.append(mode)
 
-            if widthMatch and heightMatch and depthMatch and refreshMatch and hidpiMatch:
-                return mode
-            elif widthMatch and heightMatch and depthMatch and refreshMatch:
-                whdr = mode
-            elif widthMatch and heightMatch and depthMatch:
-                whd = mode
-            elif widthMatch and heightMatch:
-                wh = mode
-
-        for match in [whdr, whd, wh]:  # iterate through the "close" modes in order of closeness
-            if match:
-                return match
+        # Return the nearest match, with HiDPI matches preferred over refresh matches
+        for modes in [hr, h, r]:
+            if modes:
+                return modes[0]
 
         raise DisplayError(
-            "Display \"{}\" cannot be set to {}x{}".format(self.tag, width, height))
+            "Display \"{}\" cannot be set to {}x{}".format(self.tag, width, height)
+        )
 
     def setMode(self, mode):
         """
@@ -231,11 +228,28 @@ class Display(object):
         # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
         options = rotateCode | (angleCodes[angle % 360] << 16)
 
+        # Record old mode and rotation for future restore
+        oldMode = self.currentMode
+        oldRotation = self.rotation
+
+        # Can often only rotate highest resolution(s)
+        self.setMode(self.highestMode())
         # Actually rotate the screen
         error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
-
         if error:
             raise DisplayError("Cannot manage rotation on display \"{}\"".format(self.tag))
+
+        # Reset mode to old resolution
+        try:
+            closest = self.closestMode(oldMode.width, oldMode.height)
+            self.setMode(closest)
+        # This angle not supported at this resolution
+        except DisplayError:
+            self.setRotate(oldRotation)
+            self.setMode(oldMode)
+            raise DisplayError(
+                "Cannot rotate display \"{}\" at resolution {}x{}".format(self.tag, oldMode.width, oldMode.height)
+            )
 
     # Brightness properties and methods
 
