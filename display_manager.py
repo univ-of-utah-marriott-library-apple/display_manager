@@ -545,7 +545,7 @@ class CommandList(object):
             displayCommands = self.commandDict[displayID]
 
             # Group commands by subcommand. Must preserve ordering to avoid interfering commands
-            commandGroups = collections.OrderedDict([
+            verbGroups = collections.OrderedDict([
                 ("help", []),
                 ("res", []),
                 ("rotate", []),
@@ -555,22 +555,22 @@ class CommandList(object):
                 ("show", []),
             ])
             for command in displayCommands:
-                commandGroups[command.verb].append(command)
+                verbGroups[command.verb].append(command)
 
             # Run commands by subcommand
-            for commandType in commandGroups:
+            for verb in verbGroups:
                 # Commands for this display, of this subcommand
-                commands = commandGroups[commandType]
+                commands = verbGroups[verb]
 
                 if len(commands) > 0:
                     # Multiple commands of these types will undo each other.
                     # As such, just run the most recently added command (the last in the list)
                     if (
-                            commandType == "help" or
-                            commandType == "res" or
-                            commandType == "rotate" or
-                            commandType == "brightness" or
-                            commandType == "underscan"
+                            verb == "help" or
+                            verb == "res" or
+                            verb == "rotate" or
+                            verb == "brightness" or
+                            verb == "underscan"
                     ):
                         try:
                             commands[-1].run()
@@ -578,7 +578,7 @@ class CommandList(object):
                             raise CommandExecutionError(e.message, commands[-1])
 
                     # "show" commands don't interfere with each other, so run all of them
-                    elif commandType == "show":
+                    elif verb == "show":
                         for command in commands:
                             try:
                                 command.run()
@@ -586,10 +586,10 @@ class CommandList(object):
                                 raise CommandExecutionError(e.message, command)
 
                     # "mirror" commands are the most complicated to deal with
-                    elif commandType == "mirror":
+                    elif verb == "mirror":
                         command = commands[-1]
 
-                        if command.type == "enable":
+                        if command.subcommand == "enable":
                             display = Display(displayID)
                             # The current Display that the above "display" is mirroring
                             currentMirror = display.mirrorOf
@@ -619,7 +619,7 @@ class CommandList(object):
                                 except DisplayError as e:
                                     raise CommandExecutionError(e.message, command)
 
-                        elif command.type == "disable":
+                        elif command.subcommand == "disable":
                             try:
                                 command.run()
                             except DisplayError as e:
