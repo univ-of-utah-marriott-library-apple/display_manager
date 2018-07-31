@@ -181,8 +181,7 @@ Note: by default, both HiDPI and non-HiDPI resolutions are shown.
 
 `manage_displays.py show available ext0`
 
-Notes:
-* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
+Note: "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
 
 ### Res
 
@@ -230,8 +229,7 @@ Note: by default, both HiDPI and non-HiDPI resolutions are shown
 
 `manage_displays.py res 1024 768 60 ext0`
 
-Notes:
-* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
+Notes: "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
 
 ### Rotate
 
