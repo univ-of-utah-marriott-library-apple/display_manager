@@ -125,12 +125,20 @@ Usage: `manage_displays.py help [command]`
 | Commands | Description |
 |---|---|
 | `help` | Show help information about a command |
+| `show` | Show current/available display configurations |
 | `res` | Manage the display resolution |
-| `show` | Show current/available display configuration |
 | `brightness` | Manage display brightness |
 | `rotate` | Manage display rotation |
 | `underscan` | Manage display underscan |
-| `mirror` | Enable or disable screen mirroring |
+| `mirror` | Manage screen mirroring |
+
+#### Examples
+
+* Show help information for the `res` command:
+`$ manage_displays.py help res`
+
+* Show general help information to see which commands are available:
+`$ manage_displays.py help`
 
 ### Show
 
