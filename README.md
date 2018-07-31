@@ -364,7 +364,9 @@ Display Manager allows you to manipulate displays in a variety of ways. You can 
 
 First, import the Display Manager library, like so:
 
-`from DisplayManager import *`
+```
+from DisplayManager import *
+```
 
 Next, say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
 
@@ -384,7 +386,7 @@ You can use any of the properties and methods of `Display` objects to configure 
 
 ### Command-Line Examples
 
-In some cases, it may be desirable to configure displays from the command line, whether manually or via a script. Say you'd like a script to automatically set a display to its highest available resolution. The following would do just that:
+In many cases, it may be desirable to configure displays from the command line, whether manually or via a script. Say you'd like a script to automatically set a display to its highest available resolution. The following would do just that:
 
 `manage_displays.py res highest`
 
@@ -393,6 +395,8 @@ But, in many cases, you might want to call several such commands at the same tim
 `manage_displays.py res 1920 1080 rotate 90 brightness .5 ...`
 
 In this way, you may pass in as many commands as you like, and Display Manager will find a way to run them simultaneously without encountering configuration errors.
+
+Note: only one `help` command may be run at a time, but any number of other commands may be run simultaneously in a non-blocking fashion.
 
 ### System Administration Examples
 
@@ -406,7 +410,7 @@ Suppose you'd like all computers in a particular Jamf Pro [scope](http://docs.ja
 
 and add a script containing the following to it
 
-`
+```
 #!/bin/bash
 
 # Check to make sure the library and command-line API are both installed
@@ -419,7 +423,7 @@ if [[ -e /Library/Python/2.7/site-packages/display_manager.py && \
 else
 	exit 1
 fi
-`
+```
 
 like so:
 
@@ -433,7 +437,7 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 Perhaps you're managing several sideways-rotated wall-mounted HDMI displays via Outset, and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
 
-`
+```
 #!/bin/bash
 
 # Check to make sure the library and command-line API are both installed
@@ -445,7 +449,7 @@ if [[ -e /Library/Python/2.7/site-packages/display_manager.py && \
 else
 	exit 1
 fi
-`
+```
 
 For more details about command-line usage, see [here](#command-line-usage); for examples, see [command-line examples](#command-line-examples).
 
