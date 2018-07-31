@@ -118,7 +118,7 @@ For more information on each command, see its section below:
 
 ### Help
 
-Help shows help information similar to that seen in this documentation for each command.
+Use `help` to see help documentation for any command.
 
 Usage: `manage_displays.py help [command]`
 
