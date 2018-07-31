@@ -159,7 +159,9 @@ Usage: `manage_displays.py show (subcommand) (options) (scope)`
 | `no-hidpi` | Don't show HiDPI resolutions |
 | `only-hidpi` | Only show HiDPI resolutions |
 
-Note: by default, both HiDPI and non-HiDPI resolutions are shown.
+Notes:
+* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
+* By default, both HiDPI and non-HiDPI resolutions are shown.
 
 | Scope (optional) | Description |
 |---|---|
@@ -180,8 +182,6 @@ Note: by default, both HiDPI and non-HiDPI resolutions are shown.
 * Show all available resolutions for the first external display:
 
 `manage_displays.py show available ext0`
-
-Note: "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
 
 ### Res
 
@@ -207,7 +207,9 @@ Note: if refresh rate is not specified, it will default to whichever rate is ava
 | `no-hidpi` | Don't set to HiDPI resolutions |
 | `only-hidpi` | Only set to HiDPI resolutions |
 
-Note: by default, both HiDPI and non-HiDPI resolutions are shown
+Notes:
+* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
+* By default, both HiDPI and non-HiDPI resolutions are shown.
 
 | SCOPE (optional) | Details |
 |---|---|
@@ -228,8 +230,6 @@ Note: by default, both HiDPI and non-HiDPI resolutions are shown
 * Set the first external display to 1024x768 at 60Hz:
 
 `manage_displays.py res 1024 768 60 ext0`
-
-Note: "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
 
 ### Rotate
 
