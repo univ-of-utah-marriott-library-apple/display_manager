@@ -47,6 +47,8 @@
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplaySettingsMac.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/pyRotateDisplayStatusBar.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/.dev/examples/PyRotate/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/display_manager_lib.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager_lib.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -92,12 +94,14 @@
       <file leaf-file-name="display_manager_lib.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/display_manager_lib.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="539">
-              <caret line="292" selection-start-line="292" selection-end-line="292" />
+            <state relative-caret-position="45">
+              <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
               <folding>
-                <element signature="n#!!doc" />
+                <element signature="e#185#253#0" expanded="true" />
                 <element signature="e#506#719#0" />
                 <element signature="e#506#710#1" />
+                <element signature="e#749#12406#0" />
+                <element signature="e#749#966#1" />
                 <element signature="e#1011#1454#0" />
                 <element signature="e#1011#1095#1" />
                 <element signature="e#1493#1532#0" />
@@ -140,6 +144,8 @@
                 <element signature="e#7094#7329#0" />
                 <element signature="e#7506#7637#0" />
                 <element signature="e#7506#7576#1" />
+                <element signature="e#7679#8375#0" />
+                <element signature="e#7679#7739#1" />
                 <element signature="e#8664#8973#0" />
                 <element signature="e#8664#8737#1" />
                 <element signature="e#9024#9651#0" />
@@ -188,10 +194,9 @@
       <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
+            <state relative-caret-position="120">
+              <caret line="8" column="68" selection-start-line="8" selection-start-column="68" selection-end-line="8" selection-end-column="68" />
               <folding>
-                <element signature="n#!!doc" />
                 <element signature="e#212#661#0" />
                 <element signature="e#212#365#1" />
                 <element signature="e#419#661#0" />
@@ -406,8 +411,6 @@
                 <element signature="e#45255#45696#0" />
                 <element signature="e#45278#45606#0" />
                 <element signature="e#45379#45498#0" />
-                <element signature="e#45749#45903#0" />
-                <element signature="e#45836#45903#0" />
               </folding>
             </state>
           </provider>
@@ -496,8 +499,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>commandString</find>
-      <find>todo:</find>
       <find>= scope</find>
       <find>scope =</find>
       <find>raise</find>
@@ -526,6 +527,8 @@
       <find>closest</find>
       <find>display_manager.py</find>
       <find>todo</find>
+      <find>sys.</find>
+      <find>sys</find>
     </findStrings>
     <replaceStrings>
       <replace>IO</replace>
@@ -612,11 +615,11 @@
         <option value="$PROJECT_DIR$/.dev/copypasta.py" />
         <option value="$PROJECT_DIR$/.dev/experiment.py" />
         <option value="$PROJECT_DIR$/new_cli.py" />
-        <option value="$PROJECT_DIR$/display_manager_lib.py" />
         <option value="$PROJECT_DIR$/.dev/tests/cli_tests.py" />
         <option value="$PROJECT_DIR$/gui.py" />
-        <option value="$PROJECT_DIR$/display_manager.py" />
         <option value="$PROJECT_DIR$/manage_displays.py" />
+        <option value="$PROJECT_DIR$/display_manager_lib.py" />
+        <option value="$PROJECT_DIR$/display_manager.py" />
       </list>
     </option>
   </component>
@@ -919,7 +922,6 @@
         <state relative-caret-position="8580">
           <caret line="572" lean-forward="true" selection-start-line="572" selection-end-line="572" />
           <folding>
-            <element signature="n#!!doc" />
             <element signature="e#212#661#0" />
             <element signature="e#212#365#1" />
             <element signature="e#419#661#0" />
@@ -1134,8 +1136,6 @@
             <element signature="e#45255#45696#0" />
             <element signature="e#45278#45606#0" />
             <element signature="e#45379#45498#0" />
-            <element signature="e#45749#45903#0" />
-            <element signature="e#45836#45903#0" />
           </folding>
         </state>
       </provider>
@@ -1396,12 +1396,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager_lib.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="539">
-          <caret line="292" selection-start-line="292" selection-end-line="292" />
+        <state relative-caret-position="45">
+          <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
           <folding>
-            <element signature="n#!!doc" />
+            <element signature="e#185#253#0" expanded="true" />
             <element signature="e#506#719#0" />
             <element signature="e#506#710#1" />
+            <element signature="e#749#12406#0" />
+            <element signature="e#749#966#1" />
             <element signature="e#1011#1454#0" />
             <element signature="e#1011#1095#1" />
             <element signature="e#1493#1532#0" />
@@ -1444,6 +1446,8 @@
             <element signature="e#7094#7329#0" />
             <element signature="e#7506#7637#0" />
             <element signature="e#7506#7576#1" />
+            <element signature="e#7679#8375#0" />
+            <element signature="e#7679#7739#1" />
             <element signature="e#8664#8973#0" />
             <element signature="e#8664#8737#1" />
             <element signature="e#9024#9651#0" />
@@ -1490,10 +1494,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
+        <state relative-caret-position="120">
+          <caret line="8" column="68" selection-start-line="8" selection-start-column="68" selection-end-line="8" selection-end-column="68" />
           <folding>
-            <element signature="n#!!doc" />
             <element signature="e#212#661#0" />
             <element signature="e#212#365#1" />
             <element signature="e#419#661#0" />
@@ -1708,8 +1711,6 @@
             <element signature="e#45255#45696#0" />
             <element signature="e#45278#45606#0" />
             <element signature="e#45379#45498#0" />
-            <element signature="e#45749#45903#0" />
-            <element signature="e#45836#45903#0" />
           </folding>
         </state>
       </provider>

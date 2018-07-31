@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
 # Display Manager, version 1.0.0
+# Python Library
 
 # Programmatically manages Mac displays.
-# Can set screen resolution, color depth, refresh rate, screen mirroring, and brightness.
+# Can set screen resolution, refresh rate, rotation, brightness, underscan, and screen mirroring.
 
 import objc             # access Objective-C functions and variables
 import CoreFoundation   # work with Objective-C data types

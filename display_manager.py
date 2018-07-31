@@ -1,11 +1,15 @@
 #!/usr/bin/python
 
-# This script allows users to access Display Manager through the command line.
+# Display Manager, version 1.0.0
+# Command-Line Interface
 
-import sys
-import re
-import collections
-from display_manager_lib import *
+# Programmatically manages Mac displays.
+# Can set screen resolution, refresh rate, rotation, brightness, underscan, and screen mirroring.
+
+import sys                          # Collect command-line arguments
+import re                           # Parse command-line input
+import collections                  # Special collections are required for CommandList
+from display_manager_lib import *   # The Display Manager Library
 
 
 class CommandSyntaxError(Exception):
