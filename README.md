@@ -73,7 +73,7 @@ Next, see [Overview](#overview) for an idea of what you can do with Display Mana
 
 ## Overview
 
-The Display Manager suite comes in 3 parts: the Display Manager library (display_manager_lib.py), the command-line API (display_manager.py), and the GUI (gui.py).
+The Display Manager suite comes in 3 parts: the Display Manager library (`display_manager_lib.py`), the command-line API (`display_manager.py`), and the GUI (`gui.py`).
 
 ### Library
 
