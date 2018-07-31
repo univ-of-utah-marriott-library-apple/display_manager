@@ -73,11 +73,11 @@ Next, see [Overview](#overview) for an idea of what you can do with Display Mana
 
 ## Overview
 
-The Display Manager suite comes in 3 parts: the Display Manager library (display_manager.py), the command-line API (manage_displays.py), and the GUI (gui.py).
+The Display Manager suite comes in 3 parts: the Display Manager library (display_manager_lib.py), the command-line API (display_manager.py), and the GUI (gui.py).
 
 ### Library
 
-The Display Manager library is housed in display_manager.py, which contains the following:
+The Display Manager library is housed in `display_manager_lib.py`, which contains the following:
 
 * The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
 * The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
@@ -88,7 +88,7 @@ The Display Manager library is housed in display_manager.py, which contains the 
 
 ### Command-Line API
 
-The command-line API, accessed via manage_displays.py, allows you to manually set [display resolution, refresh rate](#res), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
+The command-line API, accessed via `display_manager.py`, allows you to manually set [display resolution, refresh rate](#res), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). See [command-line usage](#command-line-usage) below for more information.
 
 ### GUI
 
@@ -104,7 +104,7 @@ To configure screen mirroring, select the display you'd like to mirror, and choo
 
 ![mirroring menu](./resources/gui_3.png)
 
-Finally, select either "Set Display" or "Build Script". If you click "Set Display", the display will be configured to the settings you've selected. If you pick "Build Script", you'll be given a file dialog to save a script which sets your display to these settings automatically whenever run (using the commands seen in [manage_displays.py](#command-line-api)).
+Finally, select either "Set Display" or "Build Script". If you click "Set Display", the display will be configured to the settings you've selected. If you pick "Build Script", you'll be given a file dialog to save a script which sets your display to these settings automatically whenever run (using the commands seen in [display_manager.py](#command-line-api)).
 
 ![set and build buttons](./resources/gui_4.png)
 
@@ -112,7 +112,7 @@ Finally, select either "Set Display" or "Build Script". If you click "Set Displa
 
 The Display Manager command-line API supports the following commands:
 
-`$ manage_displays.py [command]`
+`$ display_manager.py [command]`
 
 For more information on each command, see its section below:
 
@@ -120,7 +120,7 @@ For more information on each command, see its section below:
 
 Use `help` to see help documentation for any command.
 
-Usage: `$ manage_displays.py help [command]`
+Usage: `$ display_manager.py help [command]`
 
 | Commands | Description |
 |---|---|
@@ -136,17 +136,17 @@ Usage: `$ manage_displays.py help [command]`
 
 * Show help information for the `res` command:
 
-`$ manage_displays.py help res`
+`$ display_manager.py help res`
 
 * Show general help information to see which commands are available:
 
-`$ manage_displays.py help`
+`$ display_manager.py help`
 
 ### Show
 
 Use `show` to learn more about the supported display configurations for your hardware.
 
-Usage: `$ manage_displays.py show (subcommand) (options) (scope)`
+Usage: `$ display_manager.py show (subcommand) (options) (scope)`
 
 | Subcommands (optional) | Description |
 |---|---|
@@ -173,21 +173,21 @@ Notes:
 
 * Show all displays' current configurations:
 
-`$ manage_displays.py show`
+`$ display_manager.py show`
 
 * Show the highest available HiDPI resolution for the main display:
 
-`$ manage_displays.py show highest only-hidpi main`
+`$ display_manager.py show highest only-hidpi main`
 
 * Show all available resolutions for the first external display:
 
-`$ manage_displays.py show available ext0`
+`$ display_manager.py show available ext0`
 
 ### Res
 
 Use `res` to modify display resolution and refresh rate. (Checking desired settings through [`show`](#show) beforehand is recommended.)
 
-usage: `$ manage_displays.py res [resolution] (refresh) (options) (scope)`
+usage: `$ display_manager.py res [resolution] (refresh) (options) (scope)`
 
 | Resolution | Description |
 |---|---|
@@ -221,21 +221,21 @@ Notes:
 
 * Set the main display to 1920x1080:
 
-`$ manage_displays.py res 1920 1080`
+`$ display_manager.py res 1920 1080`
 
 * Set all displays to their highest available resolution:
 
-`$ manage_displays.py res highest all`
+`$ display_manager.py res highest all`
 
 * Set the first external display to 1024x768 at 60Hz:
 
-`$ manage_displays.py res 1024 768 60 ext0`
+`$ display_manager.py res 1024 768 60 ext0`
 
 ### Rotate
 
 Use `rotate` to change your display's orientation.
 
-usage: `$ manage_displays.py rotate [angle] (scope)`
+usage: `$ display_manager.py rotate [angle] (scope)`
 
 | Angle | Description |
 |---|---|
@@ -251,17 +251,17 @@ usage: `$ manage_displays.py rotate [angle] (scope)`
 
 * Rotate the main display by 90 degrees (counter-clockwise):
 
-`$ manage_displays.py rotate 90`
+`$ display_manager.py rotate 90`
 
 * Return all displays to default orientation:
 
-`$ manage_displays.py rotate 0 all`
+`$ display_manager.py rotate 0 all`
 
 ### Brightness
 
 Use `brightness` to set the brightness on your display.
 
-usage: `$ manage_displays.py brightness [brightness] (scope)`
+usage: `$ display_manager.py brightness [brightness] (scope)`
 
 | Brightness | Description |
 |---|---|
@@ -277,11 +277,11 @@ usage: `$ manage_displays.py brightness [brightness] (scope)`
 
 * Set the brightness of the main display to half of its maximum brightness:
 
-`$ manage_displays.py brightness .4`
+`$ display_manager.py brightness .4`
 
 * Set the brightness of all displays to their maximum:
 
-`$ manage_displays.py brightness 1 all`
+`$ display_manager.py brightness 1 all`
 
 Note: many displays do not support setting brightness automatically; this is most often the case with external monitors.
 
@@ -289,7 +289,7 @@ Note: many displays do not support setting brightness automatically; this is mos
 
 Use `underscan` to configure HDMI underscan settings.
 
-usage: `$ manage_displays.py underscan [underscan] (scope)`
+usage: `$ display_manager.py underscan [underscan] (scope)`
 
 | Underscan | Description |
 |---|---|
@@ -307,11 +307,11 @@ Note: HDMI underscan settings can fix displays that under-render images, causing
 
 * Set main display to 0% underscan:
 
-`$ manage_displays.py underscan 0`
+`$ display_manager.py underscan 0`
 
 * Set all displays to 42% underscan:
 
-`$ manage_displays.py underscan .42 all`
+`$ display_manager.py underscan .42 all`
 
 ### Mirror
 
@@ -319,8 +319,8 @@ Use `mirror` to enable or disable display mirroring.
 
 usage:
 
-* `$ manage_displays.py mirror enable [source] [target(s)]`
-* `$ manage_displays.py mirror disable (scope)`
+* `$ display_manager.py mirror enable [source] [target(s)]`
+* `$ display_manager.py mirror disable (scope)`
 
 | Subcommands | Description |
 |---|---|
@@ -342,19 +342,19 @@ usage:
 
 * Set all external displays to mirror the main display:
 
-`$ manage_displays.py mirror enable main all`
+`$ display_manager.py mirror enable main all`
 
 * Set the main display and the first external display to mirror the second external display:
 
-`$ manage_displays.py mirror enable ext1 main ext0`
+`$ display_manager.py mirror enable ext1 main ext0`
 
 * Stop mirroring on all displays:
 
-`$ manage_displays.py mirror disable`
+`$ display_manager.py mirror disable`
 
 * Stop mirroring on the main display:
 
-`$ manage_displays.py mirror disable main`
+`$ display_manager.py mirror disable main`
 
 ## Usage Examples
 
@@ -388,11 +388,11 @@ You can use any of the properties and methods of `Display` objects to configure 
 
 In many cases, it may be desirable to configure displays from the command line, whether manually or via a script. Say you'd like a script to automatically set a display to its highest available resolution. The following would do just that:
 
-`$ manage_displays.py res highest`
+`$ display_manager.py res highest`
 
 But, in many cases, you might want to call several such commands at the same time. Of course, you may write them out line-by-line, but this takes a little longer, and more importantly, running several commands in this way may lead to undesired interference between commands. As such, it is recommended that multiple commands be run like so:
 
-`$ manage_displays.py res 1920 1080 rotate 90 brightness .5 ...`
+`$ display_manager.py res 1920 1080 rotate 90 brightness .5 ...`
 
 In this way, you may pass in as many commands as you like, and Display Manager will find a way to run them simultaneously without encountering configuration errors.
 
@@ -414,10 +414,10 @@ and add a script containing the following to it
 #!/bin/bash
 
 # Check to make sure the library and command-line API are both installed
-if [[ -e /Library/Python/2.7/site-packages/display_manager.py && \
-	-e /usr/local/bin/manage_displays.py ]] ; then
+if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
+	-e /usr/local/bin/display_manager.py ]] ; then
 	
-	manage_displays.py res highest only-hidpi brightness 1
+	display_manager.py res highest only-hidpi brightness 1
 	exit 0
 
 else
@@ -441,10 +441,10 @@ Perhaps you're managing several sideways-rotated wall-mounted HDMI displays via 
 #!/bin/bash
 
 # Check to make sure the library and command-line API are both installed
-if [[ -e /Library/Python/2.7/site-packages/display_manager.py && \
-	-e /usr/local/bin/manage_displays.py ]] ; then
+if [[ -e /Library/Python/2.7/site-packages/display_manager_lib.py && \
+	-e /usr/local/bin/display_manager.py ]] ; then
 	
-	manage_displays.py rotate 90 underscan .5
+	display_manager.py rotate 90 underscan .5
 	
 else
 	exit 1

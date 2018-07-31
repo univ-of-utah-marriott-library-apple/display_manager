@@ -3,7 +3,7 @@
 # A collection of unittests for Display Manager's command-line interface
 
 import unittest
-from manage_displays import *
+from display_manager import *
 
 
 class CommandTests(unittest.TestCase):

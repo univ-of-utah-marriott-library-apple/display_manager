@@ -8,7 +8,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-import display_manager as dm
+import display_manager_lib as dm
 
 
 class App(object):
@@ -358,7 +358,7 @@ class App(object):
             initialfile="set",
         )
         if f is not None:  # if the user didn't cancel
-            f.write("#!/bin/bash\n\ndisplay_manager.py")
+            f.write("#!/bin/bash\n\ndisplay_manager_lib.py")
             for command in self.__generateCommands().commands:
                 f.write(' "' + command.__str__() + '"')
             f.close()

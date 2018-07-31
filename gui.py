@@ -7,7 +7,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import re
-from manage_displays import *
+from display_manager import *
 
 
 class App(object):
