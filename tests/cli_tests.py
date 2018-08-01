@@ -359,11 +359,13 @@ class ParseTests(unittest.TestCase):
             self.assertRaises(CommandValueError, parseCommands, fail)
 
 
-class TestDisplay(Display):
+class TestDisplay(AbstractDisplay):
 
     def __init__(self, displayID):
-        self.displayID = displayID
+        # Sets self.displayID to displayID
+        super(TestDisplay, self).__init__(displayID)
 
+        # All properties start at "None"
         self.__currentMode = None
         self.__rotation = None
         self.__brightness = None

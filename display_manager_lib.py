@@ -6,6 +6,7 @@
 # Programmatically manages Mac displays.
 # Can set screen resolution, refresh rate, rotation, brightness, underscan, and screen mirroring.
 
+import abc              # Allows use of abstract classes
 import objc             # access Objective-C functions and variables
 import CoreFoundation   # work with Objective-C data types
 import Quartz           # work with system graphics
@@ -23,26 +24,16 @@ class DisplayError(Exception):
     pass
 
 
-class Display(object):
-    """
-    Virtual representation of a physical display.
+# todo: block/doc comments?
+class AbstractDisplay(object):
 
-    Contains properties regarding display information for a given physical display, along with a few
-    useful helper functions to configure the display.
-    """
+    __metaclass__ = abc.ABCMeta
 
+    @abc.abstractmethod
     def __init__(self, displayID):
-        """
-        :param displayID: The DisplayID of the display to manipulate
-        """
-        getIOKit()
+        self.displayID = displayID
 
-        # Check whether displayID is actually a display
-        (error, allDisplayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
-        if displayID not in allDisplayIDs or error:
-            raise DisplayError("Display {} not found".format(displayID))
-        else:
-            self.displayID = displayID
+    # "Magic" methods
 
     def __lt__(self, other):
         return self.displayID < other.displayID
@@ -57,7 +48,105 @@ class Display(object):
             return False
 
     def __hash__(self):
-        return self.displayID
+        # Actually just returns self.displayID, as self.displayID is int;
+        # hash() is called for consistency and compatibility
+        return hash(self.displayID)
+
+    # General properties
+
+    @abc.abstractproperty
+    def isMain(self):
+        pass
+
+    @abc.abstractproperty
+    def tag(self):
+        pass
+
+    # Mode properties and methods
+
+    @abc.abstractproperty
+    def currentMode(self):
+        pass
+
+    @abc.abstractmethod
+    def allModes(self, hidpi):
+        pass
+
+    @abc.abstractmethod
+    def highestMode(self, hidpi):
+        pass
+
+    @abc.abstractmethod
+    def closestMode(self, width, height, refresh, hidpi):
+        pass
+
+    @abc.abstractmethod
+    def setMode(self, mode):
+        pass
+
+    # Rotation properties and methods
+
+    @abc.abstractproperty
+    def rotation(self):
+        pass
+
+    @abc.abstractmethod
+    def setRotate(self, angle):
+        pass
+
+    # Brightness
+
+    @abc.abstractproperty
+    def brightness(self):
+        pass
+
+    @abc.abstractmethod
+    def setBrightness(self, brightness):
+        pass
+
+    # Underscan
+
+    @abc.abstractproperty
+    def underscan(self):
+        pass
+
+    @abc.abstractmethod
+    def setUnderscan(self, underscan):
+        pass
+
+    # Mirroring
+
+    @abc.abstractproperty
+    def mirrorOf(self):
+        pass
+
+    @abc.abstractmethod
+    def setMirrorOf(self, mirrorDisplay):
+        pass
+
+
+class Display(AbstractDisplay):
+    """
+    Virtual representation of a physical display.
+
+    Contains properties regarding display information for a given physical display, along with a few
+    useful helper functions to configure the display.
+    """
+
+    def __init__(self, displayID):
+        """
+        :param displayID: The DisplayID of the display to manipulate
+        """
+        # Sets self.displayID to displayID
+        super(Display, self).__init__(displayID)
+
+        # Make sure displayID is actually a display
+        (error, allDisplayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
+        if displayID not in allDisplayIDs or error:
+            raise DisplayError("Display {} not found".format(displayID))
+
+        # iokit is required for several Display methods
+        getIOKit()
 
     # General properties
 
@@ -329,36 +418,20 @@ class Display(object):
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
 
-class DisplayMode(object):
-    """
-    Represents a DisplayMode as implemented in Quartz.
-    """
+# todo: block/doc comments?
+class AbstractDisplayMode(object):
 
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def __init__(self, mode):
-        # Low-hanging fruit
-        self.width = int(Quartz.CGDisplayModeGetWidth(mode))
-        self.height = int(Quartz.CGDisplayModeGetHeight(mode))
-        self.refresh = int(Quartz.CGDisplayModeGetRefreshRate(mode))
         self.raw = mode
 
-        # Pixel depth
-        depthMap = {
-            "PPPPPPPP": 8.0,
-            "-RRRRRGGGGGBBBBB": 16.0,
-            "--------RRRRRRRRGGGGGGGGBBBBBBBB": 32.0,
-            "--RRRRRRRRRRGGGGGGGGGGBBBBBBBBBB": 30.0
-        }
-        self.depth = depthMap[Quartz.CGDisplayModeCopyPixelEncoding(mode)]
-
-        # HiDPI status
-        maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
-        maxHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # the maximum display width for this display
-        self.hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
+    # "Magic" methods
 
     def __str__(self):
         return "resolution: {width}x{height}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
-            "width": self.width, "height": self.height, "depth": self.depth,
-            "refresh": self.refresh, "hidpi": self.hidpi
+            "width": self.width, "height": self.height, "refresh": self.refresh, "hidpi": self.hidpi
         })
 
     def __lt__(self, other):
@@ -369,12 +442,62 @@ class DisplayMode(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.width * self.height == other.width * other.height
+            return self.__str__() == other.__str__()
         else:
             return False
 
     def __hash__(self):
         return hash(self.__str__())
+
+    # General properties
+
+    @abc.abstractproperty
+    def width(self):
+        pass
+
+    @abc.abstractproperty
+    def height(self):
+        pass
+
+    @abc.abstractproperty
+    def refresh(self):
+        pass
+
+    @abc.abstractproperty
+    def hidpi(self):
+        pass
+
+
+class DisplayMode(AbstractDisplayMode):
+    """
+    Represents a DisplayMode as implemented in Quartz.
+    """
+
+    def __init__(self, mode):
+        # sets self.raw to mode
+        super(DisplayMode, self).__init__(mode)
+
+        self.__width = int(Quartz.CGDisplayModeGetWidth(mode))
+        self.__height = int(Quartz.CGDisplayModeGetHeight(mode))
+        self.__refresh = int(Quartz.CGDisplayModeGetRefreshRate(mode))
+
+        maxWidth = Quartz.CGDisplayModeGetPixelWidth(mode)  # the maximum display width for this display
+        maxHeight = Quartz.CGDisplayModeGetPixelHeight(mode)  # the maximum display width for this display
+        self.__hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
+
+    # General properties
+
+    def width(self):
+        return self.__width
+
+    def height(self):
+        return self.__height
+
+    def refresh(self):
+        return self.__refresh
+
+    def hidpi(self):
+        return self.__hidpi
 
 
 def getMainDisplay():
@@ -449,6 +572,8 @@ def getIOKit():
             if key in globals():
                 iokit[key] = globals()[key]
 
+        # A few IOKit variables that have been deprecated, but whose values
+        # still work as intended in IOKit functions
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR("brightness")
         iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
 

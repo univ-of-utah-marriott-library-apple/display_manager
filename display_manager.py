@@ -118,6 +118,8 @@ class Command(object):
         # Make sure IOKit is ready for use in any/all commands
         getIOKit()
 
+    # "Magic" methods
+
     def __str__(self):
         # A list to contain strings of all the arguments in the command
         stringList = [self.verb]
@@ -485,6 +487,8 @@ class CommandList(object):
                 for command in commands.commands:
                     self.addCommand(command)
 
+    # "Magic" methods
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return set(self.commands) == set(other.commands)
@@ -497,6 +501,8 @@ class CommandList(object):
             h = h | command.__str__()
 
         return hash(h)
+
+    # Command interfacing
 
     @property
     def commands(self):

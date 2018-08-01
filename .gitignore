@@ -56,8 +56,5 @@ docs/_build/
 target/
 
 # Custom
-.dev/examples
-copypasta.py
-experiment.py
+.dev/
 .DS_Store
-workspace.xml
