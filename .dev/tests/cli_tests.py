@@ -6,7 +6,7 @@ import unittest
 from display_manager import *
 
 
-class CommandTests(unittest.TestCase):
+class ParseTests(unittest.TestCase):
 
     # Helper methods
 
@@ -259,6 +259,8 @@ class CommandTests(unittest.TestCase):
             ),
         ])
 
+    # todo: stress tests
+
     # Error tests
 
     def test_raiseCommandSyntaxError(self):
@@ -357,5 +359,145 @@ class CommandTests(unittest.TestCase):
             self.assertRaises(CommandValueError, parseCommands, fail)
 
 
+class TestDisplay(Display):
+
+    def __init__(self, displayID):
+        self.displayID = displayID
+
+        self.__currentMode = None
+        self.__rotation = None
+        self.__brightness = None
+        self.__underscan = None
+        self.__mirrorOf = None
+
+    @property
+    def isMain(self):
+        return self.displayID == 0
+
+    @property
+    def tag(self):
+        return "main"
+
+    @staticmethod
+    def __rightHidpi(mode, hidpi):
+        """
+        Evaluates whether the mode fits the user's HiDPI specification.
+
+        :param mode: The mode to be evaluated.
+        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
+        :return: Whether the mode fits the HiDPI description specified by the user.
+        """
+        if (
+                (hidpi == 0)  # fits HiDPI or non-HiDPI (default)
+                or (hidpi == 1 and not mode.hidpi)  # fits only non-HiDPI
+                or (hidpi == 2 and mode.hidpi)  # fits only HiDPI
+        ):
+            return True
+        else:
+            return False
+
+    @property
+    def currentMode(self):
+        return self.__currentMode
+
+    def allModes(self, hidpi=0):
+        if self.currentMode:
+            if self.__rightHidpi(self.currentMode, hidpi):
+                return self.currentMode
+            else:
+                return None
+
+    def highestMode(self, hidpi=0):
+        if self.currentMode:
+            if self.__rightHidpi(self.currentMode, hidpi):
+                return self.currentMode
+            else:
+                return None
+
+    def closestMode(self, width, height, refresh=0, hidpi=0):
+        if (
+            self.currentMode.width == width and
+            self.currentMode.height == height and
+            self.currentMode.refresh == refresh and
+            self.__rightHidpi(self.currentMode, hidpi)
+        ):
+            return self.currentMode
+        else:
+            return None
+
+    def setMode(self, mode):
+        self.__currentMode = mode
+
+    @property
+    def rotation(self):
+        return self.__rotation
+
+    def setRotate(self, angle):
+        self.__rotation = angle
+
+    @property
+    def brightness(self):
+        return self.__brightness
+
+    def setBrightness(self, brightness):
+        self.__brightness = brightness
+
+    @property
+    def underscan(self):
+        return self.__underscan
+
+    def setUnderscan(self, underscan):
+        self.__underscan = underscan
+
+    @property
+    def mirrorOf(self):
+        return self.__mirrorOf
+
+    def setMirrorOf(self, mirrorDisplay):
+        self.__mirrorOf = mirrorDisplay
+
+
+class TestDisplayMode(DisplayMode):
+
+    def __init__(self, **kwargs):
+        self.width = kwargs["width"] if kwargs["width"] else None
+        self.height = kwargs["height"] if kwargs["height"] else None
+        self.refresh = kwargs["refresh"] if kwargs["refresh"] else None
+        self.hidpi = kwargs["hidpi"] if kwargs["hidpi"] else None
+
+
+class CommandTests(unittest.TestCase):
+
+    def test_res(self):
+        d = []
+        mode = TestDisplayMode(width=1, height=2, refresh=3, hidpi=False)
+        for i in range(3):
+            d.append(TestDisplay(0))
+            self.assertIs(d[i].currentMode, None)
+            mode.hidpi = i % 2 == 0  # even displays hidpi=True; odd opposite
+            d[i].setMode(mode)
+        Command(verb="res", subcommand="highest", hidpi=2, scope=d).run()
+        self.assertEqual(d[0].currentMode, mode)
+        self.assertEqual(d[1].currentMode, None)
+        self.assertEqual(d[2].currentMode, mode)
+
+    def test_brightness(self):
+        d = []
+        for i in range(3):
+            d.append(TestDisplay(0))
+            self.assertIs(d[i].brightness, None)
+        CommandList([
+            Command(verb="brightness", brightness=.35, scope=d[:2]),
+            Command(verb="brightness", brightness=.2, scope=d[2]),
+        ]).run()
+        self.assertEqual(d[0].brightness, .35)
+        self.assertEqual(d[1].brightness, .35)
+        self.assertEqual(d[2].brightness, .2)
+
+
 if __name__ == "__main__":
-    unittest.main()
+    # todo: uncomment or remove
+    # unittest.main()
+
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(CommandTests)
+    unittest.TextTestRunner().run(suite)

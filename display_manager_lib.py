@@ -51,7 +51,10 @@ class Display(object):
         return self.displayID > other.displayID
 
     def __eq__(self, other):
-        return self.displayID == other.displayID
+        if isinstance(other, self.__class__):
+            return self.displayID == other.displayID
+        else:
+            return False
 
     def __hash__(self):
         return self.displayID
@@ -365,7 +368,10 @@ class DisplayMode(object):
         return self.width * self.height > other.width * other.height
 
     def __eq__(self, other):
-        return self.width * self.height == other.width * other.height
+        if isinstance(other, self.__class__):
+            return self.width * self.height == other.width * other.height
+        else:
+            return False
 
     def __hash__(self):
         return hash(self.__str__())

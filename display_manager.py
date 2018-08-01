@@ -92,9 +92,9 @@ class Command(object):
         # Determine subcommand, scope
         self.subcommand = kwargs["subcommand"] if "subcommand" in kwargs else None
         if "scope" in kwargs:
-            if type(kwargs["scope"]) == list:
+            if isinstance(kwargs["scope"], list):
                 self.scope = kwargs["scope"]
-            elif type(kwargs["scope"]) == Display:
+            elif isinstance(kwargs["scope"], Display):
                 self.scope = [kwargs["scope"]]
             else:
                 self.scope = None
@@ -486,7 +486,10 @@ class CommandList(object):
                     self.addCommand(command)
 
     def __eq__(self, other):
-        return set(self.commands) == set(other.commands)
+        if isinstance(other, self.__class__):
+            return set(self.commands) == set(other.commands)
+        else:
+            return False
 
     def __hash__(self):
         h = 0
@@ -1045,7 +1048,7 @@ def getCommand(commandString):
                     # Since we parsed "scope" in reverse order, source will be last
                     source = getDisplayFromTag(scopeTags.pop(-1))
                     # Cannot mirror from more than one display
-                    if type(source) == list:
+                    if isinstance(source, list):
                         if len(source) > 1:
                             raise CommandValueError(
                                 "The source for mirror enable cannot be \"all\"",
