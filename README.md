@@ -42,11 +42,11 @@ Display Manager only runs on Mac computers. It depends on the Apple-supplied Pyt
 
 If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
 
-Note: Display Manager has only been tested on El Capitan, Sierra, and High Sierra. If you experience issues on other versions of macOS, please [let us know](#contact).
+Note: Display Manager has only been tested on El Capitan (10.11), Sierra (10.12), and High Sierra (10.13). If you experience issues on other versions of macOS, please [let us know](#contact).
 
 ## Purpose
 
-Display Manager programmatically manages Mac displays, including [display resolution, refresh rate](#res), [brightness](#brightness), [rotation](#rotate), [screen mirroring](#mirror), and [HDMI underscan](#underscan). Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
+Display Manager programmatically manages Mac displays, including [display resolution, refresh rate](#res), [rotation](#rotate), [brightness](#brightness), [screen mirroring](#mirror), and [HDMI underscan](#underscan). Its primary intended purpose is to allow system administrators and developers to automatically configure any number of Mac displays, by use of the command-line scripts and the Display Manager Python library.
 
 Several intended use-cases for Display Manager are elaborated in [usage examples](#usage-examples).
 
@@ -54,8 +54,12 @@ Several intended use-cases for Display Manager are elaborated in [usage examples
 
 Currently, Display Manager has a few important limitations that are worth noting:
 
-* Can't configure displays at Mac login screen.
- * Recommended workaround: simply configure displays *during* login/logout, or while logged in. Settings persist after logout, so whichever configurations you set during logout will remain active at the login screen.
+* Must be currently logged in as the user of the current Aqua Session to use Display Manager (and in cases when there is no such user (e.g. the login screen), Display Manager cannot be used).
+ * Recommended workarounds:
+  * If Display Manager is being run by a user *other* than the user of the current Aqua Session, perform one of the following:
+   * Transfer CoreGraphics control to the desired user via `$ sudo /System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession -switchToUserID <UID>`, where `<UID>` is the user ID of the desired user.
+   * Switch to the user of the current Aqua Session via `$ su <user>`, where `<user>` is the user of the current Aqua Session.
+  * Simply configure displays *during* login/logout, or while logged in. Settings persist after logout, so whichever configurations you set during logout will remain active at the login screen.
 * Displays are controlled via `DisplayID`, so any interactions with external displays via the command line must be performed by reference to that display's `DisplayID`. (However, any interactions with the main display don't need to specify its `DisplayID` -- it is implied, unless otherwise noted.)
  * Recommended workaround: try manipulating the external displays (e.g. brightness, rotation, resolution, etc.) by their `DisplayID` to see which physical screens they correspond to.
 
@@ -67,7 +71,7 @@ First, check that your system satisfies the requirements in [System Requirements
 
 Next, download the latest installer [here](./versions/Display Manager v1.0.0.dmg), or view the archive of all version installers [here](./versions). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter.
 
-For the curious: `Display Manager.pkg` puts the [Display Manager library](#library) in `/Library/Python/2.7/site-packages/`, the [command-line interface](#command-line-api) in `/usr/local/bin`, and the [GUI](#gui) in `/Applications`; `Uninstall Display Manager.pkg` removes all three of these.
+For the curious: `Display Manager.pkg` puts the [Display Manager library](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface](#command-line-api) in `/usr/local/bin`. (Note: currently, if you wish to use the [GUI](#gui), you must manually run `gui.py` from the command line. Standalone app in `/Applications` coming in a future version.)
 
 Next, see [Overview](#overview) for an idea of what you can do with Display Manager.
 
@@ -456,5 +460,5 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 | Date       | Version | Update |
 |------------|---------|--------|
-| 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library and the new command-line API, added the ability to run multiple commands at once, added a GUI, and added rotation and HDMI underscan features. |
+| 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library, the new command-line API, and the GUI; added the ability to run multiple commands at once; added rotation and HDMI underscan features. |
 | 2015-10-28 | 0.1.0 | Legacy iteration of Display Manager. Created command-line API. |

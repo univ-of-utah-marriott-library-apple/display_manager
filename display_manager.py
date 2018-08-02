@@ -64,7 +64,7 @@ class CommandExecutionError(Exception):
 
 class Command(object):
     """
-    Represents a user-requested command to Display Manager.
+    Represents a user-requested command to Display Manager
     """
 
     def __init__(self, **kwargs):
@@ -260,120 +260,120 @@ class Command(object):
         """
         helpTypes = {
             "usage": "\n".join([
-                "usage: display_manager.py [command]",
+                "usage:  display_manager.py [command]",
                 "",
                 "COMMANDS",
-                "   help        Show help information about a command",
-                "   show        Show current/available display configurations",
-                "   res         Manage display resolution",
-                "   brightness  Manage display brightness",
-                "   rotate      Manage display rotation",
-                "   underscan   Manage display underscan",
-                "   mirror      Manage screen mirroring",
+                "    help        Show help information about a command",
+                "    show        Show current/available display configurations",
+                "    res         Manage display resolution",
+                "    brightness  Manage display brightness",
+                "    rotate      Manage display rotation",
+                "    underscan   Manage display underscan",
+                "    mirror      Manage screen mirroring",
             ]), "help": "\n".join([
-                "usage: display_manager.py help [command]",
+                "usage:  display_manager.py help [command]",
                 "",
                 "COMMANDS",
-                "   help        Show help information about a command",
-                "   show        Show current/available display configurations",
-                "   res         Manage display resolution",
-                "   brightness  Manage display brightness",
-                "   rotate      Manage display rotation",
-                "   underscan   Manage display underscan",
-                "   mirror      Manage screen mirroring",
+                "    help        Show help information about a command",
+                "    show        Show current/available display configurations",
+                "    res         Manage display resolution",
+                "    brightness  Manage display brightness",
+                "    rotate      Manage display rotation",
+                "    underscan   Manage display underscan",
+                "    mirror      Manage screen mirroring",
             ]), "show": "\n".join([
-                "usage: display_manager.py show (subcommand) (options) (scope)",
+                "usage:  display_manager.py show (subcommand) (options) (scope)",
                 "",
                 "SUBCOMMANDS",
-                "   current (default)   Show current display settings",
-                "   highest             Show the highest available resolution",
-                "   available           Show all available resolutions",
+                "    current (default)   Show current display settings",
+                "    highest             Show the highest available resolution",
+                "    available           Show all available resolutions",
                 "",
                 "OPTIONS (optional)",
-                "   no-hidpi    Don\'t show HiDPI resolutions",
-                "   only-hidpi  Only show HiDPI resolutions",
+                "    no-hidpi    Don\'t show HiDPI resolutions",
+                "    only-hidpi  Only show HiDPI resolutions",
                 "",
-                "   (Note: by default, both HiDPI and non-HiDPI resolutions are shown)",
+                "    (Note: by default, both HiDPI and non-HiDPI resolutions are shown)",
                 "",
                 "SCOPE (optional)",
-                "   main            Perform this command on the main display",
-                "   ext<N>          Perform this command on external display number <N>",
-                "   all (default)   Perform this command on all connected displays",
+                "    main            Perform this command on the main display",
+                "    ext<N>          Perform this command on external display number <N>",
+                "    all (default)   Perform this command on all connected displays",
             ]), "res": "\n".join([
-                "usage: display_manager.py res [resolution] (refresh) (options) (scope)",
+                "usage:  display_manager.py res [resolution] (refresh) (options) (scope)",
                 "",
                 "RESOLUTION",
-                "   highest             Set the display to the highest available resolution",
-                "   <width> <height>    Width and height (in pixels)",
-                "       (Note: width and height must be separated by at least one space)",
+                "    highest             Set the display to the highest available resolution",
+                "    <width> <height>    Width and height (in pixels)",
+                "        (Note: width and height must be separated by at least one space)",
                 "",
                 "REFRESH (optional)",
-                "   <refresh>   Refresh rate (in Hz)",
-                "       (Note: if refresh rate is not specified, it will default to whichever rate is "
+                "    <refresh>   Refresh rate (in Hz)",
+                "        (Note: if refresh rate is not specified, it will default to whichever rate is "
                 "available at the desired resolution; if 0 is one of the options, it will be selected)",
                 "",
                 "OPTIONS (optional)",
-                "   no-hidpi    Don\'t set to HiDPI resolutions",
-                "   only-hidpi  Only set to HiDPI resolutions",
+                "    no-hidpi    Don\'t set to HiDPI resolutions",
+                "    only-hidpi  Only set to HiDPI resolutions",
                 "",
-                "   (Note: by default, both HiDPI and non-HiDPI resolutions are shown)",
+                "    (Note: by default, both HiDPI and non-HiDPI resolutions are shown)",
                 "",
                 "SCOPE (optional)",
-                "   main (default)  Perform this command on the main display",
-                "   ext<N>          Perform this command on external display number <N>",
-                "   all             Perform this command on all connected displays",
+                "    main (default)  Perform this command on the main display",
+                "    ext<N>          Perform this command on external display number <N>",
+                "    all             Perform this command on all connected displays",
             ]), "rotate": "\n".join([
-                "usage: display_manager.py rotate [angle] (scope)",
+                "usage:  display_manager.py rotate [angle] (scope)",
                 "",
                 "ANGLE",
-                "   <angle>     Desired display rotation; must be a multiple of 90",
+                "    <angle>     Desired display rotation; must be a multiple of 90",
                 "",
                 "SCOPE (optional)",
-                "   main (default)  Perform this command on the main display",
-                "   ext<N>          Perform this command on external display number <N>",
-                "   all             Perform this command on all connected displays",
+                "    main (default)  Perform this command on the main display",
+                "    ext<N>          Perform this command on external display number <N>",
+                "    all             Perform this command on all connected displays",
             ]), "brightness": "\n".join([
-                "usage: display_manager.py brightness [brightness] (scope)",
+                "usage:  display_manager.py brightness [brightness] (scope)",
                 "",
                 "BRIGHTNESS",
-                "   <brightness>    A number between 0 and 1 (inclusive); "
+                "    <brightness>    A number between 0 and 1 (inclusive); "
                 "0 is minimum brightness, and 1 is maximum brightness",
                 "",
                 "SCOPE (optional)",
-                "   main (default)  Perform this command on the main display",
-                "   ext<N>          Perform this command on external display number <N>",
-                "   all             Perform this command on all connected displays",
+                "    main (default)  Perform this command on the main display",
+                "    ext<N>          Perform this command on external display number <N>",
+                "    all             Perform this command on all connected displays",
             ]), "underscan": "\n".join([
-                "usage: display_manager.py underscan [underscan] (scope)",
+                "usage:  display_manager.py underscan [underscan] (scope)",
                 "",
                 "UNDERSCAN",
-                "   <underscan>     A number between 0 and 1 (inclusive); "
+                "    <underscan>     A number between 0 and 1 (inclusive); "
                 "0 is minimum underscan, and 1 is maximum underscan",
                 "",
                 "SCOPE (optional)",
-                "   main (default)  Perform this command on the main display",
-                "   ext<N>          Perform this command on external display number <N>",
-                "   all             Perform this command on all connected displays",
+                "    main (default)  Perform this command on the main display",
+                "    ext<N>          Perform this command on external display number <N>",
+                "    all             Perform this command on all connected displays",
             ]), "mirror": "\n".join([
-                "usage: display_manager.py mirror enable [source] [target(s)]",
-                "   or: display_manager.py mirror disable (scope)"
+                "usage:  display_manager.py mirror enable [source] [target(s)]",
+                "   or:  display_manager.py mirror disable (scope)"
                 "",
                 "SUBCOMMANDS",
-                "   enable      Set <target> to mirror <source>",
-                "   disable     Disable mirroring on <scope>",
+                "    enable      Set <target> to mirror <source>",
+                "    disable     Disable mirroring on <scope>",
                 "",
                 "SOURCE/TARGET(S) (not used by \"disable\")",
-                "   source      The display which will be mirrored by the target(s); "
+                "    source      The display which will be mirrored by the target(s); "
                 "must be a single element of <SCOPE> (see below); cannot be \"all\"",
-                "   target(s)   The display(s) which will mirror the source; "
+                "    target(s)   The display(s) which will mirror the source; "
                 "must be an element of <SCOPE> (see below)",
                 "",
                 "SCOPE",
-                "   main    The main display",
-                "   ext<N>  External display number <N>",
-                "   all (default scope for <disable>)",
-                "       For <enable>: all connected displays besides [source]; only available to [target]",
-                "       For <disable>: all connected displays",
+                "    main    The main display",
+                "    ext<N>  External display number <N>",
+                "    all (default scope for <disable>)",
+                "        For <enable>: all connected displays besides [source]; only available to [target]",
+                "        For <disable>: all connected displays",
             ])}
 
         if self.subcommand in helpTypes:
@@ -387,20 +387,20 @@ class Command(object):
         """
         for i, display in enumerate(self.scope):
             # Always print display identifier
-            print("display: {0}".format(display.tag))
+            print("display:    {0}".format(display.tag))
 
             if self.subcommand == "current":
                 current = display.currentMode
                 print("{}".format(current))
 
                 if display.rotation is not None:
-                    print("rotation: {}".format(display.rotation))
+                    print("rotation:   {}".format(display.rotation))
                 if display.brightness is not None:
-                    print("brightness: {}".format(display.brightness))
+                    print("brightness: {:.2f}".format(display.brightness))
                 if display.underscan is not None:
-                    print("underscan: {}".format(display.underscan))
+                    print("underscan:  {:.2f}".format(display.underscan))
                 if display.mirrorSource is not None:
-                    print("mirror of: {}".format(display.mirrorSource))
+                    print("mirror of:  {}".format(display.mirrorSource))
 
                 # Leave an empty line between displays
                 if i < len(self.scope) - 1:
@@ -467,7 +467,7 @@ class Command(object):
 
 class CommandList(object):
     """
-    Holds one or more "Command" instances.
+    Holds one or more "Command" instances, and allows smart simultaneous execution
     """
 
     def __init__(self, commands=None):
