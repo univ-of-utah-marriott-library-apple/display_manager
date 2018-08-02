@@ -474,6 +474,8 @@ class CommandList(object):
         """
         :param commands: A single Command, a list of Commands, or a CommandList
         """
+        # self.commands is a list that contains all the raw commands passed in to self.addCommand
+        self.commands = []
         # self.commandDict will consist of displayID keys corresponding to commands for that display
         self.commandDict = {}
 
@@ -504,17 +506,18 @@ class CommandList(object):
 
     # Command interfacing
 
-    @property
-    def commands(self):
-        """
-        :return: All the Commands in this CommandList
-        """
-        commands = []
-        for displayTag in self.commandDict:
-            for command in self.commandDict[displayTag]:
-                commands.append(command)
-
-        return commands
+    # todo: uncomment or remove
+    # @property
+    # def commands(self):
+    #     """
+    #     :return: All the Commands in this CommandList
+    #     """
+    #     commands = []
+    #     for displayTag in self.commandDict:
+    #         for command in self.commandDict[displayTag]:
+    #             commands.append(command)
+    #
+    #     return commands
 
     def addCommand(self, command):
         """
@@ -544,6 +547,8 @@ class CommandList(object):
                 self.commandDict[None].append(command)
             else:
                 self.commandDict[None] = [command]
+
+        self.commands.append(command)
 
     def run(self):
         """

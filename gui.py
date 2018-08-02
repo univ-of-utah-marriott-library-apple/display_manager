@@ -6,7 +6,6 @@ import os
 import Tkinter as tk
 import ttk
 import tkFileDialog
-import re
 from display_manager import *
 
 
@@ -337,7 +336,6 @@ class App(object):
         else:
             return None
 
-    # todo: revise?
     def setDisplay(self):
         """
         Set the Display to the currently selected settings.
@@ -345,7 +343,6 @@ class App(object):
         self.__generateCommands().run()
         self.__reloadDisplay()
 
-    # todo: revise
     def buildScript(self):
         """
         Build a script with the currently selected settings and save it where
@@ -359,53 +356,88 @@ class App(object):
             initialfile="set",
         )
         if f is not None:  # if the user didn't cancel
-            f.write("#!/bin/bash\n\ndisplay_manager.py")
+            f.write("#!/bin/sh\n\ndisplay_manager.py")
             for command in self.__generateCommands().commands:
-                f.write(' "' + command.__str__() + '"')
+                f.write(" " + command.__str__())
             f.close()
 
-    # todo: revise
     def __generateCommands(self):
         """
         :return: A CommandList with all the currently selected commands
         """
+        # todo: uncomment or remove
+        # commands = [
+        #     Command(
+        #         verb="res",
+        #         width=self.mode.width,
+        #         height=self.mode.height,
+        #         refresh=self.mode.refresh,
+        #         scope=self.display,
+        #     ),
+        #     Command(
+        #         verb="rotate",
+        #         angle=self.rotation,
+        #         scope=self.display,
+        #     ),
+        #     Command(
+        #         verb="brightness",
+        #         brightness=self.brightness,
+        #         scope=self.display,
+        #     ),
+        #     Command(
+        #         verb="underscan",
+        #         underscan=self.underscan,
+        #         scope=self.display,
+        #     ),
+        #     Command(
+        #         verb="mirror",
+        #         subcommand="enable" if self.mirrorEnabled.get() else "disable",
+        #         source=self.mirror if self.mirrorEnabled.get() else None,
+        #         scope=self.display,
+        #     ),
+        # ]
+
+        # These commands are always available
         commands = [
             Command(
-                verb="set",
+                verb="res",
                 width=self.mode.width,
                 height=self.mode.height,
                 refresh=self.mode.refresh,
                 scope=self.display,
             ),
             Command(
-                verb="brightness",
-                brightness=self.brightness,
-                scope=self.display,
-            ),
-            Command(
-                verb="rotate",
-                angle=self.rotation,
-                scope=self.display,
-            ),
-            Command(
-                verb="underscan",
-                underscan=self.underscan,
-                scope=self.display,
-            ),
-            Command(
                 verb="mirror",
                 subcommand="enable" if self.mirrorEnabled.get() else "disable",
-                mirrorTargetTags=self.mirror.displayID if self.mirror is not None else 0,
-                source=self.mirror,
+                source=self.mirror if self.mirrorEnabled.get() else None,
                 scope=self.display,
             ),
         ]
 
-        commandList = CommandList()
-        for command in commands:
-            commandList.addCommand(command)
+        # Add commands if and only if they're available to this Display
+        rotate = Command(
+            verb="rotate",
+            angle=self.rotation,
+            scope=self.display,
+        )
+        brightness = Command(
+            verb="brightness",
+            brightness=self.brightness,
+            scope=self.display,
+        )
+        underscan = Command(
+            verb="underscan",
+            underscan=self.underscan,
+            scope=self.display,
+        )
+        if self.display.rotation is not None:
+            commands.append(rotate)
+        if self.display.brightness is not None:
+            commands.append(brightness)
+        if self.display.underscan is not None:
+            commands.append(underscan)
 
-        return commandList
+        return CommandList(commands)
 
     def __reloadDisplay(self):
         """
