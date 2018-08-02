@@ -24,8 +24,12 @@ class DisplayError(Exception):
     pass
 
 
-# todo: block/doc comments?
 class AbstractDisplay(object):
+    """
+    Abstract representation which display_manager_lib.Display will inherit from.
+
+    Included for unit testing purposes
+    """
 
     __metaclass__ = abc.ABCMeta
 
@@ -117,11 +121,11 @@ class AbstractDisplay(object):
     # Mirroring
 
     @abc.abstractproperty
-    def mirrorOf(self):
+    def mirrorSource(self):
         pass
 
     @abc.abstractmethod
-    def setMirrorOf(self, mirrorDisplay):
+    def setMirrorSource(self, mirrorDisplay):
         pass
 
 
@@ -385,7 +389,7 @@ class Display(AbstractDisplay):
     # Mirroring properties and methods
 
     @property
-    def mirrorOf(self):
+    def mirrorSource(self):
         """
         Checks whether self is mirroring another display
         :return: The Display that self is mirroring; if self is not mirroring
@@ -399,7 +403,7 @@ class Display(AbstractDisplay):
         else:
             return Display(masterDisplayID)
 
-    def setMirrorOf(self, mirrorDisplay):
+    def setMirrorSource(self, mirrorDisplay):
         """
         :param mirrorDisplay: The Display which this Display will mirror.
             Input a NoneType to stop mirroring.
@@ -418,8 +422,12 @@ class Display(AbstractDisplay):
         Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
 
-# todo: block/doc comments?
 class AbstractDisplayMode(object):
+    """
+    Abstract representation which display_manager_lib.DisplayMode will inherit from.
+
+    Included for unit testing purposes
+    """
 
     __metaclass__ = abc.ABCMeta
 
@@ -487,15 +495,19 @@ class DisplayMode(AbstractDisplayMode):
 
     # General properties
 
+    @property
     def width(self):
         return self.__width
 
+    @property
     def height(self):
         return self.__height
 
+    @property
     def refresh(self):
         return self.__refresh
 
+    @property
     def hidpi(self):
         return self.__hidpi
 

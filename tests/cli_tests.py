@@ -378,7 +378,7 @@ class TestDisplay(AbstractDisplay):
 
     @property
     def tag(self):
-        return "main"
+        return "ext{}".format(self.displayID)
 
     @staticmethod
     def __rightHidpi(mode, hidpi):
@@ -452,54 +452,120 @@ class TestDisplay(AbstractDisplay):
         self.__underscan = underscan
 
     @property
-    def mirrorOf(self):
+    def mirrorSource(self):
         return self.__mirrorOf
 
-    def setMirrorOf(self, mirrorDisplay):
+    def setMirrorSource(self, mirrorDisplay):
         self.__mirrorOf = mirrorDisplay
 
 
-class TestDisplayMode(DisplayMode):
+class TestDisplayMode(AbstractDisplayMode):
 
-    def __init__(self, **kwargs):
-        self.width = kwargs["width"] if kwargs["width"] else None
-        self.height = kwargs["height"] if kwargs["height"] else None
-        self.refresh = kwargs["refresh"] if kwargs["refresh"] else None
-        self.hidpi = kwargs["hidpi"] if kwargs["hidpi"] else None
+    def __init__(self, mode):
+        # sets self.raw to mode
+        super(TestDisplayMode, self).__init__(mode)
+
+        self.__width = mode["width"] if mode["width"] else None
+        self.__height = mode["height"] if mode["height"] else None
+        self.__refresh = mode["refresh"] if mode["refresh"] else None
+        self.__hidpi = mode["hidpi"] if mode["hidpi"] else None
+
+    def width(self):
+        return self.__width
+
+    def height(self):
+        return self.__height
+
+    def refresh(self):
+        return self.__refresh
+
+    def hidpi(self):
+        return self.__hidpi
 
 
 class CommandTests(unittest.TestCase):
 
     def test_res(self):
-        d = []
-        mode = TestDisplayMode(width=1, height=2, refresh=3, hidpi=False)
+        displays = []
+        modes = [
+            TestDisplayMode({"width": 1, "height": 2, "refresh": 3, "hidpi": False}),
+            TestDisplayMode({"width": 4, "height": 5, "refresh": 6, "hidpi": True}),
+            TestDisplayMode({"width": 7, "height": 8, "refresh": 9, "hidpi": False}),
+        ]
         for i in range(3):
-            d.append(TestDisplay(0))
-            self.assertIs(d[i].currentMode, None)
-            mode.hidpi = i % 2 == 0  # even displays hidpi=True; odd opposite
-            d[i].setMode(mode)
-        Command(verb="res", subcommand="highest", hidpi=2, scope=d).run()
-        self.assertEqual(d[0].currentMode, mode)
-        self.assertEqual(d[1].currentMode, None)
-        self.assertEqual(d[2].currentMode, mode)
+            displays.append(TestDisplay(0))
+            self.assertIs(displays[i].currentMode, None)
+            displays[i].setMode(modes[i])
+
+        CommandList([
+            Command(verb="res", subcommand="highest", hidpi=0, scope=displays[0]),          # easy fit
+            Command(verb="res", width=4, height=5, refresh=6, hidpi=2, scope=displays[1]),  # hard fit
+            Command(verb="res", subcommand="highest", hidpi=1, scope=displays[2]),          # wrong hidpi
+        ]).run()
+
+        self.assertEqual(displays[0].currentMode, modes[0])     # easy fit
+        self.assertEqual(displays[1].currentMode, modes[1])     # hard fit
+        self.assertEqual(displays[2].currentMode, None)         # wrong hidpi
+
+    def test_rotate(self):
+        displays = []
+        for i in range(3):
+            displays.append(TestDisplay(i))
+            self.assertIs(displays[i].rotation, None)
+
+        CommandList([
+            Command(verb="rotate", angle=90, scope=displays[:2]),
+            Command(verb="rotate", angle=180, scope=displays[2]),
+        ]).run()
+
+        self.assertEqual(displays[0].rotation, 90)
+        self.assertEqual(displays[1].rotation, 90)
+        self.assertEqual(displays[2].rotation, 180)
 
     def test_brightness(self):
-        d = []
+        displays = []
         for i in range(3):
-            d.append(TestDisplay(0))
-            self.assertIs(d[i].brightness, None)
+            displays.append(TestDisplay(i))
+            self.assertIs(displays[i].brightness, None)
+
         CommandList([
-            Command(verb="brightness", brightness=.35, scope=d[:2]),
-            Command(verb="brightness", brightness=.2, scope=d[2]),
+            Command(verb="brightness", brightness=.35, scope=displays[:2]),
+            Command(verb="brightness", brightness=.2, scope=displays[2]),
         ]).run()
-        self.assertEqual(d[0].brightness, .35)
-        self.assertEqual(d[1].brightness, .35)
-        self.assertEqual(d[2].brightness, .2)
+
+        self.assertEqual(displays[0].brightness, .35)
+        self.assertEqual(displays[1].brightness, .35)
+        self.assertEqual(displays[2].brightness, .2)
+
+    def test_underscan(self):
+        displays = []
+        for i in range(3):
+            displays.append(TestDisplay(i))
+            self.assertIs(displays[i].underscan, None)
+
+        CommandList([
+            Command(verb="underscan", underscan=.75, scope=displays[:2]),
+            Command(verb="underscan", underscan=.9, scope=displays[2]),
+        ]).run()
+
+        self.assertEqual(displays[0].underscan, .75)
+        self.assertEqual(displays[1].underscan, .75)
+        self.assertEqual(displays[2].underscan, .9)
+
+    def test_mirror(self):
+        displays = []
+        for i in range(3):
+            displays.append(TestDisplay(i))
+            self.assertIs(displays[i].mirrorSource, None)
+
+        Command(verb="mirror", subcommand="enable", source=displays[0], scope=displays[1:]).run()
+        self.assertEqual(displays[1].mirrorSource, displays[0])
+        self.assertEqual(displays[2].mirrorSource, displays[0])
+
+        Command(verb="mirror", subcommand="disable", scope=displays[1]).run()
+        self.assertIs(displays[1].mirrorSource, None)
+        self.assertEqual(displays[2].mirrorSource, displays[0])
 
 
 if __name__ == "__main__":
-    # todo: uncomment or remove
-    # unittest.main()
-
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(CommandTests)
-    unittest.TextTestRunner().run(suite)
+    unittest.main()

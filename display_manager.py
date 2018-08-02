@@ -94,7 +94,7 @@ class Command(object):
         if "scope" in kwargs:
             if isinstance(kwargs["scope"], list):
                 self.scope = kwargs["scope"]
-            elif isinstance(kwargs["scope"], Display):
+            elif isinstance(kwargs["scope"], AbstractDisplay):
                 self.scope = [kwargs["scope"]]
             else:
                 self.scope = None
@@ -399,8 +399,8 @@ class Command(object):
                     print("brightness: {}".format(display.brightness))
                 if display.underscan is not None:
                     print("underscan: {}".format(display.underscan))
-                if display.mirrorOf is not None:
-                    print("mirror of: {}".format(display.mirrorOf))
+                if display.mirrorSource is not None:
+                    print("mirror of: {}".format(display.mirrorSource))
 
                 # Leave an empty line between displays
                 if i < len(self.scope) - 1:
@@ -456,13 +456,13 @@ class Command(object):
         if self.subcommand == "enable":
             source = self.source
             for target in self.scope:
-                target.setMirrorOf(source)
+                target.setMirrorSource(source)
 
         elif self.subcommand == "disable":
             for target in self.scope:
                 # If display is a mirror of another display, disable mirroring between them
-                if target.mirrorOf is not None:
-                    target.setMirrorOf(None)
+                if target.mirrorSource is not None:
+                    target.setMirrorSource(None)
 
 
 class CommandList(object):
@@ -601,14 +601,14 @@ class CommandList(object):
                         if command.subcommand == "enable":
                             display = Display(displayID)
                             # The current Display that the above "display" is mirroring
-                            currentMirror = display.mirrorOf
+                            currentMirror = display.mirrorSource
                             # Become a mirror of most recently requested display
                             mirrorDisplay = Display(command.mirrorDisplayID)
 
                             # If display is not a mirror of any other display
                             if currentMirror is None:
                                 try:
-                                    display.setMirrorOf(mirrorDisplay)
+                                    display.setMirrorSource(mirrorDisplay)
                                 except DisplayError as e:
                                     raise CommandExecutionError(e.message, command)
 
@@ -620,11 +620,11 @@ class CommandList(object):
                             # display is already a mirror, but not of the requested display
                             else:
                                 # First disable mirroring, then enable it for new mirror
-                                display.setMirrorOf(None)
-                                display.setMirrorOf(mirrorDisplay)
+                                display.setMirrorSource(None)
+                                display.setMirrorSource(mirrorDisplay)
                                 try:
-                                    display.setMirrorOf(None)
-                                    display.setMirrorOf(mirrorDisplay)
+                                    display.setMirrorSource(None)
+                                    display.setMirrorSource(mirrorDisplay)
                                 except DisplayError as e:
                                     raise CommandExecutionError(e.message, command)
 
