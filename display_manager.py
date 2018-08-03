@@ -400,7 +400,7 @@ class Command(object):
                 if display.underscan is not None:
                     print("underscan:  {:.2f}".format(display.underscan))
                 if display.mirrorSource is not None:
-                    print("mirror of:  {}".format(display.mirrorSource))
+                    print("mirror of:  {}".format(display.mirrorSource.tag))
 
                 # Leave an empty line between displays
                 if i < len(self.scope) - 1:
@@ -506,19 +506,6 @@ class CommandList(object):
 
     # Command interfacing
 
-    # todo: uncomment or remove
-    # @property
-    # def commands(self):
-    #     """
-    #     :return: All the Commands in this CommandList
-    #     """
-    #     commands = []
-    #     for displayTag in self.commandDict:
-    #         for command in self.commandDict[displayTag]:
-    #             commands.append(command)
-    #
-    #     return commands
-
     def addCommand(self, command):
         """
         :param command: The Command to add to this CommandList
@@ -554,9 +541,9 @@ class CommandList(object):
         """
         Runs all stored Commands in a non-interfering fashion
         """
-        for displayID in self.commandDict:
+        for displayTag in self.commandDict:
             # Commands for this particular display
-            displayCommands = self.commandDict[displayID]
+            displayCommands = self.commandDict[displayTag]
 
             # Group commands by subcommand. Must preserve ordering to avoid interfering commands
             verbGroups = collections.OrderedDict([
@@ -604,11 +591,11 @@ class CommandList(object):
                         command = commands[-1]
 
                         if command.subcommand == "enable":
-                            display = Display(displayID)
+                            display = getDisplayFromTag(displayTag)
                             # The current Display that the above "display" is mirroring
                             currentMirror = display.mirrorSource
                             # Become a mirror of most recently requested display
-                            mirrorDisplay = Display(command.mirrorDisplayID)
+                            mirrorDisplay = command.source
 
                             # If display is not a mirror of any other display
                             if currentMirror is None:

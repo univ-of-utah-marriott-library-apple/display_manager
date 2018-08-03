@@ -342,6 +342,8 @@ usage:
 | `ext<N>` | External display number `N` (starting at 0) |
 | `all` (default scope for `disable`) | For `enable`: all connected displays besides `source` (only available to `target`); for `disable`: all connected displays |
 
+Note: if `main` is set to mirror another display, that display becomes `main`.
+
 #### Examples
 
 * Set all external displays to mirror the main display:

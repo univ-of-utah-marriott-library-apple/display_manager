@@ -485,6 +485,8 @@ class TestDisplayMode(AbstractDisplayMode):
 
 class CommandTests(unittest.TestCase):
 
+    # todo: stress tests
+
     def test_res(self):
         displays = []
         modes = [
