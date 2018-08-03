@@ -440,7 +440,7 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 "Outset is a script which automatically processes packages, profiles, and scripts during the boot sequence, user login, or on demand." <sup>[source](https://github.com/chilcote/outset)</sup>
 
-Perhaps you're managing several sideways-rotated wall-mounted HDMI displays via Outset, and you'd like them to automatically display right-side-up and set underscan to 50%. You could save the following script to `/usr/local/outset/boot-every/flip.sh`:
+Perhaps you're managing several HDMI displays via Outset, and you'd like them to automatically rotate to portrait mode and set underscan to 50%. You could save the following script to `/usr/local/outset/login-every/flip.sh`:
 
 ```
 #!/bin/sh

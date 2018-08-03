@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [ $EUID -ne 0 ] ; then  # script must be run as root
+if [[ $EUID -ne 0 ]] ; then  # script must be run as root
 	echo "Script must be run as root."
 	exit 1
 fi
 
-if [ -z $1 ] ; then  # if the first command-line argument (the version info) is an empty string
+if [[ -z $1 ]] ; then  # if the first command-line argument (the version info) is an empty string
 	echo "No version supplied."
 	exit 1
 fi
