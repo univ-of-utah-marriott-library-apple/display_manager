@@ -39,17 +39,23 @@ class AbstractDisplay(object):
 
     # "Magic" methods
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.displayID == other.displayID
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return self.displayID != other.displayID
+        else:
+            return NotImplemented
+
     def __lt__(self, other):
         return self.displayID < other.displayID
 
     def __gt__(self, other):
         return self.displayID > other.displayID
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.displayID == other.displayID
-        else:
-            return False
 
     def __hash__(self):
         # Actually just returns self.displayID, as self.displayID is int;
@@ -141,13 +147,13 @@ class Display(AbstractDisplay):
         """
         :param displayID: The DisplayID of the display to manipulate
         """
-        # Sets self.displayID to displayID
-        super(Display, self).__init__(displayID)
-
         # Make sure displayID is actually a display
         (error, allDisplayIDs, count) = Quartz.CGGetOnlineDisplayList(32, None, None)  # max 32 displays
         if displayID not in allDisplayIDs or error:
-            raise DisplayError("Display {} not found".format(displayID))
+            raise DisplayError("Display with ID \"{}\" not found".format(displayID))
+
+        # Sets self.displayID to displayID
+        super(Display, self).__init__(displayID)
 
         # iokit is required for several Display methods
         getIOKit()
@@ -442,17 +448,23 @@ class AbstractDisplayMode(object):
             "width": self.width, "height": self.height, "refresh": self.refresh, "hidpi": self.hidpi
         })
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__str__() == other.__str__()
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__str__() != other.__str__()
+        else:
+            return NotImplemented
+
     def __lt__(self, other):
         return self.width * self.height < other.width * other.height
 
     def __gt__(self, other):
         return self.width * self.height > other.width * other.height
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.__str__() == other.__str__()
-        else:
-            return False
 
     def __hash__(self):
         return hash(self.__str__())
@@ -482,6 +494,8 @@ class DisplayMode(AbstractDisplayMode):
     """
 
     def __init__(self, mode):
+        if not isinstance(mode, Quartz.CGDisplayModeRef):
+            raise DisplayError("\"{}\" is not a valid Quartz.CGDisplayModeRef".format(mode))
         # sets self.raw to mode
         super(DisplayMode, self).__init__(mode)
 

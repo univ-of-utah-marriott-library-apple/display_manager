@@ -215,6 +215,12 @@ class Command(object):
             self.source == other.source,
         ])
 
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        else:
+            return NotImplemented
+
     def __lt__(self, other):
         if self.__eq__(other):
             return False
@@ -465,6 +471,8 @@ class Command(object):
                     target.setMirrorSource(None)
 
 
+# todo: inherit from Set, List, or other iterable?
+# todo: make iterable? (would require "smart-ordering" in self.commands
 class CommandList(object):
     """
     Holds one or more "Command" instances, and allows smart simultaneous execution
@@ -495,7 +503,13 @@ class CommandList(object):
         if isinstance(other, self.__class__):
             return set(self.commands) == set(other.commands)
         else:
-            return False
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return set(self.commands) != set(other.commands)
+        else:
+            return NotImplemented
 
     def __hash__(self):
         h = 0

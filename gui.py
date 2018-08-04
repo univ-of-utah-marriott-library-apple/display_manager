@@ -365,38 +365,6 @@ class App(object):
         """
         :return: A CommandList with all the currently selected commands
         """
-        # todo: uncomment or remove
-        # commands = [
-        #     Command(
-        #         verb="res",
-        #         width=self.mode.width,
-        #         height=self.mode.height,
-        #         refresh=self.mode.refresh,
-        #         scope=self.display,
-        #     ),
-        #     Command(
-        #         verb="rotate",
-        #         angle=self.rotation,
-        #         scope=self.display,
-        #     ),
-        #     Command(
-        #         verb="brightness",
-        #         brightness=self.brightness,
-        #         scope=self.display,
-        #     ),
-        #     Command(
-        #         verb="underscan",
-        #         underscan=self.underscan,
-        #         scope=self.display,
-        #     ),
-        #     Command(
-        #         verb="mirror",
-        #         subcommand="enable" if self.mirrorEnabled.get() else "disable",
-        #         source=self.mirror if self.mirrorEnabled.get() else None,
-        #         scope=self.display,
-        #     ),
-        # ]
-
         # These commands are always available
         commands = [
             Command(
@@ -414,7 +382,7 @@ class App(object):
             ),
         ]
 
-        # Add commands if and only if they're available to this Display
+        # Add these commands if and only if they're available to this Display
         rotate = Command(
             verb="rotate",
             angle=self.rotation,

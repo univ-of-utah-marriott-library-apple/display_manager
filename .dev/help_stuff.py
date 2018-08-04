@@ -386,19 +386,6 @@ def setDisplayMode(id, mode):
     Quartz.CGCompleteDisplayConfiguration(conf, options)
 
 
-# todo: remove deprecated?
-# def setDisplayMode2(id, currentMode):
-#     '''NOT VIABLE
-#     Only able to change the DisplayMode for the duration of the script
-#     '''
-#     opt = None
-#     m = currentMode.currentMode
-#     err = Quartz.CGDisplaySetDisplayMode(id, m, opt)
-#     if err:
-#         e = "CGDisplaySetDisplayMode failed: {0}".format(err)
-#         raise DisplayError(e)
-
-
 def main():
     id = Quartz.CGMainDisplayID()
     modes = getAllDisplays(id, dupLowRes=True, returnUnusable=False)
