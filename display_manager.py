@@ -83,11 +83,13 @@ class Command(object):
             source: Display
         """
         # Determine verb
-        if kwargs["verb"]:
+        if "verb" in kwargs:
             if kwargs["verb"] in ["help", "show", "res", "brightness", "rotate", "underscan", "mirror"]:
                 self.verb = kwargs["verb"]
             else:
                 raise CommandSyntaxError("\"{}\" is not a valid command".format(kwargs["verb"]))
+        else:
+            self.verb = None
 
         # Determine subcommand, scope
         self.subcommand = kwargs["subcommand"] if "subcommand" in kwargs else None
@@ -198,22 +200,25 @@ class Command(object):
             else:
                 return a.scope == b.scope
 
-        return all([
-            isinstance(other, self.__class__),
+        if isinstance(other, self.__class__):
+            return all([
+                isinstance(other, self.__class__),
 
-            self.verb == other.verb,
-            self.subcommand == other.subcommand,
-            safeScopeCheckEquals(self, other),
+                self.verb == other.verb,
+                self.subcommand == other.subcommand,
+                safeScopeCheckEquals(self, other),
 
-            self.width == other.width,
-            self.height == other.height,
-            self.refresh == other.refresh,
-            self.hidpi == other.hidpi,
-            self.angle == other.angle,
-            self.brightness == other.brightness,
-            self.underscan == other.underscan,
-            self.source == other.source,
-        ])
+                self.width == other.width,
+                self.height == other.height,
+                self.refresh == other.refresh,
+                self.hidpi == other.hidpi,
+                self.angle == other.angle,
+                self.brightness == other.brightness,
+                self.underscan == other.underscan,
+                self.source == other.source,
+            ])
+        else:
+            return NotImplemented
 
     def __ne__(self, other):
         if isinstance(other, self.__class__):
