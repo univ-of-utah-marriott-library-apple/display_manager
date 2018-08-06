@@ -58,15 +58,13 @@ Currently, Display Manager has a few important limitations that are worth noting
 
 Recommended workarounds:
 
-1. Transfer CoreGraphics control to the desired user via `$ sudo /System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession -switchToUserID <UID>`, where `<UID>` is the user ID of the desired user.
-1. Switch to the user of the current Aqua Session via `$ su <user>`, where `<user>` is the user of the current Aqua Session.
-1. Simply configure displays *during* login/logout, or while logged in. Settings persist after logout, so whichever configurations you set during logout will remain active at the login screen.
-
-Note: DisplayIDs are metadata descriptions of display capabilities. For more information, see [here](https://en.wikipedia.org/wiki/DisplayID).
+* Transfer CoreGraphics control to the desired user via `$ sudo /System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession -switchToUserID <UID>`, where `<UID>` is the user ID of the desired user.
+* Switch to the user of the current Aqua Session via `$ su <user>`, where `<user>` is the user of the current Aqua Session.
+* Simply configure displays *during* login/logout, or while logged in. Settings persist after logout, so whichever configurations you set during logout will remain active at the login screen.
 
 ## Get Started
 
-First, check that your system satisfies the requirements in [System Requirements](#system-requirements). If you haven't played around with `/usr/bin/python`, it should.
+First, check that your system satisfies the requirements in [System Requirements](#system-requirements). If you haven't touched `/usr/bin/python`, it should.
 
 Next, download the latest installer [here](./versions/Display Manager v1.0.0.dmg), or view the archive of all version installers [here](./versions). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter.
 
@@ -82,12 +80,14 @@ The Display Manager suite comes in 3 parts: the Display Manager library (`displa
 
 The Display Manager library is housed in `display_manager_lib.py`, which contains the following:
 
-* The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
-* The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
+* Classes:
+	* The `Display` class is a virtual representation of a connected physical display. It allows one to check the status of various display parameters (e.g. brightness, resolution, rotation, etc.) and to configure such parameters.
+	* The `DisplayMode` class is a simple representation of Quartz's Display Modes. DisplayModes can be sorted, converted to strings, and passed as parameters to various methods which configure the display.
 
-* `getMainDisplay` returns the primary `Display`;
-* `getAllDisplays` returns a `Display` for each connected display
-* `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Display`s instead, if possible)
+* Functions:
+	* `getMainDisplay` returns the primary `Display`;
+	* `getAllDisplays` returns a `Display` for each connected display
+	* `getIOKit` allows one to manually access the IOKit functions and constants used in Display Manager (usage not recommended -- it's much simpler to go through `Display`s instead, if possible)
 
 ### Command-Line API
 
@@ -157,7 +157,7 @@ Usage: `$ display_manager.py show (subcommand) (options) (scope)`
 | `highest` | Show the highest available resolution |
 | `available` | Show a list of all the available resolutions |
 
-| Options (optional) | Description |
+| Options (optional; only apply to `available`) | Description |
 |---|---|
 | `no-hidpi` | Don't show HiDPI resolutions |
 | `only-hidpi` | Only show HiDPI resolutions |
@@ -203,7 +203,7 @@ Note: width and height must be separated by at least one space.
 |---|---|
 | `<refresh>` | Refresh rate (in Hz) |
 
-Note: if refresh rate is not specified, it will default to whichever rate is available at the desired resolution
+Note: if refresh rate is not specified, it will default to whichever rate is available at the desired resolution.
 
 | Options (optional) | Description |
 |---|---|
@@ -211,7 +211,7 @@ Note: if refresh rate is not specified, it will default to whichever rate is ava
 | `only-hidpi` | Only set to HiDPI resolutions |
 
 Notes:
-* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display)
+* "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display).
 * By default, both HiDPI and non-HiDPI resolutions are shown.
 
 | SCOPE (optional) | Details |
@@ -286,7 +286,7 @@ usage: `$ display_manager.py brightness [brightness] (scope)`
 
 `$ display_manager.py brightness 1 all`
 
-Note: many displays do not support setting brightness automatically; this is most often the case with external monitors.
+Note: many displays do not support setting brightness automatically; this is most often the case with external monitors. If Display Manager cannot configure your display's brightness, see whether it can be set manually on the display's hardware.
 
 ### Underscan
 
@@ -304,7 +304,9 @@ usage: `$ display_manager.py underscan [underscan] (scope)`
 | `ext<N>` | Perform this command on external display number `N` (starting at 0) |
 | `all` | Perform this command on all connected displays |
 
-Note: HDMI underscan settings can fix displays that under-render images, causing the outer edge of the screen to be left empty. Displays default to underscan 0. For more details, see [here](https://support.apple.com/en-us/ht202763).
+Notes:
+* HDMI underscan settings can fix displays that under-render images, causing the outer edge of the screen to be left empty. Displays default to underscan 0. For more details, see [here](https://support.apple.com/en-us/ht202763).
+* Display Manager can only set underscan on HDMI screens, and not all HDMI screens are supported. If Display Manager cannot configure your display's underscan, see whether it can be set manually on the display's hardware.
 
 #### Examples
 
@@ -332,10 +334,10 @@ usage:
 
 | Source/Target(s) (not used by `disable`) | Description |
 |---|---|
-| `source` | The display which will be mirrored by the `target`s; must be a single element of `<SCOPE>` (see below); cannot be `all` |
-| `target(s)` | The display(s) which will mirror the `source`; must be an element of `<SCOPE>` (see below) |
+| `source` | The display which will be mirrored by the `target`s; must be a single element of `scope` (see below); cannot be `all` |
+| `target(s)` | The display(s) which will mirror the `source`; must be an element of `scope` (see below) |
 
-| SCOPE | Description |
+| Scope | Description |
 |---|---|
 | `main` | The main display |
 | `ext<N>` | External display number `N` (starting at 0) |
@@ -363,27 +365,27 @@ Note: if `main` is set to mirror another display, that display becomes `main`.
 
 ## Usage Examples
 
-Display Manager allows you to manipulate displays in a variety of ways. You can write your own scripts with the [Display Manager library](#library), manually configure displays through the [command-line API](#command-line-api), or access the functionality of the command-line API through the [GUI](#gui). A few potential use cases are outlined below:
+Display Manager allows you to manipulate displays in a variety of ways. You can write your own Python scripts with the [Display Manager library](#library), write shell scripts or manually configure displays using the [command-line API](#command-line-api), or access the functionality of the command-line API through the [GUI](#gui). A few potential use cases are outlined below:
 
 ### Library Examples
 
 First, import the Display Manager library, like so:
 
 ```
-from DisplayManager import *
+import display_manager_lib as dm
 ```
 
 Next, say you'd like to automatically set all the displays connected to your computer to their highest resolution. A simple script might look like this:
 
 ```
-for display in getAllDisplays():
+for display in dm.getAllDisplays():
     display.setMode(display.highestMode())
 ```
 
 Perhaps you'd like your main display to rotate to 90 degrees. The following would work:
 
 ```
-display = getMainDisplay()
+display = dm.getMainDisplay()
 display.setRotate(90)
 ```
 
