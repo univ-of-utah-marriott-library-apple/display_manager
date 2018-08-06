@@ -55,7 +55,7 @@ Several intended use-cases for Display Manager are elaborated in [usage examples
 Currently, Display Manager has a few important limitations that are worth noting:
 
 * Must be currently logged in as the user of the current Aqua Session to use Display Manager (and in cases when there is no such user (e.g. the login screen), Display Manager cannot be used).
- * Recommended workarounds:
+ Recommended workarounds:
   * If Display Manager is being run by a user *other* than the user of the current Aqua Session, perform one of the following:
    * Transfer CoreGraphics control to the desired user via `$ sudo /System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession -switchToUserID <UID>`, where `<UID>` is the user ID of the desired user.
    * Switch to the user of the current Aqua Session via `$ su <user>`, where `<user>` is the user of the current Aqua Session.
