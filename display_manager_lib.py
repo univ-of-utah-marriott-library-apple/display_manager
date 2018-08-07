@@ -190,13 +190,15 @@ class Display(AbstractDisplay):
     @property
     def isHidpi(self):
         """
-        :return: Whether
+        :return: Whether this display can be set to HiDPI resolutions
         """
         # Check if self.allModes has any HiDPI modes
         if self.allModes(2):
             return True
         else:
             return False
+
+    # Helper methods, properties
 
     @property
     def __servicePort(self):
