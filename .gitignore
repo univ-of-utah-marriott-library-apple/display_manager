@@ -61,4 +61,6 @@ dev/
 
 # Custom files
 .DS_Store
+.update.sh
+.version
 ez.py

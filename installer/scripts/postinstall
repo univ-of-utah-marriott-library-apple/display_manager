@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Delete the installed files
-rm -rf /Library/Python/2.7/site-packages/display_manager_lib.py
-rm -rf /usr/local/bin/display_manager.py
-rm -rf "/Applications/Display Manager.app"

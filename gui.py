@@ -16,7 +16,7 @@ class App(object):
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Display Manager 1.0.0")
+        self.root.title("Display Manager")
 
         self.mainFrame = ttk.Frame(self.root)
 
