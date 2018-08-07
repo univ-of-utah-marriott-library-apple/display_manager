@@ -55,6 +55,10 @@ docs/_build/
 # PyBuilder
 target/
 
-# Custom
+# Custom directories
+dev/
 .dev/
+
+# Custom files
 .DS_Store
+ez.py

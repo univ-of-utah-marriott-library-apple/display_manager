@@ -398,7 +398,7 @@ class Command(object):
         """
         for i, display in enumerate(self.scope):
             # Always print display identifier
-            print("display:    {0}".format(display.tag))
+            print("display: {0}".format(display.tag))
 
             if self.subcommand == "current":
                 current = display.currentMode

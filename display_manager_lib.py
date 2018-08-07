@@ -161,13 +161,6 @@ class Display(AbstractDisplay):
     # General properties
 
     @property
-    def isMain(self):
-        """
-        :return: Boolean for whether this Display is the main display
-        """
-        return Quartz.CGDisplayIsMain(self.displayID)
-
-    @property
     def tag(self):
         """
         :return: The display tag for this Display
@@ -186,6 +179,24 @@ class Display(AbstractDisplay):
             for i in range(len(externals)):
                 if self == externals[i]:
                     return "ext" + str(i)
+
+    @property
+    def isMain(self):
+        """
+        :return: Boolean for whether this Display is the main display
+        """
+        return Quartz.CGDisplayIsMain(self.displayID)
+
+    @property
+    def isHidpi(self):
+        """
+        :return: Whether
+        """
+        # Check if self.allModes has any HiDPI modes
+        if self.allModes(2):
+            return True
+        else:
+            return False
 
     @property
     def __servicePort(self):
@@ -223,6 +234,7 @@ class Display(AbstractDisplay):
 
     def allModes(self, hidpi=0):
         """
+        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
         :return: All possible Quartz "DisplayMode" interfaces for this display.
         """
         modes = []
