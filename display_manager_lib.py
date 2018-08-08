@@ -234,6 +234,14 @@ class Display(AbstractDisplay):
         """
         return DisplayMode(Quartz.CGDisplayCopyDisplayMode(self.displayID))
 
+    @property
+    def defaultMode(self):
+        for mode in self.allModes():
+            if bin(Quartz.CGDisplayModeGetIOFlags(mode.raw))[-3] == '1':  # the "default" flag is 0x...1--
+                return mode
+        # No default mode was found
+        return None
+
     def allModes(self, hidpi=0):
         """
         :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
@@ -337,12 +345,26 @@ class Display(AbstractDisplay):
         """
         :param angle: The angle of rotation.
         """
-        angleCodes = {0: 0, 90: 48, 180: 96, 270: 80}
-        rotateCode = 1024
-        if angle % 90 != 0:  # user entered inappropriate angle, so we quit
+        # see: https://opensource.apple.com/source/IOGraphics/IOGraphics-406/IOGraphicsFamily/IOKit/graphics/
+        # IOGraphicsTypes.h for angle codes (kIOScaleRotate{0, 90, 180, 270}).
+        # Likewise, see ...IOKit/graphics/IOGraphicsTypesPrivate.h for rotateCode (kIOFBSetTransform)
+        # todo: try this next one out sometime!
+        # scaleRotate = 0xf0
+        swapAxes = 0x10
+        invertX = 0x20
+        invertY = 0x40
+        angleCodes = {
+            0: 0,
+            90: (swapAxes | invertX) << 16,
+            180: (invertX | invertY) << 16,
+            270: (swapAxes | invertY) << 16,
+        }
+        rotateCode = 0x400
+
+        # If user enters inappropriate angle, we should quit
+        if angle % 90 != 0:
             raise ValueError("Can only rotate by multiples of 90 degrees.")
-        # "or" the rotate code with the right angle code (which is being moved to the right part of the 32-bit word)
-        options = rotateCode | (angleCodes[angle % 360] << 16)
+        options = rotateCode | angleCodes[angle % 360]
 
         # Actually rotate the screen
         error = iokit["IOServiceRequestProbe"](self.__servicePort, options)
