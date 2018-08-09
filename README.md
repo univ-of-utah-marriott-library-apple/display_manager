@@ -193,7 +193,7 @@ Notes:
 
 ### Res
 
-Use `res` to modify display resolution and refresh rate. (Checking desired settings through [`show`](#show) beforehand is recommended.)
+Use `res` to modify display resolution and refresh rate. (Checking desired configuration through [`show`](#show) beforehand is recommended.)
 
 usage: `$ display_manager.py res <resolution> [refresh] [options] [scope...]`
 
@@ -205,7 +205,7 @@ usage: `$ display_manager.py res <resolution> [refresh] [options] [scope...]`
 
 Note: width and height must be separated by at least one space.
 
-| Refresh (not used by \"default\" or \"highest\" resolution; optional otherwise) | Description |
+| Refresh (not used by "default" or "highest" resolution; optional otherwise) | Description |
 |---|---|
 | `<refresh>` | Refresh rate (in Hz) |
 
