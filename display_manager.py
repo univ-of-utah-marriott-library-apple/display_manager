@@ -265,15 +265,16 @@ class Command(object):
         except DisplayError as e:
             raise CommandExecutionError(e.message, command=self)
 
+    # todo: reword "default": "current (default)" => ...?; "Apple's recommended..." => ...?
     def __handleHelp(self):
         """
         Shows the user usage information (either for a specific verb, or general help)
         """
         helpTypes = {
             "usage": "\n".join([
-                "usage:  display_manager.py [command]",
+                "usage:  display_manager.py <command>",
                 "",
-                "COMMANDS",
+                "COMMANDS (required)",
                 "    help        Show help information about a command",
                 "    show        Show current/available display configurations",
                 "    res         Manage display resolution",
@@ -282,25 +283,26 @@ class Command(object):
                 "    underscan   Manage display underscan",
                 "    mirror      Manage screen mirroring",
             ]), "help": "\n".join([
-                "usage:  display_manager.py help [command]",
+                "usage:  display_manager.py help <command>",
                 "",
-                "COMMANDS",
+                "COMMANDS (required)",
                 "    help        Show help information about a command",
                 "    show        Show current/available display configurations",
-                "    res         Manage display resolution",
+                "    res         Manage display resolution and refresh rate",
                 "    brightness  Manage display brightness",
                 "    rotate      Manage display rotation",
                 "    underscan   Manage display underscan",
                 "    mirror      Manage screen mirroring",
             ]), "show": "\n".join([
-                "usage:  display_manager.py show (subcommand) (options) (scope)",
+                "usage:  display_manager.py show [subcommand] [options] [scope...]",
                 "",
-                "SUBCOMMANDS",
-                "    current (default)   Show current display settings",
-                "    highest             Show the highest available resolution",
-                "    available           Show all available resolutions",
+                "SUBCOMMANDS (optional)",
+                "    current (default)   Show the current display configuration",
+                "    default             Apple's recommended default configuration",
+                "    highest             Show the highest available configuration",
+                "    available           Show all available configurations",
                 "",
-                "OPTIONS (optional)",
+                "OPTIONS (optional; only apply to \"available\")",
                 "    no-hidpi    Don\'t show HiDPI resolutions",
                 "    only-hidpi  Only show HiDPI resolutions",
                 "",
@@ -311,17 +313,18 @@ class Command(object):
                 "    ext<N>          Perform this command on external display number <N>",
                 "    all (default)   Perform this command on all connected displays",
             ]), "res": "\n".join([
-                "usage:  display_manager.py res [resolution] (refresh) (options) (scope)",
+                "usage:  display_manager.py res <resolution> [refresh] [options] [scope...]",
                 "",
-                "RESOLUTION",
-                "    highest             Set the display to the highest available resolution",
+                "RESOLUTION (required)",
+                "    default             Apple's recommended default configuration",
+                "    highest             Set the display to the highest available configuration",
                 "    <width> <height>    Width and height (in pixels)",
                 "        (Note: width and height must be separated by at least one space)",
                 "",
-                "REFRESH (optional)",
+                "REFRESH (not used by \"default\" or \"highest\" resolution; optional otherwise)",
                 "    <refresh>   Refresh rate (in Hz)",
-                "        (Note: if refresh rate is not specified, it will default to whichever rate is "
-                "available at the desired resolution; if 0 is one of the options, it will be selected)",
+                "        (Note: if refresh rate is not specified, it will default to a rate that is "
+                "available at the desired resolution, if possible)",
                 "",
                 "OPTIONS (optional)",
                 "    no-hidpi    Don\'t set to HiDPI resolutions",
@@ -334,9 +337,9 @@ class Command(object):
                 "    ext<N>          Perform this command on external display number <N>",
                 "    all             Perform this command on all connected displays",
             ]), "rotate": "\n".join([
-                "usage:  display_manager.py rotate [angle] (scope)",
+                "usage:  display_manager.py rotate <angle> [scope...]",
                 "",
-                "ANGLE",
+                "ANGLE (required)",
                 "    <angle>     Desired display rotation; must be a multiple of 90",
                 "",
                 "SCOPE (optional)",
@@ -344,9 +347,9 @@ class Command(object):
                 "    ext<N>          Perform this command on external display number <N>",
                 "    all             Perform this command on all connected displays",
             ]), "brightness": "\n".join([
-                "usage:  display_manager.py brightness [brightness] (scope)",
+                "usage:  display_manager.py brightness <brightness> [scope...]",
                 "",
-                "BRIGHTNESS",
+                "BRIGHTNESS (required)",
                 "    <brightness>    A number between 0 and 1 (inclusive); "
                 "0 is minimum brightness, and 1 is maximum brightness",
                 "",
@@ -355,9 +358,9 @@ class Command(object):
                 "    ext<N>          Perform this command on external display number <N>",
                 "    all             Perform this command on all connected displays",
             ]), "underscan": "\n".join([
-                "usage:  display_manager.py underscan [underscan] (scope)",
+                "usage:  display_manager.py underscan <underscan> [scope...]",
                 "",
-                "UNDERSCAN",
+                "UNDERSCAN (required)",
                 "    <underscan>     A number between 0 and 1 (inclusive); "
                 "0 is minimum underscan, and 1 is maximum underscan",
                 "",
@@ -366,14 +369,14 @@ class Command(object):
                 "    ext<N>          Perform this command on external display number <N>",
                 "    all             Perform this command on all connected displays",
             ]), "mirror": "\n".join([
-                "usage:  display_manager.py mirror enable [source] [target(s)]",
-                "   or:  display_manager.py mirror disable (scope)"
+                "usage:  display_manager.py mirror enable <source> <target...>",
+                "   or:  display_manager.py mirror disable [scope...]",
                 "",
-                "SUBCOMMANDS",
+                "SUBCOMMANDS (required)",
                 "    enable      Set <target> to mirror <source>",
                 "    disable     Disable mirroring on <scope>",
                 "",
-                "SOURCE/TARGET(S) (not used by \"disable\")",
+                "SOURCE/TARGET(S) (not used by \"disable\"; required for \"enable\")",
                 "    source      The display which will be mirrored by the target(s); "
                 "must be a single element of <SCOPE> (see below); cannot be \"all\"",
                 "    target(s)   The display(s) which will mirror the source; "
@@ -382,8 +385,8 @@ class Command(object):
                 "SCOPE",
                 "    main    The main display",
                 "    ext<N>  External display number <N>",
-                "    all (default scope for <disable>)",
-                "        For <enable>: all connected displays besides [source]; only available to [target]",
+                "    all (default scope for \"disable\")",
+                "        For <enable>: all connected displays besides <source>; only available to <target>",
                 "        For <disable>: all connected displays",
             ])}
 

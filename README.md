@@ -123,7 +123,7 @@ For more information on each command, see its section below:
 
 Use `help` to see help documentation for any command.
 
-Usage: `$ display_manager.py help [command]`
+Usage: `$ display_manager.py help <command>`
 
 | Commands | Description |
 |---|---|
@@ -149,13 +149,14 @@ Usage: `$ display_manager.py help [command]`
 
 Use `show` to learn more about the supported display configurations for your hardware.
 
-Usage: `$ display_manager.py show (subcommand) (options) (scope)`
+Usage: `$ display_manager.py show [subcommand] [options] [scope...]`
 
 | Subcommands (optional) | Description |
 |---|---|
-| `current` (default) | Show the current display settings |
-| `highest` | Show the highest available resolution |
-| `available` | Show a list of all the available resolutions |
+| `current` (default) | Show the current display configuration |
+| `default` | Apple's recommended default configuration |
+| `highest` | Show the highest available configuration |
+| `available` | Show a list of all the available configuration |
 
 | Options (optional; only apply to `available`) | Description |
 |---|---|
@@ -176,30 +177,35 @@ Notes:
 
 * Show all displays' current configurations:
 
-`$ display_manager.py show`
+`$ display_manager.py show` or `$ display_manager.py show `*`all`*
 
-* Show the highest available HiDPI resolution for the main display:
+* Show the main display's default configuration:
 
-`$ display_manager.py show highest only-hidpi main`
+`$ display_manager.py show default main`
 
-* Show all available resolutions for the first external display:
+* Show the highest configuration for the first external display:
 
-`$ display_manager.py show available ext0`
+`$ display_manager.py show highest ext0`
+
+* Show all available HiDPI configurations for all displays:
+
+`$ display_manager.py show available only-hidpi` or `$ display_manager.py show available only-hidpi `*`all`*
 
 ### Res
 
 Use `res` to modify display resolution and refresh rate. (Checking desired settings through [`show`](#show) beforehand is recommended.)
 
-usage: `$ display_manager.py res [resolution] (refresh) (options) (scope)`
+usage: `$ display_manager.py res <resolution> [refresh] [options] [scope...]`
 
 | Resolution | Description |
 |---|---|
-| `highest` | Set the display to the highest available resolution |
+| `default` | Apple's recommended default configuration |
+| `highest` | Set the display to the highest available configuration |
 | `<width> <height>` | Width and height (in pixels) |
 
 Note: width and height must be separated by at least one space.
 
-| Refresh (optional) | Description |
+| Refresh (not used by \"default\" or \"highest\" resolution; optional otherwise) | Description |
 |---|---|
 | `<refresh>` | Refresh rate (in Hz) |
 
@@ -207,8 +213,8 @@ Note: if refresh rate is not specified, it will default to whichever rate is ava
 
 | Options (optional) | Description |
 |---|---|
-| `no-hidpi` | Don't set to HiDPI resolutions |
-| `only-hidpi` | Only set to HiDPI resolutions |
+| `no-hidpi` | Don't set to HiDPI configurations |
+| `only-hidpi` | Only set to HiDPI configurations |
 
 Notes:
 * "HiDPI" , also known as "Retina Display" among Apple products, refers to a high ratio of pixels (or "dots" in "dots per inch"/"DPI") to the physical area they occupy in a display. Fore more information, see [here](https://en.wikipedia.org/wiki/Retina_Display).
@@ -224,21 +230,25 @@ Notes:
 
 * Set the main display to 1920x1080:
 
-`$ display_manager.py res 1920 1080`
+`$ display_manager.py res 1920 1080` or `$ display_manager.py res 1920 1080 `*`main`*
 
-* Set all displays to their highest available resolution:
+* Set all displays to their default configurations:
 
-`$ display_manager.py res highest all`
+`$ display_manager.py res default all`
 
-* Set the first external display to 1024x768 at 60Hz:
+* Set the first external display to its highest available configuration:
 
-`$ display_manager.py res 1024 768 60 ext0`
+`$ display_manager.py res highest ext0`
+
+* Set the first two external displays to 1024x768 at 60Hz:
+
+`$ display_manager.py res 1024 768 60 ext0 ext1`
 
 ### Rotate
 
 Use `rotate` to change your display's orientation.
 
-usage: `$ display_manager.py rotate [angle] (scope)`
+usage: `$ display_manager.py rotate <angle> [scope...]`
 
 | Angle | Description |
 |---|---|
@@ -254,7 +264,7 @@ usage: `$ display_manager.py rotate [angle] (scope)`
 
 * Rotate the main display by 90 degrees (counter-clockwise):
 
-`$ display_manager.py rotate 90`
+`$ display_manager.py rotate 90` or `$ display_manager.py rotate 90 `*`main`*
 
 * Return all displays to default orientation:
 
@@ -264,7 +274,7 @@ usage: `$ display_manager.py rotate [angle] (scope)`
 
 Use `brightness` to set the brightness on your display.
 
-usage: `$ display_manager.py brightness [brightness] (scope)`
+usage: `$ display_manager.py brightness <brightness> [scope...]`
 
 | Brightness | Description |
 |---|---|
@@ -278,9 +288,9 @@ usage: `$ display_manager.py brightness [brightness] (scope)`
 
 #### Examples
 
-* Set the brightness of the main display to half of its maximum brightness:
+* Set the brightness of the main display to 40% of its maximum brightness:
 
-`$ display_manager.py brightness .4`
+`$ display_manager.py brightness .4` or `$ display_manager.py brightness .4 `*`main`*
 
 * Set the brightness of all displays to their maximum:
 
@@ -292,7 +302,7 @@ Note: many displays do not support setting brightness automatically; this is mos
 
 Use `underscan` to configure HDMI underscan settings.
 
-usage: `$ display_manager.py underscan [underscan] (scope)`
+usage: `$ display_manager.py underscan <underscan> [scope...]`
 
 | Underscan | Description |
 |---|---|
@@ -312,11 +322,11 @@ Notes:
 
 * Set main display to 0% underscan:
 
-`$ display_manager.py underscan 0`
+`$ display_manager.py underscan 0` or `$ display_manager.py underscan 0 `*`main`*
 
-* Set all displays to 42% underscan:
+* Set all displays to 75% underscan:
 
-`$ display_manager.py underscan .42 all`
+`$ display_manager.py underscan .75 all`
 
 ### Mirror
 
@@ -324,8 +334,8 @@ Use `mirror` to enable or disable display mirroring.
 
 usage:
 
-* `$ display_manager.py mirror enable [source] [target(s)]`
-* `$ display_manager.py mirror disable (scope)`
+* `$ display_manager.py mirror enable <source> <target...>`
+* `$ display_manager.py mirror disable [scope...]`
 
 | Subcommands | Description |
 |---|---|
