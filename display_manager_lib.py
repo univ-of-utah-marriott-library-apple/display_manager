@@ -237,7 +237,7 @@ class Display(AbstractDisplay):
     @property
     def defaultMode(self):
         for mode in self.allModes():
-            if bin(Quartz.CGDisplayModeGetIOFlags(mode.raw))[-3] == '1':  # the "default" flag is 0x...1--
+            if mode.isDefault:
                 return mode
         # No default mode was found
         return None
@@ -254,7 +254,27 @@ class Display(AbstractDisplay):
             mode = DisplayMode(modeRef)
             if self.__rightHidpi(mode, hidpi):
                 modes.append(mode)
-        return modes
+
+        # Eliminate all duplicate modes, including any modes that duplicate "default"
+        uniqueModes = set(modes)
+        defaultMode = None
+        # Find default mode
+        for mode in uniqueModes:
+            if mode.isDefault:
+                defaultMode = mode
+        if defaultMode:
+            # If there are any duplicates of defaultMode, remove them (and not defaultMode)
+            for mode in modes:
+                if all([
+                    defaultMode.width == mode.width,
+                    defaultMode.height == mode.height,
+                    defaultMode.refresh == mode.refresh,
+                    defaultMode.hidpi == mode.hidpi,
+                    not mode.isDefault,
+                ]):
+                    uniqueModes.remove(mode)
+
+        return uniqueModes
 
     def highestMode(self, hidpi=0):
         """
@@ -480,19 +500,28 @@ class AbstractDisplayMode(object):
     # "Magic" methods
 
     def __str__(self):
-        return "resolution: {width}x{height}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
-            "width": self.width, "height": self.height, "refresh": self.refresh, "hidpi": self.hidpi
-        })
+        return "\n".join([
+            "resolution:     {}x{}".format(self.width, self.height),
+            "refresh rate:   {}".format(self.refresh),
+            "HiDPI:          {}".format(self.hidpi),
+            "default:        {}".format(self.isDefault),
+        ])
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.__str__() == other.__str__()
+            return all([
+                self.width == other.width,
+                self.height == other.height,
+                self.refresh == other.refresh,
+                self.hidpi == other.hidpi,
+                self.isDefault == other.isDefault,
+            ])
         else:
             return NotImplemented
 
     def __ne__(self, other):
         if isinstance(other, self.__class__):
-            return self.__str__() != other.__str__()
+            return not self.__eq__(other)
         else:
             return NotImplemented
 
@@ -523,10 +552,14 @@ class AbstractDisplayMode(object):
     def hidpi(self):
         pass
 
+    @abc.abstractproperty
+    def isDefault(self):
+        pass
+
 
 class DisplayMode(AbstractDisplayMode):
     """
-    Represents a DisplayMode as implemented in Quartz.
+    Represents a DisplayMode as implemented in Quartz.CoreGraphics
     """
 
     def __init__(self, mode):
@@ -560,6 +593,16 @@ class DisplayMode(AbstractDisplayMode):
     @property
     def hidpi(self):
         return self.__hidpi
+
+    @property
+    def isDefault(self):
+        """
+        :return: Whether this DisplayMode is the display's default mode
+        """
+        # CGDisplayModeGetIOFlags returns a hexadecimal number representing the DisplayMode's flags
+        # the "default" flag is 0x4, which means that said number's binary representation must have
+        # a '1' in the third-to-last position for it to be the default
+        return bin(Quartz.CGDisplayModeGetIOFlags(self.raw))[-3] == '1'
 
 
 def getMainDisplay():

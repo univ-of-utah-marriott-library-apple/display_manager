@@ -398,20 +398,20 @@ class Command(object):
         """
         for i, display in enumerate(self.scope):
             # Always print display identifier
-            print("display: {0}".format(display.tag))
+            print("display \"{0}\":".format(display.tag))
 
             if self.subcommand == "current":
                 current = display.currentMode
                 print("{}".format(current))
 
                 if display.rotation is not None:
-                    print("rotation:   {}".format(display.rotation))
+                    print("rotation:       {}".format(display.rotation))
                 if display.brightness is not None:
-                    print("brightness: {:.2f}".format(display.brightness))
+                    print("brightness:     {:.2f}".format(display.brightness))
                 if display.underscan is not None:
-                    print("underscan:  {:.2f}".format(display.underscan))
+                    print("underscan:      {:.2f}".format(display.underscan))
                 if display.mirrorSource is not None:
-                    print("mirror of:  {}".format(display.mirrorSource.tag))
+                    print("mirror of:      {}".format(display.mirrorSource.tag))
 
                 # Leave an empty line between displays
                 if i < len(self.scope) - 1:
@@ -424,7 +424,15 @@ class Command(object):
 
             elif self.subcommand == "available":
                 for mode in sorted(display.allModes(self.hidpi), reverse=True):
-                    print("    {}".format(mode))
+                    print(
+                        "    resolution: {width}x{height}, refresh rate: {refresh}, HiDPI: {hidpi}{default}"
+                        .format(**{
+                            "width": mode.width,
+                            "height": mode.height,
+                            "refresh": mode.refresh,
+                            "hidpi": mode.hidpi,
+                            "default": "  *DEFAULT*" if mode.isDefault else ""
+                        }))
 
     def __handleRes(self):
         """

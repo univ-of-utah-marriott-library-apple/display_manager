@@ -482,6 +482,9 @@ class TestDisplayMode(AbstractDisplayMode):
     def hidpi(self):
         return self.__hidpi
 
+    def isDefault(self):
+        return False
+
 
 class CommandTests(unittest.TestCase):
 
