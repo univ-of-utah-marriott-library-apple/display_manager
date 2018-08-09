@@ -78,8 +78,8 @@ class AbstractDisplay(object):
     def currentMode(self):
         pass
 
-    @abc.abstractmethod
-    def allModes(self, hidpi):
+    @abc.abstractproperty
+    def allModes(self):
         pass
 
     @abc.abstractmethod
@@ -193,10 +193,11 @@ class Display(AbstractDisplay):
         :return: Whether this display can be set to HiDPI resolutions
         """
         # Check if self.allModes has any HiDPI modes
-        if self.allModes(2):
-            return True
-        else:
-            return False
+        for mode in self.allModes:
+            if mode.hidpi:
+                return True
+        # None of self.allModes were HiDPI
+        return False
 
     # Helper methods, properties
 
@@ -236,24 +237,27 @@ class Display(AbstractDisplay):
 
     @property
     def defaultMode(self):
-        for mode in self.allModes():
+        for mode in self.allModes:
             if mode.isDefault:
                 return mode
         # No default mode was found
         return None
 
-    def allModes(self, hidpi=0):
+    @property
+    def allModes(self):
         """
-        :param hidpi: HiDPI code. 0 returns everything, 1 returns only non-HiDPI, and 2 returns only HiDPI.
         :return: All possible Quartz "DisplayMode" interfaces for this display.
         """
         modes = []
         # options forces Quartz to show HiDPI modes
         options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
         for modeRef in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            mode = DisplayMode(modeRef)
-            if self.__rightHidpi(mode, hidpi):
-                modes.append(mode)
+            # todo: remove deprecated
+            # mode = DisplayMode(modeRef)
+            # if self.__rightHidpi(mode, hidpi):
+            #     modes.append(mode)
+
+            modes.append(DisplayMode(modeRef))
 
         # Eliminate all duplicate modes, including any modes that duplicate "default"
         uniqueModes = set(modes)
@@ -274,7 +278,7 @@ class Display(AbstractDisplay):
                 ]):
                     uniqueModes.remove(mode)
 
-        return uniqueModes
+        return list(uniqueModes)
 
     def highestMode(self, hidpi=0):
         """
@@ -282,7 +286,7 @@ class Display(AbstractDisplay):
         :return: The Quartz "DisplayMode" interface with the highest display resolution for this display.
         """
         highest = None
-        for mode in self.allModes():
+        for mode in self.allModes:
             if highest:
                 if mode > highest and self.__rightHidpi(mode, hidpi):
                     highest = mode
@@ -315,7 +319,7 @@ class Display(AbstractDisplay):
         onlyHidpi = []      # matches HiDPI
         onlyRefresh = []    # matches refresh
 
-        for mode in self.allModes():
+        for mode in self.allModes:
             if mode.width == width and mode.height == height:
                 if self.__rightHidpi(mode, hidpi) and mode.refresh == refresh:
                     both.append(mode)
@@ -499,14 +503,6 @@ class AbstractDisplayMode(object):
 
     # "Magic" methods
 
-    def __str__(self):
-        return "\n".join([
-            "resolution:     {}x{}".format(self.width, self.height),
-            "refresh rate:   {}".format(self.refresh),
-            "HiDPI:          {}".format(self.hidpi),
-            "default:        {}".format(self.isDefault),
-        ])
-
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return all([
@@ -532,7 +528,7 @@ class AbstractDisplayMode(object):
         return self.width * self.height > other.width * other.height
 
     def __hash__(self):
-        return hash(self.__str__())
+        return hash((self.width, self.height, self.refresh, self.hidpi, self.isDefault))
 
     # General properties
 
@@ -577,6 +573,23 @@ class DisplayMode(AbstractDisplayMode):
         self.__hidpi = (maxWidth != self.width and maxHeight != self.height)  # if they're the same, mode is not HiDPI
 
     # General properties
+
+    @property
+    def littleString(self):
+        return "resolution: {width}x{height}, refresh rate: {refresh}, HiDPI: {hidpi}".format(**{
+            "width": self.width,
+            "height": self.height,
+            "refresh": self.refresh,
+            "hidpi": self.hidpi,
+        })
+
+    @property
+    def bigString(self):
+        return "\n".join([
+            "resolution:     {}x{}".format(self.width, self.height),
+            "refresh rate:   {}".format(self.refresh),
+            "HiDPI:          {}".format(self.hidpi),
+        ])
 
     @property
     def width(self):

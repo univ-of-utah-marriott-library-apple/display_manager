@@ -72,10 +72,11 @@ class ParseTests(unittest.TestCase):
                 CommandList([
                     Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),  # default
                     Command(verb="show", subcommand="current", hidpi=0, scope=getAllDisplays()),
+                    Command(verb="show", subcommand="default", hidpi=0, scope=getAllDisplays()),
                     Command(verb="show", subcommand="highest", hidpi=0, scope=getAllDisplays()),
                     Command(verb="show", subcommand="available", hidpi=0, scope=getAllDisplays()),
                 ]),
-                "show show current show highest show available"
+                "show show current show default show highest show available"
             ),
             # Options (HiDPI)
             (
@@ -104,6 +105,18 @@ class ParseTests(unittest.TestCase):
 
     def test_parseRes(self):
         self.assertParse([
+            # case "default"
+            (
+                CommandList([
+                    # Scopes
+                    Command(verb="res", subcommand="default", hidpi=0, scope=getMainDisplay()),
+                    Command(verb="res", subcommand="default", hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="res", subcommand="default", hidpi=0, scope=getDisplayFromTag("ext0")),
+                    Command(verb="res", subcommand="default", hidpi=0, scope=getAllDisplays()),
+                ]),
+                "res default res default main res default ext0 res default all "  # scopes
+            ),
             # case "highest"
             (
                 CommandList([
@@ -120,6 +133,18 @@ class ParseTests(unittest.TestCase):
                 ]),
                 "res highest res highest main res highest ext0 res highest all "    # scopes
                 "res highest no-hidpi res highest only-hidpi"                       # HiDPI options
+            ),
+            # case ("default", refresh)
+            (
+                CommandList([
+                    # Scopes
+                    Command(verb="res", subcommand="default", refresh=1, hidpi=0, scope=getMainDisplay()),
+                    Command(verb="res", subcommand="default", refresh=2, hidpi=0, scope=getMainDisplay()),
+                    # NOTE: THIS NEXT COMMAND WILL FAIL IF NO EXTERNAL DISPLAYS ARE CONNECTED
+                    Command(verb="res", subcommand="default", refresh=3, hidpi=0, scope=getDisplayFromTag("ext0")),
+                    Command(verb="res", subcommand="default", refresh=4, hidpi=0, scope=getAllDisplays()),
+                ]),
+                "res default 1 res default 2 main res default 3 ext0 res default 4 all "  # scopes
             ),
             # case ("highest", refresh)
             (

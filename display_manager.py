@@ -265,7 +265,7 @@ class Command(object):
         except DisplayError as e:
             raise CommandExecutionError(e.message, command=self)
 
-    # todo: reword "default": "current (default)" => ...?; "Apple's recommended..." => ...?
+    # todo: reword "current (default)" => ...?, "Apple's recommended..." => ...?
     def __handleHelp(self):
         """
         Shows the user usage information (either for a specific verb, or general help)
@@ -302,7 +302,7 @@ class Command(object):
                 "    highest             Show the highest available configuration",
                 "    available           Show all available configurations",
                 "",
-                "OPTIONS (optional; only apply to \"available\")",
+                "OPTIONS (optional; only applies to \"available\")",
                 "    no-hidpi    Don\'t show HiDPI resolutions",
                 "    only-hidpi  Only show HiDPI resolutions",
                 "",
@@ -405,7 +405,7 @@ class Command(object):
 
             if self.subcommand == "current":
                 current = display.currentMode
-                print("{}".format(current))
+                print(current.bigString)
 
                 if display.rotation is not None:
                     print("rotation:       {}".format(display.rotation))
@@ -416,33 +416,77 @@ class Command(object):
                 if display.mirrorSource is not None:
                     print("mirror of:      {}".format(display.mirrorSource.tag))
 
-                # Leave an empty line between displays
-                if i < len(self.scope) - 1:
-                    print("")
+            elif self.subcommand == "default":
+                default = display.defaultMode
+                if default:
+                    print(default.bigString)
 
             elif self.subcommand == "highest":
-                current = display.highestMode(self.hidpi)
-                if current:
-                    print("{}".format(current))
+                highest = display.highestMode(self.hidpi)
+                if highest:
+                    print(highest.bigString)
 
             elif self.subcommand == "available":
-                for mode in sorted(display.allModes(self.hidpi), reverse=True):
+                # Categorize modes by type, in order
+                current = None
+                default = None
+                hidpi = []
+                lodpi = []
+                for mode in sorted(display.allModes, reverse=True):
+                    if mode == display.currentMode:
+                        current = mode
+                    # Note: intentionally left "if" instead of "elif"; mode can be both current and default
+                    if mode.isDefault:
+                        default = mode
+                    if mode.hidpi:
+                        hidpi.append(mode)
+                    if not mode.hidpi:
+                        lodpi.append(mode)
+
+                if current:
+                    print("\n".join([
+                        "    current mode:",
+                        "        {}".format(current.littleString),
+                    ]))
+
+                if default:
+                    print("\n".join([
+                        "    default mode:",
+                        "        {}".format(default.littleString),
+                    ]))
+
+                if hidpi:
                     print(
-                        "    resolution: {width}x{height}, refresh rate: {refresh}, HiDPI: {hidpi}{default}"
-                        .format(**{
-                            "width": mode.width,
-                            "height": mode.height,
-                            "refresh": mode.refresh,
-                            "hidpi": mode.hidpi,
-                            "default": "  *DEFAULT*" if mode.isDefault else ""
-                        }))
+                        "    HiDPI modes:"
+                    )
+                    for mode in hidpi:
+                        print(
+                            "        {}".format(mode.littleString)
+                        )
+
+                if lodpi:
+                    print(
+                        "    non-HiDPI modes:"
+                    )
+                    for mode in lodpi:
+                        print(
+                            "        {}".format(mode.littleString)
+                        )
+
+            # Leave an empty line between displays
+            if i < len(self.scope) - 1:
+                print("")
 
     def __handleRes(self):
         """
         Sets the display to the correct DisplayMode.
         """
         for display in self.scope:
-            if self.subcommand == "highest":
+            if self.subcommand == "default":
+                default = display.defaultMode
+                display.setMode(default)
+
+            elif self.subcommand == "highest":
                 highest = display.highestMode(self.hidpi)
                 display.setMode(highest)
 
@@ -774,7 +818,7 @@ def getCommand(commandString):
             # Default subcommand
             subcommand = "current"
         elif len(positionals) == 1:
-            if positionals[0] in ["current", "highest", "available"]:
+            if positionals[0] in ["current", "default", "highest", "available"]:
                 subcommand = positionals[0]
             # Invalid subcommand
             else:
@@ -818,24 +862,12 @@ def getCommand(commandString):
                 else:
                     raise CommandValueError("Cannot specify both \"no-hidpi\" and \'only-hidpi\"", verb=verb)
 
-        # Determine scope
-        if len(scopeTags) > 0:
-            if "all" in scopeTags:
-                scope = getAllDisplays()
-            else:
-                scope = []
-                for scopeTag in scopeTags:
-                    scope.append(getDisplayFromTag(scopeTag))
-        else:
-            # Default scope
-            scope = getMainDisplay()
-
         if len(positionals) == 0:
             raise CommandSyntaxError("Res commands must specify a resolution", verb=verb)
 
-        # case: "highest"
+        # case: "default"/"highest"
         elif len(positionals) == 1:
-            if positionals[0] == "highest":
+            if positionals[0] in ["default", "highest"]:
                 subcommand = positionals[0]
             else:
                 raise CommandValueError(
@@ -845,12 +877,11 @@ def getCommand(commandString):
 
             attributesDict["subcommand"] = subcommand
             attributesDict["hidpi"] = hidpi
-            attributesDict["scope"] = scope
 
-        # cases: ("highest", refresh) or (width, height)
+        # cases: ("default"/"highest", refresh) or (width, height)
         elif len(positionals) == 2:
-            # case: ("highest", refresh)
-            if positionals[0] == "highest":
+            # case: ("default"/"highest", refresh)
+            if positionals[0] in ["default", "highest"]:
                 subcommand = positionals[0]
                 try:
                     refresh = int(positionals[1])
@@ -862,7 +893,6 @@ def getCommand(commandString):
                 attributesDict["subcommand"] = subcommand
                 attributesDict["refresh"] = refresh
                 attributesDict["hidpi"] = hidpi
-                attributesDict["scope"] = scope
 
             # case: (width, height)
             else:
@@ -903,7 +933,6 @@ def getCommand(commandString):
                 attributesDict["width"] = width
                 attributesDict["height"] = height
                 attributesDict["hidpi"] = hidpi
-                attributesDict["scope"] = scope
 
         # case: (width, height, refresh)
         elif len(positionals) == 3:
@@ -946,13 +975,25 @@ def getCommand(commandString):
             attributesDict["height"] = height
             attributesDict["refresh"] = refresh
             attributesDict["hidpi"] = hidpi
-            attributesDict["scope"] = scope
 
         else:
             raise CommandSyntaxError(
                 "Too many arguments supplied for the res command",
                 verb=verb
             )
+
+        # Determine scope
+        if len(scopeTags) > 0:
+            if "all" in scopeTags:
+                scope = getAllDisplays()
+            else:
+                scope = []
+                for scopeTag in scopeTags:
+                    scope.append(getDisplayFromTag(scopeTag))
+        else:
+            # Default scope
+            scope = getMainDisplay()
+        attributesDict["scope"] = scope
 
     elif verb == "rotate":
         if len(positionals) == 0:

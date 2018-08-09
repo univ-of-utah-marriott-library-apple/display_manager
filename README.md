@@ -156,9 +156,9 @@ Usage: `$ display_manager.py show [subcommand] [options] [scope...]`
 | `current` (default) | Show the current display configuration |
 | `default` | Apple's recommended default configuration |
 | `highest` | Show the highest available configuration |
-| `available` | Show a list of all the available configuration |
+| `available` | Show a list of all the available configurations |
 
-| Options (optional; only apply to `available`) | Description |
+| Options (optional; only applies to `available`) | Description |
 |---|---|
 | `no-hidpi` | Don't show HiDPI resolutions |
 | `only-hidpi` | Only show HiDPI resolutions |
