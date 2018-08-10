@@ -622,9 +622,9 @@ class CommandList(object):
             # Group commands by subcommand. Must preserve ordering to avoid interfering commands
             verbGroups = collections.OrderedDict([
                 ("help", []),
-                ("res", []),
-                ("rotate", []),
                 ("mirror", []),
+                ("rotate", []),
+                ("res", []),
                 ("underscan", []),
                 ("brightness", []),
                 ("show", []),
@@ -642,8 +642,8 @@ class CommandList(object):
                     # As such, just run the most recently added command (the last in the list)
                     if (
                             verb == "help" or
-                            verb == "res" or
                             verb == "rotate" or
+                            verb == "res" or
                             verb == "brightness" or
                             verb == "underscan"
                     ):
