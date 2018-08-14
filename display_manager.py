@@ -265,7 +265,6 @@ class Command(object):
         except DisplayError as e:
             raise CommandExecutionError(e.message, command=self)
 
-    # todo: reword "current (default)" => ...?, "Apple's recommended..." => ...?
     def __handleHelp(self):
         """
         Shows the user usage information (either for a specific verb, or general help)
@@ -531,8 +530,6 @@ class Command(object):
                     target.setMirrorSource(None)
 
 
-# todo: inherit from Set, List, or other iterable?
-# todo: make iterable? (would require "smart-ordering" in self.commands
 class CommandList(object):
     """
     Holds one or more "Command" instances, and allows smart simultaneous execution

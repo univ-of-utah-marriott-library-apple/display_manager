@@ -252,11 +252,6 @@ class Display(AbstractDisplay):
         # options forces Quartz to show HiDPI modes
         options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
         for modeRef in Quartz.CGDisplayCopyAllDisplayModes(self.displayID, options):
-            # todo: remove deprecated
-            # mode = DisplayMode(modeRef)
-            # if self.__rightHidpi(mode, hidpi):
-            #     modes.append(mode)
-
             modes.append(DisplayMode(modeRef))
 
         # Eliminate all duplicate modes, including any modes that duplicate "default"
@@ -371,9 +366,7 @@ class Display(AbstractDisplay):
         """
         # see: https://opensource.apple.com/source/IOGraphics/IOGraphics-406/IOGraphicsFamily/IOKit/graphics/
         # IOGraphicsTypes.h for angle codes (kIOScaleRotate{0, 90, 180, 270}).
-        # Likewise, see ...IOKit/graphics/IOGraphicsTypesPrivate.h for rotateCode (kIOFBSetTransform)
-        # todo: try this next one out sometime!
-        # scaleRotate = 0xf0
+        # Likewise, see .../IOKit/graphics/IOGraphicsTypesPrivate.h for rotateCode (kIOFBSetTransform)
         swapAxes = 0x10
         invertX = 0x20
         invertY = 0x40
