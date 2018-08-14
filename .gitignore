@@ -57,6 +57,7 @@ target/
 
 # Ignore everything except the next cluster
 *
+/*
 */
 */*
 */*/
