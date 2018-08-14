@@ -55,9 +55,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# Custom
-versions/.DS_Store
-
 # Ignore everything except the next cluster
 /*
 /*/
@@ -80,3 +77,6 @@ versions/.DS_Store
 !README.md
 !versions/
 !versions/*
+
+# Custom
+versions/.DS_Store
