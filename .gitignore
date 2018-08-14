@@ -55,12 +55,15 @@ docs/_build/
 # PyBuilder
 target/
 
-# Custom directories
-dev/
-.dev/
+# Ignore everything except the next cluster
+*
 
-# Custom files
-.DS_Store
-.update.sh
-.version
-ez.py
+# Do actually keep these
+!.gitignore
+!display_manager.py
+!display_manager_lib.py
+!gui.py
+!LICENSE.txt
+!README.md
+!versions/
+!versions/*
