@@ -56,7 +56,7 @@ docs/_build/
 target/
 
 # Custom
-.DS_Store
+versions/.DS_Store
 
 # Ignore everything except the next cluster
 /*
