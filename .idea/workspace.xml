@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c78953a0-75a1-4200-8984-b1a0b5f68667" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_manager_lib.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_manager_lib.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -49,11 +47,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="display_manager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/display_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="19" lean-forward="true" selection-start-line="14" selection-start-column="19" selection-end-line="14" selection-end-column="19" />
+            <state relative-caret-position="165">
+              <caret line="11" column="26" selection-start-line="11" selection-start-column="26" selection-end-line="11" selection-end-column="26" />
               <folding>
                 <element signature="e#546#995#0" />
                 <element signature="e#546#699#1" />
@@ -286,6 +284,47 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="mirror_toggle.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/mirror_toggle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="19" column="45" lean-forward="true" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
+            <state split_layout="FIRST">
+              <first_editor relative-caret-position="933">
+                <caret line="416" column="193" selection-start-line="416" selection-start-column="193" selection-end-line="416" selection-end-column="193" />
+              </first_editor>
+              <second_editor>
+                <markdownNavigatorState />
+              </second_editor>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="262">
+              <caret line="33" selection-start-line="33" selection-end-line="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gui.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gui.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="24" column="29" selection-start-line="24" selection-start-column="29" selection-end-line="24" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="display_manager_lib.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/display_manager_lib.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -435,35 +474,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cli_tests.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/cli_tests.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="8" column="36" selection-start-line="8" selection-start-column="36" selection-end-line="8" selection-end-column="36" />
-              <folding>
-                <element signature="n#!!doc" />
-                <element signature="e#183#16707#0" />
-                <element signature="e#244#846#0" />
-                <element signature="e#244#495#1" />
-                <element signature="e#533#846#0" />
-                <element signature="e#907#1992#0" />
-                <element signature="e#924#1991#0" />
-                <element signature="e#956#1035#0" />
-                <element signature="e#1081#1164#0" />
-                <element signature="e#1210#1293#0" />
-                <element signature="e#1339#1420#0" />
-                <element signature="e#1466#1553#0" />
-                <element signature="e#1599#1694#0" />
-                <element signature="e#1740#1833#0" />
-                <element signature="e#1879#1966#0" />
-                <element signature="e#4010#9833#0" />
-                <element signature="e#4027#9832#0" />
-                <element signature="e#5860#6542#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -512,10 +522,10 @@
         <option value="$PROJECT_DIR$/gui.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/dev/experiment.py" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/tests/cli_tests.py" />
         <option value="$PROJECT_DIR$/display_manager.py" />
         <option value="$PROJECT_DIR$/display_manager_lib.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -541,17 +551,7 @@
             <path>
               <item name="display_manager" type="b2602c69:ProjectViewProjectNode" />
               <item name="display_manager" type="462c0819:PsiDirectoryNode" />
-              <item name="dev" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="display_manager" type="b2602c69:ProjectViewProjectNode" />
-              <item name="display_manager" type="462c0819:PsiDirectoryNode" />
               <item name="examples" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="display_manager" type="b2602c69:ProjectViewProjectNode" />
-              <item name="display_manager" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -689,13 +689,7 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/dev/experiment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="65" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/experiment.py" />
     <entry file="file://$PROJECT_DIR$/examples/jamf_default.py" />
     <entry file="file://$PROJECT_DIR$/examples/mirror_toggle.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -720,26 +714,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="486">
           <caret line="138" column="6" selection-start-line="138" selection-start-column="6" selection-end-line="138" selection-end-column="6" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#183#16707#0" />
-            <element signature="e#244#846#0" />
-            <element signature="e#244#495#1" />
-            <element signature="e#533#846#0" />
-            <element signature="e#907#1992#0" />
-            <element signature="e#924#1991#0" />
-            <element signature="e#956#1035#0" />
-            <element signature="e#1081#1164#0" />
-            <element signature="e#1210#1293#0" />
-            <element signature="e#1339#1420#0" />
-            <element signature="e#1466#1553#0" />
-            <element signature="e#1599#1694#0" />
-            <element signature="e#1740#1833#0" />
-            <element signature="e#1879#1966#0" />
-            <element signature="e#4010#9833#0" />
-            <element signature="e#4027#9832#0" />
-            <element signature="e#5860#6542#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1372,26 +1346,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="660">
           <caret line="487" column="24" selection-start-line="487" selection-start-column="24" selection-end-line="487" selection-end-column="24" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#183#16707#0" />
-            <element signature="e#244#846#0" />
-            <element signature="e#244#495#1" />
-            <element signature="e#533#846#0" />
-            <element signature="e#907#1992#0" />
-            <element signature="e#924#1991#0" />
-            <element signature="e#956#1035#0" />
-            <element signature="e#1081#1164#0" />
-            <element signature="e#1210#1293#0" />
-            <element signature="e#1339#1420#0" />
-            <element signature="e#1466#1553#0" />
-            <element signature="e#1599#1694#0" />
-            <element signature="e#1740#1833#0" />
-            <element signature="e#1879#1966#0" />
-            <element signature="e#4010#9833#0" />
-            <element signature="e#4027#9832#0" />
-            <element signature="e#5860#6542#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1795,26 +1749,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="660">
           <caret line="487" column="24" selection-start-line="487" selection-start-column="24" selection-end-line="487" selection-end-column="24" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#183#16707#0" />
-            <element signature="e#244#846#0" />
-            <element signature="e#244#495#1" />
-            <element signature="e#533#846#0" />
-            <element signature="e#907#1992#0" />
-            <element signature="e#924#1991#0" />
-            <element signature="e#956#1035#0" />
-            <element signature="e#1081#1164#0" />
-            <element signature="e#1210#1293#0" />
-            <element signature="e#1339#1420#0" />
-            <element signature="e#1466#1553#0" />
-            <element signature="e#1599#1694#0" />
-            <element signature="e#1740#1833#0" />
-            <element signature="e#1879#1966#0" />
-            <element signature="e#4010#9833#0" />
-            <element signature="e#4027#9832#0" />
-            <element signature="e#5860#6542#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2351,26 +2285,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1980">
           <caret line="485" column="13" selection-start-line="485" selection-start-column="13" selection-end-line="485" selection-end-column="13" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#183#16707#0" />
-            <element signature="e#244#846#0" />
-            <element signature="e#244#495#1" />
-            <element signature="e#533#846#0" />
-            <element signature="e#907#1992#0" />
-            <element signature="e#924#1991#0" />
-            <element signature="e#956#1035#0" />
-            <element signature="e#1081#1164#0" />
-            <element signature="e#1210#1293#0" />
-            <element signature="e#1339#1420#0" />
-            <element signature="e#1466#1553#0" />
-            <element signature="e#1599#1694#0" />
-            <element signature="e#1740#1833#0" />
-            <element signature="e#1879#1966#0" />
-            <element signature="e#4010#9833#0" />
-            <element signature="e#4027#9832#0" />
-            <element signature="e#5860#6542#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2388,16 +2302,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dev/experiment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dev/copypasta.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/experiment.py" />
+    <entry file="file://$PROJECT_DIR$/dev/copypasta.py" />
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/collections.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="166">
@@ -2417,26 +2323,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="416">
           <caret line="487" column="24" selection-start-line="487" selection-start-column="24" selection-end-line="487" selection-end-column="24" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#183#16707#0" />
-            <element signature="e#244#846#0" />
-            <element signature="e#244#495#1" />
-            <element signature="e#533#846#0" />
-            <element signature="e#907#1992#0" />
-            <element signature="e#924#1991#0" />
-            <element signature="e#956#1035#0" />
-            <element signature="e#1081#1164#0" />
-            <element signature="e#1210#1293#0" />
-            <element signature="e#1339#1420#0" />
-            <element signature="e#1466#1553#0" />
-            <element signature="e#1599#1694#0" />
-            <element signature="e#1740#1833#0" />
-            <element signature="e#1879#1966#0" />
-            <element signature="e#4010#9833#0" />
-            <element signature="e#4027#9832#0" />
-            <element signature="e#5860#6542#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2841,13 +2727,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/set.sh" />
-    <entry file="file://$PROJECT_DIR$/dev/help_stuff.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="569">
-          <caret line="364" selection-start-line="364" selection-end-line="364" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/help_stuff.py" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/2/__builtin__.pyi">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="352">
@@ -2856,79 +2736,27 @@
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2018.2/python_stubs/348993582/__builtin__.py" />
-    <entry file="file://$PROJECT_DIR$/ez.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="29" selection-start-line="3" selection-start-column="29" selection-end-line="3" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/update.sh" />
     <entry file="file://$PROJECT_DIR$/gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="40" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
+        <state relative-caret-position="300">
+          <caret line="24" column="29" selection-start-line="24" selection-start-column="29" selection-end-line="24" selection-end-column="29" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="112">
-          <caret line="20" column="11" lean-forward="true" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />
+        <state relative-caret-position="262">
+          <caret line="33" selection-start-line="33" selection-end-line="33" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dev/experiment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="65" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/experiment.py" />
     <entry file="file://$PROJECT_DIR$/examples/jamf_default.py" />
-    <entry file="file://$PROJECT_DIR$/examples/mirror_toggle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="29" selection-start-line="10" selection-start-column="29" selection-end-line="10" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
-        <state split_layout="FIRST">
-          <first_editor relative-caret-position="321">
-            <caret line="158" column="63" selection-start-line="158" selection-start-column="63" selection-end-line="158" selection-end-column="63" />
-          </first_editor>
-          <second_editor>
-            <markdownNavigatorState />
-          </second_editor>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/cli_tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="8" column="36" selection-start-line="8" selection-start-column="36" selection-end-line="8" selection-end-column="36" />
-          <folding>
-            <element signature="n#!!doc" />
-            <element signature="e#183#16707#0" />
-            <element signature="e#244#846#0" />
-            <element signature="e#244#495#1" />
-            <element signature="e#533#846#0" />
-            <element signature="e#907#1992#0" />
-            <element signature="e#924#1991#0" />
-            <element signature="e#956#1035#0" />
-            <element signature="e#1081#1164#0" />
-            <element signature="e#1210#1293#0" />
-            <element signature="e#1339#1420#0" />
-            <element signature="e#1466#1553#0" />
-            <element signature="e#1599#1694#0" />
-            <element signature="e#1740#1833#0" />
-            <element signature="e#1879#1966#0" />
-            <element signature="e#4010#9833#0" />
-            <element signature="e#4027#9832#0" />
-            <element signature="e#5860#6542#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -3081,8 +2909,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/display_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="19" lean-forward="true" selection-start-line="14" selection-start-column="19" selection-end-line="14" selection-end-column="19" />
+        <state relative-caret-position="165">
+          <caret line="11" column="26" selection-start-line="11" selection-start-column="26" selection-end-line="11" selection-end-column="26" />
           <folding>
             <element signature="e#546#995#0" />
             <element signature="e#546#699#1" />
@@ -3311,6 +3139,32 @@
             <element signature="e#48990#49144#0" />
             <element signature="e#49077#49144#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ez.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="29" selection-start-line="3" selection-start-column="29" selection-end-line="3" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/mirror_toggle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" column="45" lean-forward="true" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
+        <state split_layout="FIRST">
+          <first_editor relative-caret-position="933">
+            <caret line="416" column="193" selection-start-line="416" selection-start-column="193" selection-end-line="416" selection-end-column="193" />
+          </first_editor>
+          <second_editor>
+            <markdownNavigatorState />
+          </second_editor>
         </state>
       </provider>
     </entry>

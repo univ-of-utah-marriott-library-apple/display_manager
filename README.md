@@ -379,7 +379,7 @@ Display Manager allows you to manipulate displays in a variety of ways. You can 
 
 ### Library Examples
 
-First, import the Display Manager library, like so:
+First, import the [Display Manager library](#library), like so:
 
 ```
 import display_manager_lib as dm
@@ -399,7 +399,18 @@ display = dm.getMainDisplay()
 display.setRotate(90)
 ```
 
-You can use any of the properties and methods of `Display` objects to configure their settings, which is exactly how the [command-line API](#command-line-api) works.
+Finally, consider a case where you'd like the main display in a set of two displays to mirror each other if not mirroring, or to disable mirroring if it is currently enabled. You might try this:
+
+```
+main = dm.getMainDisplay()
+ext0 = [d for d in dm.getAllDisplays() if d.tag == "ext0"][0]
+if not ext0.mirrorSource:
+    ext0.setMirrorSource(main)
+else:
+    ext0.setMirrorSource(None)
+```
+
+You can use any of the properties and methods of `Display` objects to configure their settings, which is exactly how the [command-line API](#command-line-api) works. For more information about the Display Manager Library, see [here](#library), or look at the triple-quoted docstrings in `display_manager_lib.py` for any object or function you're interested in.
 
 ### Command-Line Examples
 
