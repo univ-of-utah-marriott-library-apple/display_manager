@@ -5,7 +5,7 @@ An open-source Python library which can modify your Mac's display settings.
 
 Includes the library itself, and a command-line API + GUI to use it in pre-specified ways.
 
-You can download the installer [here](./versions/Display Manager v1.0.0.dmg).
+You can download the installer [here](versions/Display Manager v1.0.0.dmg).
 
 ## Contents
 
