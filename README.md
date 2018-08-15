@@ -42,7 +42,7 @@ Display Manager only runs on Mac computers. It depends on the Apple-supplied Pyt
 
 If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
 
-Note: Display Manager has only been tested on El Capitan (10.11), Sierra (10.12), and High Sierra (10.13). If you experience issues on other versions of macOS, please [let us know](#contact).
+Note: Display Manager has only been tested on El Capitan (10.11), Sierra (10.12), High Sierra (10.13), and Mojave Beta (10.14). If you experience issues on other versions of macOS, please [let us know](#contact).
 
 ## Purpose
 

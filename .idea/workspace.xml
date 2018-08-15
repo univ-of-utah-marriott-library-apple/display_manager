@@ -288,7 +288,7 @@
         <entry file="file://$PROJECT_DIR$/examples/mirror_toggle.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="285">
-              <caret line="19" column="45" lean-forward="true" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+              <caret line="19" column="45" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
             </state>
           </provider>
         </entry>
@@ -297,8 +297,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor relative-caret-position="933">
-                <caret line="416" column="193" selection-start-line="416" selection-start-column="193" selection-end-line="416" selection-end-column="193" />
+              <first_editor relative-caret-position="410">
+                <caret line="44" column="212" lean-forward="true" selection-start-line="44" selection-start-column="212" selection-end-line="44" selection-end-column="212" />
               </first_editor>
               <second_editor>
                 <markdownNavigatorState />
@@ -3152,15 +3152,15 @@
     <entry file="file://$PROJECT_DIR$/examples/mirror_toggle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
-          <caret line="19" column="45" lean-forward="true" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+          <caret line="19" column="45" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor relative-caret-position="933">
-            <caret line="416" column="193" selection-start-line="416" selection-start-column="193" selection-end-line="416" selection-end-column="193" />
+          <first_editor relative-caret-position="410">
+            <caret line="44" column="212" lean-forward="true" selection-start-line="44" selection-start-column="212" selection-end-line="44" selection-end-column="212" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />
