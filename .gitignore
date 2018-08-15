@@ -77,6 +77,8 @@ target/
 !README.md
 !versions/
 !versions/*
+!resources/
+!resources/*
 
 # Custom
 versions/.DS_Store
