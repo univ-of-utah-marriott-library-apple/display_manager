@@ -15,21 +15,21 @@ You can download the installer <a href="./versions/">here</a>.
 * [Limitations](#limitations) - what *can't* be done with Display Manager?
 * [Get Started](#get-started) - how to get started with Display Manager
 * [Overview](#overview) - what is included in this library?
- * [Library](#library)
- * [Command-Line API](#command-line-api)
- * [GUI](#gui)
+    * [Library](#library)
+    * [Command-Line API](#command-line-api)
+    * [GUI](#gui)
 * [Command-Line Usage](#command-line-usage) - how to use the command-line API
- * [Help](#help)
- * [Show](#show)
- * [Res](#res)
- * [Rotate](#rotate)
- * [Brightness](#brightness)
- * [Underscan](#underscan)
- * [Mirror](#mirror)
+    * [Help](#help)
+    * [Show](#show)
+    * [Res](#res)
+    * [Rotate](#rotate)
+    * [Brightness](#brightness)
+    * [Underscan](#underscan)
+    * [Mirror](#mirror)
 * [Usage Examples](#usage-examples) - potential use cases for Display Manager
- * [Library Examples](#library-examples)
- * [Command-Line Examples](#command-line-examples)
- * [System Administration Examples](#system-administration-examples)
+    * [Library Examples](#library-examples)
+    * [Command-Line Examples](#command-line-examples)
+    * [System Administration Examples](#system-administration-examples)
 * [Update History](#update-history)
 
 ## Contact
