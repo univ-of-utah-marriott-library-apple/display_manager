@@ -15,13 +15,15 @@
 # implied warranties of any kind.                                      #
 ########################################################################
 
-# Display Manager, version 1.0.0
+# Display Manager, version 1.0.1
 # Python Library
 
 # Programmatically manages Mac displays.
 # Can set screen resolution, refresh rate, rotation, brightness, underscan, and screen mirroring.
 
-import abc              # Allows use of abstract classes
+import sys		        # make decisions based on system configuration
+import warnings		    # control warning settings for
+import abc              # allows use of abstract classes
 import objc             # access Objective-C functions and variables
 import CoreFoundation   # work with Objective-C data types
 import Quartz           # work with system graphics
@@ -656,7 +658,13 @@ def getIOKit():
     :return: A dictionary containing several IOKit functions and variables.
     """
     global iokit
-    if not iokit:  # iokit may have already been instantiated, in which case, nothing needs to be done
+
+    # IOKit may have already been instantiated, in which case, nothing needs to be done
+    if not iokit:
+        # PyObjC sometimes raises compatibility warnings in macOS 10.14 relating to parts of IOKit that
+        # Display Manager doesn't use. Thus, such warnings will be temporarily ignored
+        warnings.simplefilter("ignore")
+
         # The dictionary which will contain all of the necessary functions and variables from IOKit
         iokit = {}
 
@@ -702,5 +710,8 @@ def getIOKit():
         # still work as intended in IOKit functions
         iokit["kDisplayBrightness"] = CoreFoundation.CFSTR("brightness")
         iokit["kDisplayUnderscan"] = CoreFoundation.CFSTR("pscn")
+
+        # Stop ignoring warnings now that we've finished with PyObjC
+        warnings.simplefilter("default")
 
     return iokit

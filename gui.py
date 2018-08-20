@@ -15,7 +15,7 @@
 # implied warranties of any kind.                                      #
 ########################################################################
 
-# Display Manager, version 1.0.0
+# Display Manager, version 1.0.1
 # Graphical User Interface
 
 import os
