@@ -484,5 +484,6 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 
 | Date       | Version | Update |
 |------------|---------|--------|
+| 2018-08-20 | 1.0.1 | Fixed minor compatibility issues with macOS 10.14 Beta. |
 | 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library, the new command-line API, and the GUI; added the ability to run multiple commands at once; added rotation and HDMI underscan features. |
 | 2015-10-28 | 0.1.0 | Legacy iteration of Display Manager. Created command-line API. |
