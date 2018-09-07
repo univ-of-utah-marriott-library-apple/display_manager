@@ -66,7 +66,7 @@ Recommended workarounds:
 
 First, check that your system satisfies the requirements in [System Requirements](#system-requirements). If you haven't touched `/usr/bin/python`, it should.
 
-Next, download the latest installer [here](./versions/Display Manager v1.0.0.dmg), or view the archive of all version installers [here](./versions). Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter.
+Next, download the latest installer <a href="./versions/">here</a>. Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter.
 
 For the curious: `Display Manager.pkg` puts the [Display Manager library](#library) in `/Library/Python/2.7/site-packages/`, and the [command-line interface](#command-line-api) in `/usr/local/bin`. (Note: currently, if you wish to use the [GUI](#gui), you must manually run `gui.py` from the command line. Standalone app in `/Applications` coming in a future version.)
 
