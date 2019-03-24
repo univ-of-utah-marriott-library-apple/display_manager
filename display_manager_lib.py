@@ -21,7 +21,6 @@
 # Programmatically manages Mac displays.
 # Can set screen resolution, refresh rate, rotation, brightness, underscan, and screen mirroring.
 
-import sys		        # make decisions based on system configuration
 import warnings		    # control warning settings for
 import abc              # allows use of abstract classes
 import objc             # access Objective-C functions and variables
@@ -203,6 +202,54 @@ class Display(AbstractDisplay):
         :return: Boolean for whether this Display is the main display
         """
         return Quartz.CGDisplayIsMain(self.displayID)
+
+    @property
+    def modelNumber(self):
+        """
+        :return: model number of this Display
+        """
+        return Quartz.CGDisplayModelNumber(self.displayID)
+
+    @property
+    def boundsOrigin(self):
+        """
+        :return: object with x and y properties of the origin
+        of this Display in global coordinate space.  Origin
+        is upper left corner of display.
+        """
+        rect = Quartz.CGDisplayBounds(self.displayID)
+        return rect.origin
+
+    @property
+    def boundsSize(self):
+        """
+        :return: object with width and height properties for
+        this Display, in pixels.
+        """
+        rect = Quartz.CGDisplayBounds(self.displayID)
+        return rect.size
+
+    def setOrigin(self, x, y):
+        """
+        This function may not make sense by itself.  The origin of
+        all displays should be set at once.
+        :param x: The desired x-coordinate for the upper-left corner of the display.
+        :param y: The desired y-coordinate for the upper-left corner of the display.
+        """
+        (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
+        if error:
+            raise DisplayError(
+                "Display \"{}\"\'s origin cannot be set to ({}, {})".format(
+                    self.tag, x, y))
+
+        error = Quartz.CGConfigureDisplayOrigin(configRef, self.displayID, x, y)
+        if error:
+            Quartz.CGCancelDisplayConfiguration(configRef)
+            raise DisplayError(
+                "Display \"{}\"\'s origin cannot be set to ({}, {})".format(
+                    self.tag, x, y))
+
+        Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
 
     @property
     def isHidpi(self):
@@ -715,3 +762,60 @@ def getIOKit():
         warnings.simplefilter("default")
 
     return iokit
+
+
+def swapDisplays(display1, display2):
+    """
+    Swaps the position of two displays in global coordinate space.
+    One display must be the Main display at the origin.  Both displays
+    must be neigbors (share a common edge)
+    """
+    #   check to see if the two displays are neighbors
+    #   ensure one display is the main display
+    if display1.isMain:
+        main = display1
+        other = display2
+    elif display2.isMain:
+        main = display2
+        other = display1
+    else:
+        raise DisplayError("neither display is primary display")
+
+    #   determine relative location of secondary display
+    mainOrigin = main.boundsOrigin
+    otherOrigin = other.boundsOrigin
+    mainSize = main.boundsSize
+    otherSize = other.boundsSize
+
+    if mainOrigin.x == otherOrigin.x:
+        #   verically stacked
+        if otherOrigin.y > mainOrigin.y:
+            mainNewOrigin = (mainOrigin.x, otherSize.height)
+        else:
+            mainNewOrigin = (mainOrigin.x, -mainSize.height)
+    elif mainOrigin.y == otherOrigin.y:
+        #   horizontally stacked
+        if otherOrigin.x > mainOrigin.x:
+            mainNewOrigin = (otherSize.width, mainOrigin.y)
+        else:
+            mainNewOrigin = (-mainSize.width, mainOrigin.y)
+
+    (error, configRef) = Quartz.CGBeginDisplayConfiguration(None)
+    if error:
+        raise DisplayError("Can not begin display configuration")
+
+    error = Quartz.CGConfigureDisplayOrigin(configRef, main.displayID, *mainNewOrigin)
+    if error:
+        Quartz.CGCancelDisplayConfiguration(configRef)
+        raise DisplayError(
+            "Display \"{}\"\'s origin cannot be set to ({}, {})".format(
+                main.tag, *mainNewOrigin))
+
+    error = Quartz.CGConfigureDisplayOrigin(configRef, other.displayID, 0, 0)
+    if error:
+        Quartz.CGCancelDisplayConfiguration(configRef)
+        raise DisplayError(
+            "Display \"{}\"\'s origin cannot be set to ({}, {})".format(
+                other.tag, 0, 0))
+
+    Quartz.CGCompleteDisplayConfiguration(configRef, Quartz.kCGConfigurePermanently)
