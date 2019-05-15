@@ -15,7 +15,7 @@
 # implied warranties of any kind.                                      #
 ########################################################################
 
-# Display Manager, version 1.0.1
+# Display Manager, version 1.0.2
 # Python Library
 
 # Programmatically manages Mac displays.
@@ -265,6 +265,7 @@ class Display(AbstractDisplay):
         """
         :return: All possible Quartz "DisplayMode" interfaces for this display.
         """
+        # TO-DO: This needs to be revisited
         modes = []
         # options forces Quartz to show HiDPI modes
         options = {Quartz.kCGDisplayShowDuplicateLowResolutionModes: True}
@@ -288,7 +289,10 @@ class Display(AbstractDisplay):
                     defaultMode.hidpi == mode.hidpi,
                     not mode.isDefault,
                 ]):
-                    uniqueModes.remove(mode)
+                    try:
+                        uniqueModes.remove(mode)
+                    except KeyError:
+                        pass
 
         return list(uniqueModes)
 
