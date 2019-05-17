@@ -5,10 +5,9 @@ An open-source Python library which can modify your Mac's display settings.
 
 Includes the library itself, and a command-line API + GUI to use it in pre-specified ways.
 
-You can download the installer <a href="./versions/">here</a>.
-
 ## Contents
 
+* [Download](#download)
 * [Contact](#contact) - how to reach us
 * [System Requirements](#system-requirements) - what you need
 * [Purpose](#purpose) - what can be done with Display Manager?
@@ -31,6 +30,10 @@ You can download the installer <a href="./versions/">here</a>.
     * [Command-Line Examples](#command-line-examples)
     * [System Administration Examples](#system-administration-examples)
 * [Update History](#update-history)
+
+## Download
+
+The latest release is available for download [here](../../releases). Uninstallation instructions are provided [below](#uninstallation). 
 
 ## Contact
 
@@ -487,3 +490,4 @@ For more details about command-line usage, see [here](#command-line-usage); for 
 | 2018-08-20 | 1.0.1 | Fixed minor compatibility issues with macOS 10.14 Beta. |
 | 2018-07-13 | 1.0.0 | First edition of full Display Manager. Created the DisplayManager library, the new command-line API, and the GUI; added the ability to run multiple commands at once; added rotation and HDMI underscan features. |
 | 2015-10-28 | 0.1.0 | Legacy iteration of Display Manager. Created command-line API. |
+| 2019-05-17 | 1.0.2 | Fixed an issue that would cause crash Display Manager when retrieving DisplayModes on certain monitors |
