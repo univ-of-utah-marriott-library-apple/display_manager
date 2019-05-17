@@ -33,7 +33,7 @@ Includes the library itself, and a command-line API + GUI to use it in pre-speci
 
 ## Download
 
-The latest release is available for download [here](../../releases). Uninstallation instructions are provided [below](#uninstallation). 
+The latest release is available for download [here](../../releases).
 
 ## Contact
 
