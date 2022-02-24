@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ########################################################################
 # Copyright (c) 2018 University of Utah Student Computing Labs.        #
@@ -19,9 +19,9 @@
 # Graphical User Interface
 
 import os
-import Tkinter as tk
-import ttk
-import tkFileDialog
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog as tkFileDialog
 from display_manager import *
 
 
