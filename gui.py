@@ -21,7 +21,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk
-from tkinter import tkFileDialog
+from tkinter import filedialog as tkFileDialog
 from display_manager import *
 
 
