@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 ########################################################################
 # Copyright (c) 2018 University of Utah Student Computing Labs.        #
@@ -223,7 +223,7 @@ class App(object):
         """
         # Add self.display's DisplayModes to self.modeDropdown in reverse sorted order
         sortedModeStrings = []
-        for mode in sorted(self.display.allModes(), reverse=True):
+        for mode in sorted(self.display.allModes, reverse=True):
             modeString = mode.__str__()
             self.modeDict[modeString] = mode
             sortedModeStrings.append(modeString)
