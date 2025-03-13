@@ -41,11 +41,11 @@ If you have any comments, questions, or concerns, feel free to [send us an email
 
 ## System Requirements
 
-Display Manager only runs on Mac computers. It depends on the Apple-supplied Python 2.7 binary, which lives at `/usr/bin/python` and comes pre-configured with the PyObjC bindings. These bindings allow Python to access the Objective-C methods that perform display manipulations.
+Display Manager only runs on Mac computers. It depends on the Apple-supplied Python binary, which lives at `/usr/bin/python` for older versions using Python 2.7 and at `/usr/bin/python3` for newer versions that use Python 3. The older Python 2.7 supplied by Apple comes pre-configured with the PyObjC bindings which allow Python to access the Objective-C methods that perform display manipulations. For newer version using Python 3+, these bindings need to be manually installed by doing `pip install pyobjc`.
 
-If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly.
+If you have replaced the setDefault `/usr/bin/python` binary (which is not generally advised), you should ensure that it has the PyObjC bindings set up correctly (see `pip` comment above).
 
-Note: Display Manager has only been tested on El Capitan (10.11), Sierra (10.12), High Sierra (10.13), and Mojave Beta (10.14). If you experience issues on other versions of macOS, please [let us know](#contact).
+Note: Display Manager has been tested on El Capitan (10.11), Sierra (10.12), High Sierra (10.13), Mojave (10.14), and so on till Sequoia (15). If you experience issues on specific versions of macOS, please [let us know](#contact).
 
 ## Purpose
 
@@ -67,7 +67,7 @@ Recommended workarounds:
 
 ## Get Started
 
-First, check that your system satisfies the requirements in [System Requirements](#system-requirements). If you haven't touched `/usr/bin/python`, it should.
+First, check that your system satisfies the requirements in [System Requirements](#system-requirements). If you haven't touched or changed the system supplied python at `/usr/bin/python` or `/usr/bin/python3`, it should work as advertised. If you are on a version that uses Python 3, you will need to additionally install `pyobjc` - see system requirements for how to do this.
 
 Next, download the latest installer <a href="./versions/">here</a>. Included within are two files: `Display Manager.pkg`, and `Uninstall Display Manager.pkg`. To install, click the former and follow the prompts on-screen; to uninstall, do the same for the latter.
 
